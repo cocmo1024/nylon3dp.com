@@ -6,9 +6,17 @@ interface Props {
   title: string;
   description: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** <html lang> value; defaults to English */
+  lang?: string;
+  /** og:locale value; only emitted when provided */
+  ogLocale?: string;
+  /** inLanguage for the WebSite JSON-LD; defaults to 'en' */
+  inLanguage?: string;
+  /** hreflang alternates; only for pages that have real translations */
+  alternates?: { hreflang: string; href: string }[];
 }
 
-const { title, description, jsonLd } = Astro.props;
+const { title, description, jsonLd, lang = 'en', ogLocale, inLanguage = 'en', alternates } = Astro.props;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
 
 const orgLd = {
@@ -24,19 +32,20 @@ const siteLd = {
   '@type': 'WebSite',
   name: `${SITE.name} — ${SITE.tagline}`,
   url: SITE.url,
-  inLanguage: 'en',
+  inLanguage,
 };
 const extra = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates?.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content={SITE.themeColor} />
     <meta property="og:type" content="website" />
@@ -44,6 +53,7 @@ const extra = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    {ogLocale && <meta property="og:locale" content={ogLocale} />}
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />

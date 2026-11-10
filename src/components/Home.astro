@@ -1,0 +1,104 @@
+---
+import Base from '../layouts/Base.astro';
+import { MATERIALS } from '../data/materials';
+import { MACHINES } from '../data/machines';
+import { GLOSSARY } from '../data/glossary';
+import {
+  ALL_LOCALES,
+  HOME_ALTERNATES,
+  LOCALE_META,
+  homePath,
+  type AnyLocale,
+  type HomeCopy,
+} from '../i18n/home';
+
+interface Props {
+  copy: HomeCopy;
+  locale: AnyLocale;
+}
+
+const { copy, locale } = Astro.props;
+const meta = LOCALE_META[locale];
+const featuredMaterials = MATERIALS.slice(0, 6);
+
+// Copy strings carry {materials}/{machines}/{glossary} count tokens so every
+// language renders the same live database counts as the English homepage.
+// First-sentence extraction that survives decimal points ("0.45 MPa"):
+// a sentence ends at ., ! or ? followed by a space and an uppercase/digit.
+const firstSentence = (s: string) => {
+  const m = s.match(/^[\s\S]*?[.!?](?=\s+[A-Z0-9"'（「]|$)/);
+  const t = (m ? m[0] : s).trim();
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+};
+
+const fill = (s: string) =>
+  s
+    .replaceAll('{materials}', String(MATERIALS.length))
+    .replaceAll('{machines}', String(MACHINES.length))
+    .replaceAll('{glossary}', String(GLOSSARY.length));
+
+const cards = [
+  { href: '/materials/', ...copy.cards.materials },
+  { href: '/machines/', ...copy.cards.machines },
+  { href: '/processes/', ...copy.cards.processes },
+  { href: '/guides/', ...copy.cards.guides },
+  { href: '/glossary/', ...copy.cards.glossary },
+  { href: '/compare/sls-vs-mjf/', ...copy.cards.compare },
+];
+---
+
+<Base
+  title={copy.title}
+  description={copy.description}
+  lang={meta.htmlLang}
+  ogLocale={locale === 'en' ? undefined : meta.ogLocale}
+  inLanguage={meta.htmlLang}
+  alternates={HOME_ALTERNATES}
+>
+  <nav class="lang-nav" aria-label="Language">
+    {ALL_LOCALES.map((code) => (
+      <a href={homePath(code)} aria-current={code === locale ? 'page' : undefined}>{LOCALE_META[code].label}</a>
+    ))}
+  </nav>
+
+  <section class="hero">
+    <h1>{copy.heroTitle}</h1>
+    <p class="lede">{copy.heroLede}</p>
+  </section>
+
+  <div class="quick-answer">
+    <p class="qa-label">{copy.qaLabel}</p>
+    <p set:html={copy.qaBody} />
+  </div>
+
+  <h2>{copy.startHeading}</h2>
+  <div class="cards">
+    {cards.map((c) => (
+      <a class="card" href={c.href}>
+        <h3>{c.title}</h3>
+        <p>{fill(c.body)}</p>
+        <p class="meta">{c.meta}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>{copy.featuredHeading}</h2>
+  <div class="cards">
+    {featuredMaterials.map((m) => (
+      <a class="card" href={`/materials/${m.slug}/`}>
+        <h3>{m.name}</h3>
+        <p class="meta">{m.manufacturer} · {m.basePolymer} · {m.process}</p>
+        <p>{copy.featuredTeasers?.[m.slug] ?? firstSentence(m.quickAnswer)}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>{copy.coverageHeading}</h2>
+  <div class="note">
+    <p set:html={fill(copy.coverageBody)} />
+  </div>
+
+  <h2>{copy.trustHeading}</h2>
+  <p set:html={copy.trustBody} />
+  <p class="updated">{fill(copy.updatedLine)}</p>
+</Base>

@@ -1,0 +1,12 @@
+---
+import Home from '../../components/Home.astro';
+import { HOME_COPY, LOCALE_CODES, type LocaleCode } from '../../i18n/home';
+
+export function getStaticPaths() {
+  return LOCALE_CODES.map((code) => ({ params: { locale: code } }));
+}
+
+const locale = Astro.params.locale as LocaleCode;
+---
+
+<Home copy={HOME_COPY[locale]} locale={locale} />
