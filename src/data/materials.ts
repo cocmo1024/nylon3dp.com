@@ -490,6 +490,93 @@ export const MATERIALS: Material[] = [
       { label: 'Bambu Lab store — PAHT-CF', url: 'https://eu.store.bambulab.com/products/paht-cf' },
     ],
   },
+  {
+    slug: 'formlabs-nylon-12-gf-powder',
+    name: 'Formlabs Nylon 12 GF Powder',
+    manufacturer: 'Formlabs',
+    basePolymer: 'PA12, glass-filled',
+    form: 'Powder',
+    process: 'SLS (Fuse series)',
+    quickAnswer:
+      'Formlabs Nylon 12 GF Powder is the glass-filled PA12 for the Fuse SLS series: glass filler raises tensile modulus to 2800 MPa (from 1850 MPa for unfilled Nylon 12 Powder) and HDT at 1.8 MPa to 113 °C, per Formlabs — at the cost of tensile strength (38 MPa) and elongation at break (4% in X/Y). It is the Fuse material for stiff parts that must hold their shape under sustained load and heat.',
+    intro: [
+      'Nylon 12 GF is Formlabs\' stiffness option for the Fuse series, positioned for parts where structural rigidity and thermal stability are the key requirements — static jigs and fixtures, and fixtures that sit under sustained loading. Adding glass to the PA12 base lifts the modulus by roughly half over the unfilled powder and pushes the load-bearing heat deflection temperature from 87 °C to 113 °C.',
+      'The other side of the trade is written in the same data: ultimate tensile strength falls from 50 MPa to 38 MPa and elongation at break from 11% to 4%. Formlabs itself warns that thin features in Nylon 12 GF are more prone to breaking than in Nylon 12 because of the increased stiffness and brittleness — this is a material for rigid, chunky parts, not for clips, hinges or thin walls.',
+    ],
+    processing: [
+      'SLS powder for Formlabs Fuse series printers, run at a standard refresh rate of 50% (Formlabs allows up to 70% under its guidance for troubleshooting defects).',
+      'Formlabs recommends tuning the printer\'s bed temperature before the first build in this material, on aged powder.',
+      'Parts carry a stronger Surface Armor shell than Nylon 12 parts and need media blasting to remove it fully.',
+    ],
+    properties: [
+      { label: 'Ultimate tensile strength', value: '38 MPa', note: 'ASTM D638-14 Type 1' },
+      { label: 'Tensile modulus', value: '2800 MPa', note: 'ASTM D638-14 Type 1' },
+      { label: 'Elongation at break (X/Y)', value: '4%', note: 'ASTM D638-14 Type 1; Z: 3%' },
+      { label: 'Flexural modulus', value: '2400 MPa', note: 'ASTM D790-15' },
+      { label: 'Notched Izod impact strength', value: '36 J/m', note: 'ASTM D256-10' },
+      { label: 'HDT @ 1.8 MPa', value: '113 °C', note: 'ASTM D648-16' },
+      { label: 'HDT @ 0.45 MPa', value: '170 °C', note: 'ASTM D648-16' },
+    ],
+    applications: [
+      'Stiff structural components that must not flex',
+      'Static jigs and fixtures, including fixtures under long-term sustained loading',
+      'Parts needing thermal stability at higher service temperatures',
+      'Rigid housings and brackets on Fuse-series production',
+    ],
+    faqs: [
+      { q: 'Nylon 12 GF or plain Nylon 12 Powder?', a: 'GF when the part must stay rigid and hold shape under load and heat: modulus 2800 vs 1850 MPa and HDT at 1.8 MPa of 113 °C vs 87 °C. Plain Nylon 12 when the part needs strength and toughness instead: 50 MPa tensile strength and 11% elongation versus 38 MPa and 4% for the GF grade.' },
+      { q: 'What refresh rate does Nylon 12 GF use?', a: 'Formlabs specifies a standard refresh rate of 50% virgin powder, and allows up to 70% under its guidance when troubleshooting part defects. That is a higher virgin-powder share than unfilled Fuse nylons typically run, which is part of this material\'s running cost.' },
+      { q: 'Is the filler glass fibre or glass beads?', a: 'Formlabs describes the material as glass-filled PA12 and does not specify the filler form (fibre vs beads) in its published data sheet, so this page does not claim one. EOS, by contrast, explicitly specifies glass beads for PA 3200 GF.' },
+      { q: 'When should I avoid Nylon 12 GF?', a: 'For thin features, snap-fits, hinges and anything that must flex or absorb impact. Formlabs notes thin features are more prone to breaking in this material; its 4% elongation at break is the lowest of the Fuse nylon powders listed here.' },
+    ],
+    sources: [
+      { label: 'Formlabs support — Using Nylon 12 GF (values per Formlabs Nylon 12 GF Powder TDS, Rev. 01)', url: 'https://formlabs.com/support/Using-Nylon-12-GF/' },
+    ],
+  },
+  {
+    slug: 'polymaker-polymide-pa12-cf',
+    name: 'Polymaker PolyMide PA12-CF',
+    manufacturer: 'Polymaker',
+    basePolymer: 'PA12, carbon-fibre filled',
+    form: 'Filament',
+    process: 'FDM',
+    quickAnswer:
+      'Polymaker PolyMide PA12-CF is a carbon-fibre-filled PA12 filament built around moisture stability: 77.4 MPa tensile strength and 3311 MPa Young\'s modulus in XY (dry), an HDT of 105 °C at 1.8 MPa and only ~1.5% equilibrium water absorption, per Polymaker\'s TDS (v5.4). Where PA6-CF grades are stiffer but thirstier, PA12-CF keeps its properties in humid service — note that the datasheet\'s dry figures are measured on annealed specimens.',
+    intro: [
+      'PA12-CF is Polymaker\'s answer to the PA6 problem: PA6-based carbon-fibre filaments post higher dry stiffness, but PA6 absorbs so much moisture that properties fall away in service. The long-chain PA12 base absorbs far less (Polymaker estimates ~1.5% equilibrium water absorption), and the TDS wet column shows the result — tensile strength only drops from 77.4 MPa dry to 71.7 MPa wet. Polymaker adds its Warp-Free technology, so the filament prints on a cool 25–50 °C bed.',
+      'Read the datasheet\'s fine print before using its headline numbers: the dry mechanical values come from specimens annealed at 80 °C for 6 h and dried for 48 h before testing. Polymaker recommends annealing printed parts the same way, so the published figures describe the annealed part, not the as-printed one. Its Z tensile strength of 52.2 MPa is also unusually high for an FDM filament, which matters for parts loaded across layers.',
+    ],
+    processing: [
+      'Contains 10% chopped carbon fibre by weight (per Polymaker\'s SDS) — abrasive; Polymaker states a brass nozzle lasts roughly 9 hours and recommends hardened steel or ruby.',
+      'Nozzle temperature 260–300 °C; build plate only 25–50 °C per the TDS (do not exceed 50 °C); an enclosure held at ambient temperature is specified.',
+      'Drying setting: 100 °C for 8 h. Annealing setting: 80 °C for 6 h, recommended after printing.',
+    ],
+    properties: [
+      { label: 'Tensile strength (X-Y)', value: '77.4 MPa', note: 'ISO 527, ±1.1, dry; Z: 52.2 MPa; wet: 71.7 MPa' },
+      { label: 'Young\'s modulus (X-Y)', value: '3311 MPa', note: 'ISO 527, ±135, dry; Z: 1807 MPa' },
+      { label: 'Elongation at break (X-Y)', value: '4.2%', note: 'ISO 527, ±0.4, dry; Z: 5.0%' },
+      { label: 'HDT @ 1.8 MPa', value: '105 °C', note: 'ISO 75; @ 0.45 MPa: 131 °C' },
+      { label: 'Density', value: '1.06 g/cm³', note: 'ISO 1183 at 23 °C' },
+      { label: 'Melting temperature', value: '171 °C', note: 'DSC, 10 °C/min' },
+      { label: 'Nozzle temperature', value: '260–300 °C', note: 'Manufacturer recommendation' },
+      { label: 'Drying', value: '100 °C for 8 h', note: 'TDS drying setting' },
+    ],
+    applications: [
+      'Manufacturing tools — Polymaker\'s stated design use for this grade',
+      'Jigs and fixtures that work in humid environments',
+      'End-use parts where PA6-CF\'s moisture-driven property loss is unacceptable',
+      'Dimensionally stable functional parts printed on low-temperature beds',
+    ],
+    faqs: [
+      { q: 'PA12-CF or PA6-CF?', a: 'PA6-CF grades are stiffer and stronger when bone dry (Polymaker\'s own PA6-CF: 8636 MPa modulus, 109.3 MPa strength). PA12-CF wins on stability: ~1.5% equilibrium water absorption, and wet tensile strength of 71.7 MPa against 77.4 MPa dry — a small drop where PA6 grades fall much further. Choose by the environment the part will live in, not the dry datasheet alone.' },
+      { q: 'Why do the datasheet values say "annealed"?', a: 'Polymaker tested specimens that were annealed at 80 °C for 6 h and dried for 48 h, and it recommends annealing printed parts at 80 °C for 6 h. Annealing raises crystallinity and with it strength and stiffness, so as-printed, unannealed parts will test below the table values.' },
+      { q: 'Does PA12-CF need a hot build plate?', a: 'No — the opposite. The TDS specifies a 25–50 °C build plate and warns implicitly through its Warp-Free design: the material is formulated to release from the bed cleanly at low temperatures. It still needs a 260–300 °C all-metal hotend and a hardened nozzle.' },
+    ],
+    sources: [
+      { label: 'Polymaker TDS — PolyMide PA12-CF, v5.4', url: 'https://polymaker-imweb.pages.dev/tds/polymide-pa12-cf.pdf' },
+      { label: 'Polymaker SDS — PolyMide PA12-CF (fibre content)', url: 'https://polymaker.com.cn/wp-content/tech-docs/PolyMide_PA12-CF_SDS_AU_EN_V1.pdf' },
+    ],
+  },
 ];
 
 // Build-time validation: a material may not ship without sources or properties.

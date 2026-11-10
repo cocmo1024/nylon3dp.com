@@ -43,6 +43,18 @@ export const GLOSSARY: GlossaryTerm[] = [
       "Stratasys's powder-bed fusion technology, used in the H350 printer. An infrared-absorbing fluid is jetted where parts are to form and the whole layer is exposed to infrared energy; areas with the fluid absorb enough energy to fuse. SAF targets production volumes of polymer parts, including nylon-based powders.",
   },
   {
+    id: 'haf',
+    term: 'HAF (High Absorption Fluid)',
+    definition:
+      "Stratasys's infrared-absorbing fluid, the single working fluid of SAF printing. Piezoelectric printheads jet HAF onto the powder layer only where the part cross-section is to form; when an infrared lamp then exposes the whole layer, the HAF-treated powder absorbs enough energy to fuse while untreated powder stays loose. Unlike MJF, which uses separate fusing and detailing agents, SAF works with this one fluid.",
+  },
+  {
+    id: 'big-wave',
+    term: 'Big Wave powder management',
+    definition:
+      "Stratasys's powder distribution and thermal management system in SAF printers such as the H350. It spreads and conditions the powder bed so that layer temperature stays uniform across the whole build area — a prerequisite for the flood infrared exposure in SAF to fuse parts consistently across a full production build.",
+  },
+  {
     id: 'fdm',
     term: 'FDM / FFF (fused deposition modeling)',
     definition:

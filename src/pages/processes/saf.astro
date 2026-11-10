@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+
+const faq = [
+  { q: 'How is SAF different from MJF?', a: 'Both jet fluid onto powder and fuse with infrared energy, but MJF uses two agents — a fusing agent for the part and a detailing agent for its edges — while SAF uses a single fluid, Stratasys HAF, for the whole imaging job. Stratasys frames the single fluid as making cost per part simpler and more predictable.' },
+  { q: 'How is SAF different from SLS?', a: 'SLS fuses each cross-section point by point with a scanning laser, so layer time grows with part area. SAF images the layer with printheads and fuses it in one flood infrared exposure, so layer time is fixed regardless of content — the same throughput logic as MJF, from a different machine maker.' },
+  { q: 'What nylons does SAF print?', a: "Stratasys's H350 material list is built on High Yield PA11 and SAF PA12 (plus a polypropylene grade and SAF ReLife PA12, which reuses waste PA12 from other powder-bed processes). Individual SAF powder datasheets will get their own pages in the material database once verified." },
+  { q: 'Does SAF need support structures?', a: 'No. Like SLS and MJF, the unfused powder supports the parts during the build, so SAF prints complex geometries and densely nested production builds without supports.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="SAF (Selective Absorption Fusion) with Nylon | Nylon3DP"
+  description="How Stratasys SAF prints nylon: a jetted infrared-absorbing fluid (HAF) and flood infrared fusion, PA11 and PA12 powders on the H350 at 100 µm layers."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/processes/">Processes</a> / SAF</p>
+  <h1>SAF: Selective Absorption Fusion</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>SAF is Stratasys's powder-bed fusion process, used in the <a href="/machines/stratasys-h350/">H350</a> printer. Industrial piezoelectric printheads jet a single infrared-absorbing fluid (<a href="/glossary/">HAF</a>) onto nylon powder wherever the part should form, and an infrared lamp then fuses the whole layer at once. It is a production process — fixed layer times, densely nested builds, PA11 and PA12 powders — positioned as the third route to volume nylon parts alongside <a href="/processes/sls/">SLS</a> and <a href="/processes/mjf/">MJF</a>.</p>
+  </div>
+
+  <h2>How SAF works</h2>
+  <p>A counter-rotating roller spreads a layer of polymer powder across the build bed — Stratasys's <a href="/glossary/">Big Wave powder management</a> keeps that bed uniform and thermally even. Printheads then jet HAF fluid in single or multiple drops per point: multiple drops put more absorber (and therefore more fusion energy) into solid areas, single drops keep fine detail crisp. An infrared lamp exposes the entire layer; only the fluid-treated powder absorbs enough energy to fuse. The bed lowers, and the cycle repeats until the parts are excavated from the unfused powder, which is recovered for reuse.</p>
+  <p>The defining choice is the single fluid. SLS needs a laser; MJF needs two agents working against each other. SAF images and fuses with HAF alone, which is why Stratasys presents part cost on the platform as simple and predictable — one fluid, one exposure, a fixed time per layer.</p>
+
+  <h2>Materials</h2>
+  <p>The H350's material list, per the <a href="https://support.stratasys.com/-/preview-pdf/public1/products/saf/h350/spec sheets/h350 - en saf spec sheet.pdf">Stratasys H350 spec sheet</a>, is nylon-centred: <strong>High Yield PA11</strong> for impact and fatigue resistance, <strong>SAF PA12</strong> as the all-round production grade, and <strong>SAF PA12 – Powered by Evonik</strong>, alongside a polypropylene grade (SAF PP) outside this site's nylon scope. Stratasys also offers SAF ReLife PA12, which turns waste PA12 powder from SLS and MJF production into H350 feedstock. Verified property tables for the individual SAF powders will be added to the <a href="/materials/">material database</a> as their datasheets are checked, per our <a href="/editorial/">sourcing policy</a>.</p>
+
+  <h2>The machine: H350 numbers</h2>
+  <p>SAF currently ships in one printer, the <a href="/machines/stratasys-h350/">Stratasys H350</a>. Per its spec sheet: an effective build size of 315 × 208 × 293 mm (19.2 L), a single layer thickness of 100 µm, and a full-build print time of 11.5 hours in SAF PA12 — the fixed-time behaviour the process is built around. Closed-loop thermal control with ceramic heaters and thermal cameras is Stratasys's answer to the consistency question that dominates production powder printing.</p>
+
+  <h2>Strengths and limits</h2>
+  <ul>
+    <li><strong>Strengths:</strong> fixed, content-independent layer times like MJF; a single imaging fluid instead of two agents; production-oriented thermal control and powder handling (including automated breakout via Stratasys's PowderEase T1); no laser to scan, align or replace.</li>
+    <li><strong>Limits:</strong> one machine maker and, so far, one machine — there is no SAF equivalent of the broad SLS installed base; the H350 offers a single 100 µm layer thickness rather than a range; the public datasheet trail for SAF powders is thinner than for EOS or HP grades, which is why this database lists SAF materials conservatively.</li>
+  </ul>
+
+  <h2>SAF vs SLS and MJF</h2>
+  <p>All three are powder-bed fusion with the same workflow skeleton — coat, fuse, lower, repeat, excavate, refresh. They differ in the fusing mechanism: a scanning laser (<a href="/processes/sls/">SLS</a>), two jetted agents plus infrared (<a href="/processes/mjf/">MJF</a>), or one jetted absorber plus infrared (SAF). The detailed two-way comparison of the established processes is at <a href="/compare/sls-vs-mjf/">SLS vs MJF</a>; SAF's case rests on production consistency and single-fluid simplicity within the Stratasys ecosystem.</p>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: November 2026</p>
+</Base>

@@ -34,6 +34,7 @@ export const GET: APIRoute = () => {
     '',
     `- [SLS — selective laser sintering](${SITE.url}/processes/sls/)`,
     `- [MJF — Multi Jet Fusion](${SITE.url}/processes/mjf/)`,
+    `- [SAF — Selective Absorption Fusion](${SITE.url}/processes/saf/)`,
     `- [FDM — nylon filament printing](${SITE.url}/processes/fdm/)`,
     '',
     '## Guides',

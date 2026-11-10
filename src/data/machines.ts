@@ -139,6 +139,35 @@ export const MACHINES: Machine[] = [
       { label: 'Stratasys product page — H350 (SAF)', url: 'https://www.stratasys.com/en/3d-printers/printer-catalog/saf/h350/' },
     ],
   },
+  {
+    slug: 'eos-p-396',
+    name: 'EOS P 396',
+    manufacturer: 'EOS',
+    process: 'SLS',
+    quickAnswer:
+      'The EOS P 396 is EOS\'s medium-format production SLS printer: a 340 × 340 × 600 mm build volume, a 70 W CO₂ laser and five material-dependent layer thicknesses from 0.06 to 0.18 mm, per the EOS system data sheet — the scale-up platform for serial nylon production on PA 2200, PA 1101 and PA 3200 GF.',
+    intro: [
+      'The P 396 is the mid-size production workhorse of the EOS polymer line — EOS calls it its medium-format bestseller — aimed at serial components, spare parts on demand and functional prototypes. It runs the same EOS powder ecosystem as the compact Formiga P 110 at roughly triple the build height, with EOSCONNECT integration into MES/ERP environments for documented, repeatable production.',
+      'For nylon work the relevant materials are the EOS polyamide set: PA 2200 (PA12) as the standard, PA 1101 (PA11) for ductility and PA 3200 GF (glass-filled PA12) for stiffness — all three are in the material database with datasheet values.',
+    ],
+    specs: [
+      { label: 'Technology', value: 'SLS (polymer powder-bed fusion)' },
+      { label: 'Build volume', value: '340 × 340 × 600 mm', note: '13.4 × 13.4 × 23.6 in, per EOS SDS' },
+      { label: 'Layer thickness', value: '0.06 / 0.10 / 0.12 / 0.15 / 0.18 mm', note: 'Availability depending on material, per EOS SDS' },
+      { label: 'Laser', value: 'CO₂, 1 × 70 W', note: 'Per EOS system data sheet' },
+    ],
+    notes: [
+      'EOS states 14 materials with 26 parameter sets for the current P 396 configuration; layer thickness is selected per material parameter set, not freely.',
+      'The compact sibling in this database, the Formiga P 110 Velocis (200 × 250 × 330 mm, 30 W), shares the same EOS powder ecosystem.',
+    ],
+    faqs: [
+      { q: 'What is the difference between the EOS P 396 and the Formiga P 110?', a: 'Scale and laser power. Per their EOS data sheets: the P 396 offers 340 × 340 × 600 mm with a 70 W CO₂ laser and five layer thicknesses (0.06–0.18 mm); the P 110 Velocis offers 200 × 250 × 330 mm with a 30 W CO₂ laser. Both run the EOS polymer powder range.' },
+      { q: 'Which nylons run on the EOS P 396?', a: 'The EOS polyamide portfolio, including PA 2200 (PA12), PA 1101 (PA11) and PA 3200 GF (glass-filled PA12) — each documented with datasheet values in the material database — plus black and flame-retardant PA grades listed by EOS.' },
+    ],
+    sources: [
+      { label: 'EOS System Data Sheet — EOS P 396', url: 'https://www.eos.info/polymer-solutions/polymer-printers/data-sheets/sds-eos-p-396' },
+    ],
+  },
 ];
 
 for (const mc of MACHINES) {
