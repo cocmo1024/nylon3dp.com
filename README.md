@@ -33,13 +33,15 @@ description 50–160 chars, canonical = own URL, no broken internal links, every
 indexable page present in the sitemap, and `llms.txt` / `llms-full.txt` /
 `robots.txt` present in `dist/`.
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers — project "nylon3dp-com")
 
 - Build command: `npm run build`
 - Build output directory: `dist`
-- Framework preset: Astro
+- Deploy command: `npx wrangler deploy` (config: `wrangler.jsonc`)
 - Production branch: `main` of the project repository
-- `public/_redirects` carries the legacy `/Terms/` → `/terms/` 301.
+- `worker.js` serves the static build and carries the legacy
+  `/Terms/` → `/terms/` 301 plus the custom 404 (`public/_redirects`
+  remains in the repo for reference; Workers does not process it).
 - After a deploy, submit the sitemap URLs to IndexNow:
   `npm run indexnow` (key file: `public/9dab3462f2c4f7ea5b0c3b4242b1e9cc.txt`).
 

@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers deployment for nylon3dp.com.
+  // The site itself is a static Astro build (dist/); worker.js only adds
+  // the legacy /Terms/ redirect and the custom 404 on top of static assets.
+  "name": "nylon3dp-com",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  }
+}
