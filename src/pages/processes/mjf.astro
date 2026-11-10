@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+
+const faq = [
+  { q: 'What materials does MJF print?', a: "HP's nylon range for MJF is the High Reusability family: PA 12 as the standard, PA 11 for ductility, and PA 12 Glass Beads for stiffness and dimensional stability. PA 12 has a full page in the material database with HP datasheet values; the PA 11 and glass-beads datasheets are being re-verified before their values are published here." },
+  { q: 'Is MJF faster than SLS?', a: 'Per layer, yes in most cases: MJF fuses a whole layer in a fixed number of passes regardless of how many parts it contains, while SLS laser time scales with cross-section area. Whole-job turnaround also depends on cooling and post-processing, which both processes share.' },
+  { q: 'What colour are MJF parts?', a: 'Raw MJF parts come out grey because of the fusing agent; they are very commonly dyed black for a uniform finish. SLS parts, by contrast, are white or off-white and accept dye in a wide range of colours.' },
+  { q: 'Does MJF need supports?', a: 'No. Like SLS, the powder bed supports the parts, so MJF prints complex geometries and nested builds without support structures.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="MJF (Multi Jet Fusion) with Nylon | Nylon3DP"
+  description="How HP Multi Jet Fusion prints nylon: agents and infrared fusion, PA 12 / PA 11 / glass-beads materials, strengths and limits, and how MJF differs from SLS."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/processes/">Processes</a> / MJF</p>
+  <h1>MJF: Multi Jet Fusion</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>MJF is HP's powder-bed fusion process: inkjet arrays print fusing and detailing agents onto nylon powder, and an infrared lamp fuses the printed areas. It produces PA12, PA11 and glass-bead-filled parts with fine detail, consistent properties and fast layer times — the main alternative to SLS for production nylon parts.</p>
+  </div>
+
+  <h2>How MJF works</h2>
+  <p>Each layer starts as a fresh bed of nylon powder. A carriage carrying inkjet heads sweeps the bed and deposits two liquids: a fusing agent wherever the part's cross-section should melt, and a detailing agent around its edges to keep boundaries sharp. A second carriage exposes the bed to infrared energy; only the agent-treated powder absorbs enough energy to fuse. Because fusing happens across the whole layer at once, layer time does not depend on how much of the layer is part — a key difference from laser-based SLS.</p>
+
+  <h2>Materials</h2>
+  <p>HP's nylon range is built around reusability: unfused powder is recovered and used again at a manufacturer-specified refresh ratio. The flagship grade is <a href="/materials/hp-pa-12/">HP PA 12</a>, the balanced standard; the range also includes a PA 11 grade where ductility and impact resistance matter, and a glass-beads grade for stiffer, more dimensionally stable parts. HP's current datasheets for those two grades could not be re-verified at this site's publication date, so — per our <a href="/editorial/">sourcing policy</a> — only PA 12 carries a data page for now; the others will be added when their datasheets are verified.</p>
+
+  <h2>Strengths and limits</h2>
+  <ul>
+    <li><strong>Strengths:</strong> fast, content-independent layer times; fine features and sharp edges from the detailing agent; consistent, near-isotropic properties; a streamlined powder-recovery workflow, especially with HP's processing stations.</li>
+    <li><strong>Limits:</strong> parts emerge grey and are usually dyed black, so colour work is less flexible than SLS; the material catalogue is narrower than SLS (one machine maker, a focused material set); hollow parts still need escape holes, as covered in the <a href="/guides/designing-for-sls-mjf/">design guide</a>.</li>
+  </ul>
+
+  <h2>SLS or MJF?</h2>
+  <p>The two processes overlap heavily in applications. The detailed, sourced comparison — mechanics, materials, colour, economics — is at <a href="/compare/sls-vs-mjf/">SLS vs MJF</a>.</p>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: November 2026</p>
+</Base>

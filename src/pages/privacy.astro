@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base
+  title="Privacy Policy | Nylon3DP"
+  description="Nylon3DP privacy policy: no accounts, no tracking cookies, no analytics scripts; what server logs contain and how email contact is handled."
+>
+  <p class="crumbs"><a href="/">Home</a> / Privacy</p>
+  <h1>Privacy policy</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Nylon3DP is a static reference site. It has no user accounts, sets no tracking cookies and runs no analytics or advertising scripts. The only personal data we ever receive is the email you choose to send us.</p>
+  </div>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Nothing via the website itself.</strong> Pages are static files. There are no forms, logins, comment systems or embedded third-party trackers.</li>
+    <li><strong>Server logs.</strong> Like any website, the hosting platform records basic request logs (IP address, user agent, pages requested, timestamps) for security and reliability. These logs are not used to build reader profiles and are not sold or shared for marketing.</li>
+    <li><strong>Email.</strong> If you write to {SITE.email}, we receive your email address and message. It is used only to reply and to apply any correction or suggestion you sent.</li>
+  </ul>
+
+  <h2>Cookies</h2>
+  <p>This site does not set cookies of its own. If that ever changes (for example, if advertising is introduced in the future), this policy will be updated first and any consent requirements that apply will be implemented at that time.</p>
+
+  <h2>External links</h2>
+  <p>Pages link to manufacturer websites and datasheets. Those sites have their own privacy policies, which govern what they collect when you visit them.</p>
+
+  <h2>Your rights and contact</h2>
+  <p>If you have emailed us and want that correspondence deleted, write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a> and it will be removed. Questions about this policy go to the same address.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

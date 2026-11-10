@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base
+  title="Editorial & Sourcing Policy | Nylon3DP"
+  description="How Nylon3DP sources its data: manufacturer datasheets only, no invented or estimated values, per-page source lists, and a corrections process by email."
+>
+  <p class="crumbs"><a href="/">Home</a> / Editorial policy</p>
+  <h1>Editorial &amp; sourcing policy</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Every specification published on Nylon3DP comes from a primary manufacturer source — an official datasheet, technical data sheet or product specification page. If a value cannot be verified against such a source, it is not published. Each database page carries its own source list so readers can check the numbers themselves.</p>
+  </div>
+
+  <h2>Primary sources only</h2>
+  <p>Acceptable sources are the material or machine manufacturer's own documents: datasheets and TDS PDFs, official product and specification pages, and official design guidelines (for example the SLS and MJF design guides published by Formlabs and HP). Reseller listings, distributor summaries, forum posts and other secondary write-ups are not used as the basis for a published number, because they routinely mix test methods, orientations and material variants.</p>
+
+  <h2>No invented values, no silent gaps</h2>
+  <ul>
+    <li>Values are reproduced as published, with the manufacturer's stated test method noted where the datasheet gives one.</li>
+    <li>Where manufacturers test differently (for example XY vs Z orientation, or different heat-deflection loads), the table says so instead of merging the numbers into a false single figure.</li>
+    <li>Properties a manufacturer does not publish are omitted from the table rather than estimated. An absent row means "not published in the cited source", not "zero".</li>
+    <li>Prices, user reviews and case-study claims are not published, because they cannot be held to the same standard.</li>
+  </ul>
+
+  <h2>How pages are maintained</h2>
+  <p>Manufacturers revise datasheets. Pages carry a "Last updated" date, sources are re-checked on a rolling basis, and when a manufacturer publishes revised values the page is updated and the date moved. Qualitative guidance (process explainers, design guides) follows the same rule: specific numbers in guides cite the official guideline documents they come from.</p>
+
+  <h2>Corrections</h2>
+  <p>If you spot a value that does not match the current manufacturer datasheet, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with the page address and, if possible, a link to the datasheet. Verified corrections are applied and noted in the page's update date. Manufacturers are equally welcome to flag revised documents.</p>
+
+  <h2>Independence</h2>
+  <p>Nylon3DP is an independent reference. It is not a store, a print service or a manufacturer's channel: nothing is sold through this site and no listing is paid for. Coverage decisions are based on how widely a material or machine is used in nylon 3D printing.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

@@ -1,0 +1,73 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+const faq = [
+  { q: 'What is the minimum wall thickness for SLS nylon?', a: 'Per Formlabs\' SLS design guide for the Fuse series (Nylon 12 Powder): 0.6 mm for vertical walls and 0.3 mm for horizontal walls, for both supported and unsupported features. Treat those as absolute floors for small features, not as a structural recommendation — load-bearing walls should be substantially thicker.' },
+  { q: 'Why do hollow SLS/MJF parts need escape holes?', a: 'A sealed hollow part traps unfused powder inside — it adds weight, can leak powder later, and prevents proper cleaning. Both Formlabs (SLS) and HP (MJF) guidance requires escape holes; Formlabs specifies at least two holes of at least 3.5 mm diameter per enclosed cavity so powder can drain and air can flow.' },
+  { q: 'What is the smallest hole that survives powder printing?', a: 'Formlabs\' guide states holes below 1.0 mm diameter may close off during the build. Design functional holes at or above 1.0 mm, or plan to drill them afterwards.' },
+  { q: 'Are SLS and MJF design rules the same?', a: 'The principles are shared — powder support, escape holes, even wall thickness, cooling-driven warping — because both are powder-bed fusion. Exact minimums are published per system: this guide cites Formlabs\' SLS numbers where they exist and marks MJF guidance qualitatively, because HP publishes its minimums in its own MJF design documentation, which you should consult for the specific system you will print on.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'Designing parts for SLS & MJF: wall thickness, holes and escape holes',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="Designing Parts for SLS & MJF — Design Rules | Nylon3DP"
+  description="Powder-bed design rules from official guidelines: SLS minimum wall 0.6 mm vertical / 0.3 mm horizontal, holes ≥ 1.0 mm, escape holes ≥ 3.5 mm (Formlabs)."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/guides/">Guides</a> / Designing for SLS &amp; MJF</p>
+  <h1>Designing parts for SLS &amp; MJF</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>From Formlabs' official SLS design guide: minimum wall thickness <strong>0.6 mm (vertical) / 0.3 mm (horizontal)</strong>, minimum reliable hole diameter <strong>1.0 mm</strong>, and for any enclosed cavity, <strong>at least two escape holes of ≥ 3.5 mm</strong> so unfused powder can be removed. On top of those floors, design for the physics both powder processes share: even walls, no trapped powder, and respect for cooling-driven shrinkage.</p>
+  </div>
+
+  <h2>The numbers, with their source</h2>
+  <p>The table below reproduces the design minimums from Formlabs' <em>SLS Design Guide</em> for the Fuse series with Nylon 12 Powder (March 2023). They are genuine minimums — the smallest features that survive the process — not targets for structural parts.</p>
+  <table>
+    <thead>
+      <tr><th>Feature</th><th>Minimum</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Wall thickness, vertical walls</td><td><strong>0.6 mm</strong></td><td>Supported and unsupported, per Formlabs SLS design guide</td></tr>
+      <tr><td>Wall thickness, horizontal walls</td><td><strong>0.3 mm</strong></td><td>Supported and unsupported, per Formlabs SLS design guide</td></tr>
+      <tr><td>Hole diameter</td><td><strong>1.0 mm</strong></td><td>Holes below 1.0 mm may close off during the build</td></tr>
+      <tr><td>Escape holes</td><td><strong>≥ 3.5 mm, at least 2 per cavity</strong></td><td>So powder can drain and air can displace it</td></tr>
+    </tbody>
+  </table>
+  <p>For MJF, HP publishes its own design guidelines for the Jet Fusion systems; the workflow rules below apply to both processes, but always confirm feature minimums against the documentation of the system your parts will actually run on — bureaus will also apply their own house rules.</p>
+
+  <h2>Rules both powder processes share</h2>
+  <h3>1. No trapped powder</h3>
+  <p>Any enclosed void fills with unfused powder. Beyond the escape-hole minimums above, place holes at the cavity's low points in its removal orientation and avoid long, narrow internal channels that powder cannot flow out of. If a channel must be long, widen it or split the part.</p>
+  <h3>2. Keep wall thickness even</h3>
+  <p>Powder-bed parts cool as one mass. Thick sections shrink later than thin ones, and abrupt transitions warp or crack. Use ribs instead of solid blocks for stiffness, and blend thickness changes gradually.</p>
+  <h3>3. Design for the material's ductility, not around it</h3>
+  <p>The reason to print nylon is often a feature that must flex — a hinge, a clip, a snap. Size those features from the material's elongation data (see <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a>) and keep flexing sections away from layer-direction weaknesses where the datasheet shows a Z penalty.</p>
+  <h3>4. Orientation is a design decision</h3>
+  <p>Powder support makes orientation geometrically free, but not mechanically neutral: datasheets on this site show XY-versus-Z gaps in elongation for nearly every powder (e.g. PA 2200: 18% vs 4%). Orient the part so critical loads and flexing run in-plane, and tell your bureau which faces matter.</p>
+  <h3>5. Leave room for post-processing</h3>
+  <p>As-built powder surfaces are matte and slightly grainy; bead blasting, tumbling, dyeing and coating all change dimensions slightly and soften sharp edges. Embossed text and fine detail should be sized generously, and sealing surfaces should be designed with the finishing route in mind from the start.</p>
+
+  <Faq items={faq} />
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      <li><a href="https://formlabs-media.formlabs.com/rs/060-UIG-504/images/WP-EN-fuse-series-sls-design-guide.pdf" rel="noopener">Formlabs — SLS Design Guide, Fuse Series (March 2023)</a></li>
+      <li><a href="/materials/eos-pa-2200/" rel="noopener">EOS PA 2200 datasheet values (orientation-dependent elongation)</a></li>
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

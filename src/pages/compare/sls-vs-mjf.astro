@@ -1,0 +1,67 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+const faq = [
+  { q: 'Is MJF stronger than SLS?', a: 'On flagship PA12 datasheets the numbers are close: HP lists 54 MPa tensile strength for MJF PA 12 with equal XY and Z values, while EOS lists 48 MPa (XY) / 42 MPa (Z) for SLS PA 2200. Different test setups prevent a strict verdict, but MJF\'s published isotropy is real, and SLS closes much of the gap with PA11 where ductility matters.' },
+  { q: 'Which is cheaper, SLS or MJF?', a: 'It depends on volume and packing. MJF\'s layer time is fixed regardless of content, so full builds are very economical per part at volume; SLS has a broader machine price range, from desktop-class units to large industrial systems, and a wider second-hand/service market. For one-off parts, bureau pricing usually reflects whichever capacity they run — get both quotes for production work.' },
+  { q: 'Can SLS and MJF parts be used interchangeably?', a: 'Often, for PA12 functional parts of moderate precision — the materials are close cousins. Watch three things: colour (SLS white vs MJF grey), surface feel, and any feature designed exactly at one process\'s minimums. Re-validate critical dimensions on the new process.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="SLS vs MJF: Nylon Powder Processes Compared | Nylon3DP"
+  description="SLS vs MJF on manufacturer data: PA12 tensile 48-50 MPa (SLS) vs 54 MPa (MJF), isotropy, colour, materials range, speed and cost structure."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / Compare / SLS vs MJF</p>
+  <h1>SLS vs MJF</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>SLS and MJF print the same nylon family with comparable strength; they differ in how they fuse powder and what that implies. <strong>MJF</strong> fuses whole layers at once (fast, consistent, near-isotropic; parts come out grey, usually dyed black) and is tied to HP's focused material set. <strong>SLS</strong> scans a laser (slower on dense layers) but offers the widest material range — PA12, PA11, glass-filled PA12, PA6 — the widest machine range, and white parts that dye any colour. Pick MJF for repeatable volume in PA12; pick SLS for material choice and flexibility.</p>
+  </div>
+
+  <h2>Side by side</h2>
+  <table>
+    <thead>
+      <tr><th>Aspect</th><th>SLS</th><th>MJF</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fusing method</td><td>Scanning laser (CO₂ or fibre, per machine data sheets)</td><td>Jetted fusing/detailing agents + infrared exposure</td></tr>
+      <tr><td>Flagship PA12 datasheet</td><td>EOS PA 2200: 48 MPa tensile, 1650 MPa modulus, 18% elongation (XY)</td><td>HP HR PA 12: 54 MPa tensile, 2150 MPa modulus, 18% elongation (XY)</td></tr>
+      <tr><td>Z-direction behaviour</td><td>Published penalty: PA 2200 falls to 42 MPa and 4% elongation in Z</td><td>HP lists equal XY/Z tensile strength and modulus; elongation 18% (XY) vs 10% (Z)</td></tr>
+      <tr><td>Materials range</td><td>Broad: PA12, PA11, glass-bead PA12, PA6, from multiple suppliers</td><td>Focused: HP PA 12, PA 11, PA 12 Glass Beads</td></tr>
+      <tr><td>As-built colour</td><td>White / off-white; dyes to any colour</td><td>Grey; most commonly dyed black</td></tr>
+      <tr><td>Layer time</td><td>Scales with cross-section area scanned</td><td>Fixed per layer, independent of content</td></tr>
+      <tr><td>Machine landscape</td><td>EOS, Formlabs, Farsoon, Sinterit and others; desktop-class to large industrial</td><td>HP Jet Fusion series only</td></tr>
+      <tr><td>Supports</td><td colspan="2">None in either process — the powder bed supports the parts; both need escape holes for hollow parts (see the <a href="/guides/designing-for-sls-mjf/">design guide</a>)</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Material figures are the manufacturers' published values from the data sheets cited on the <a href="/materials/eos-pa-2200/">PA 2200</a> and <a href="/materials/hp-pa-12/">HP PA 12</a> pages; test methods differ between manufacturers. Other rows are qualitative descriptions of how the two processes work — see the <a href="/processes/sls/">SLS</a> and <a href="/processes/mjf/">MJF</a> pages.</p>
+
+  <h2>When SLS wins</h2>
+  <ul>
+    <li>You need a material MJF does not offer — glass-filled stiffness (<a href="/materials/eos-pa-3200-gf/">PA 3200 GF</a>), PA6 heat resistance (<a href="/materials/basf-ultrasint-pa6/">Ultrasint PA6</a>), or a specific PA11 grade.</li>
+    <li>Colour matters: white parts and full-colour dyeing.</li>
+    <li>You are buying a machine and want choice across sizes and budgets, including compact systems like the <a href="/machines/formlabs-fuse-1-plus-30w/">Fuse 1+ 30W</a>.</li>
+  </ul>
+
+  <h2>When MJF wins</h2>
+  <ul>
+    <li>Repeatable production in PA12: fixed layer times and HP's integrated powder workflow favour full, nested builds.</li>
+    <li>You value the published isotropy — equal XY/Z strength on the PA 12 data sheet — for parts that cannot be oriented freely.</li>
+    <li>Your parts will be dyed black anyway, which is MJF's home turf.</li>
+  </ul>
+
+  <h2>The honest summary</h2>
+  <p>For most PA12 functional parts, either process produces a good part, and the deciding factor is usually which capacity is available at the right price and turnaround. The processes diverge at the edges — unusual materials, colour, extreme isotropy requirements, fleet economics — and those edges are where this comparison should be applied.</p>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import { MACHINES } from '../../data/machines';
+---
+
+<Base
+  title="Nylon 3D Printer Database — SLS, MJF & SAF Machines | Nylon3DP"
+  description="Manufacturer-verified specs for nylon printers: HP Jet Fusion 5200 (MJF), EOS Formiga P 110 and Formlabs Fuse 1+ 30W (SLS), Stratasys H350 (SAF)."
+>
+  <p class="crumbs"><a href="/">Home</a> / Machines</p>
+  <h1>Nylon 3D printer database</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Professional nylon printing runs on powder-bed machines: SLS systems from EOS and Formlabs, HP's MJF platform, and Stratasys's SAF production printer. This database lists each machine's build volume, layer thickness and energy source exactly as the manufacturer states them.</p>
+  </div>
+
+  <p>Coverage so far: {MACHINES.length} machines. The database expands toward the full landscape of nylon-capable systems — industrial SLS, MJF and SAF platforms first, then high-temperature FDM machines — and a machine is only listed once its specification sheet has been verified against the manufacturer's own documents.</p>
+
+  <h2>At a glance</h2>
+  <table>
+    <thead>
+      <tr><th>Machine</th><th>Process</th><th>Build volume / size</th><th>Layer thickness</th></tr>
+    </thead>
+    <tbody>
+      {MACHINES.map((m) => (
+        <tr>
+          <td><a href={`/machines/${m.slug}/`}>{m.name}</a></td>
+          <td>{m.process}</td>
+          <td>{m.specs.find((s) => /build/i.test(s.label))?.value ?? ''}</td>
+          <td>{m.specs.find((s) => /layer/i.test(s.label))?.value ?? 'Not stated by manufacturer'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <div class="cards">
+    {MACHINES.map((m) => (
+      <a class="card" href={`/machines/${m.slug}/`}>
+        <h3>{m.name}</h3>
+        <p class="meta">{m.manufacturer} · {m.process}</p>
+        <p>{m.quickAnswer.split('.')[0]}.</p>
+      </a>
+    ))}
+  </div>
+  <p class="updated">Last updated: November 2026</p>
+</Base>

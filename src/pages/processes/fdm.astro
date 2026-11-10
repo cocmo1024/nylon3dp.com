@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+
+const faq = [
+  { q: 'Why does nylon filament need drying?', a: 'Nylon absorbs moisture from the air quickly. Wet filament boils its water content in the nozzle, causing pops, bubbles, stringing, rough surfaces and weak layer bonds. Manufacturers such as Polymaker and Bambu Lab specify drying temperatures and times for their PA filaments — see the drying guide for the sourced values.' },
+  { q: 'What is the best nylon filament?', a: 'It depends on the job. Carbon-fibre PA6 grades maximise stiffness and strength; copolyamide (CoPA) blends print more easily and warp less; unfilled PA12 is a forgiving all-rounder. The material database lists the main grades with datasheet properties so you can compare numbers rather than marketing claims.' },
+  { q: 'Can any FDM printer print nylon?', a: 'Most nylon filaments need a high-temperature hotend, a heated bed and ideally an enclosure; abrasive carbon-fibre grades also need a hardened nozzle. Check the filament datasheet for the manufacturer-stated nozzle and bed temperatures before buying.' },
+  { q: 'Is FDM nylon as strong as SLS nylon?', a: 'Within a layer, good FDM nylon can approach powder-bed strength, but across layers (Z direction) FDM parts are significantly weaker because each layer bonds to an already-cooled one. Powder-bed parts are close to isotropic. Design FDM parts so main loads run along the layers.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="FDM Nylon Filament Printing | Nylon3DP"
+  description="Printing nylon by FDM: PA6, PA12, CoPA and carbon-fibre filaments, why drying matters, printer requirements and how FDM nylon compares with SLS/MJF."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/processes/">Processes</a> / FDM</p>
+  <h1>FDM: nylon filament printing</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>FDM (fused deposition modeling) extrudes nylon filament through a heated nozzle to build tough, wear-resistant functional parts on inexpensive machines. It is the most accessible nylon process, but the filament is hygroscopic — it must be dried before and often during printing — and parts are weaker across layers than powder-bed nylon.</p>
+  </div>
+
+  <h2>The filament families</h2>
+  <ul>
+    <li><strong>PA6 and PA6-CF:</strong> the strongest common nylon filaments; carbon-fibre filling (for example <a href="/materials/polymaker-polymide-pa6-cf/">Polymaker PolyMide PA6-CF</a>) adds stiffness and reduces warping. PA6 absorbs moisture fastest of the common grades.</li>
+    <li><strong>PA12:</strong> lower moisture uptake and a friendlier printing window; the FDM counterpart of the powder standard.</li>
+    <li><strong>Copolyamide (CoPA):</strong> PA6/PA66 blends such as <a href="/materials/polymaker-polymide-copa/">Polymaker PolyMide CoPA</a>, tuned to warp less and print more easily while keeping nylon toughness.</li>
+    <li><strong>High-temperature and filled variants:</strong> grades such as Bambu Lab's PAHT-CF target hotter, stiffer applications. Individual grades with datasheet values are listed in the <a href="/materials/">material database</a>.</li>
+  </ul>
+
+  <h2>The three practical challenges</h2>
+  <h3>1. Moisture</h3>
+  <p>Nylon is <a href="/glossary/">hygroscopic</a>: a spool left in room air can become unprintable in days. Dry filament before printing at the temperature and duration the manufacturer specifies, print from a dry box where possible, and store spools sealed with desiccant. The full procedure is in <a href="/guides/how-to-dry-nylon-filament/">how to dry nylon filament</a>.</p>
+  <h3>2. Warping and adhesion</h3>
+  <p>Nylon shrinks as it cools and lets go of bare build plates. An enclosure, a suitable adhesive surface and the datasheet's bed temperature keep parts flat and attached.</p>
+  <h3>3. Anisotropy</h3>
+  <p>Layer bonds are the weak direction. Orient parts so tensile loads run within layers, add perimeters rather than relying on infill for strength, and treat published filament datasheet values — measured on printed test bars — as in-layer reference points.</p>
+
+  <h2>When FDM is the right choice</h2>
+  <p>Choose FDM nylon for one-off brackets, gears, tooling and enclosures where a desktop machine's cost and immediacy beat powder-bed economics; choose <a href="/processes/sls/">SLS</a> or <a href="/processes/mjf/">MJF</a> for complex geometries, repeated batches and isotropic strength. The processes overview is at <a href="/processes/">nylon printing processes</a>.</p>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: November 2026</p>
+</Base>

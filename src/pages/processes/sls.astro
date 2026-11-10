@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+
+const faq = [
+  { q: 'What materials does SLS print?', a: 'Nylon dominates SLS: PA12 is the standard powder, with PA11 for more ductile parts, glass-filled PA12 for stiffness, and PA6 for higher temperature resistance. The material database lists the main grades with datasheet properties.' },
+  { q: 'Does SLS need support structures?', a: 'No. The unfused powder surrounding the part supports it throughout the build, which is why SLS can produce complex internal channels, nested assemblies and moving parts in a single build.' },
+  { q: 'What happens to the leftover powder?', a: 'Unfused powder is sieved and reused after being mixed with a proportion of virgin powder — the refresh ratio specified by the material manufacturer. Powder that has been thermally aged too many times is eventually discarded.' },
+  { q: 'How accurate is SLS?', a: 'Accuracy depends on the machine, material and part geometry, and manufacturers state tolerances in their design guides. For design minimums such as wall thickness and hole sizes, see the designing for SLS & MJF guide, which cites the official Formlabs and HP guidelines.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="SLS (Selective Laser Sintering) with Nylon | Nylon3DP"
+  description="How selective laser sintering works with nylon powder: the process, PA12 and PA11 materials, strengths, limits and post-processing, with datasheet links."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/processes/">Processes</a> / SLS</p>
+  <h1>SLS: selective laser sintering</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>SLS builds parts by scanning a laser over a heated bed of nylon powder, sintering one cross-section at a time. The surrounding powder supports the part, so SLS prints complex, functional PA12 and PA11 parts with no support structures — it is the benchmark process for strong, end-use nylon components.</p>
+  </div>
+
+  <h2>How SLS works</h2>
+  <p>A recoater spreads a thin layer of polymer powder across the build platform. The bed is held just below the material's melting point, and a laser draws the part's cross-section, adding just enough energy to fuse the powder it touches. The platform lowers, another layer is spread, and the cycle repeats. When the build finishes and cools, the parts are excavated from a solid "cake" of unfused powder, cleaned by bead blasting, and optionally dyed, coated or smoothed.</p>
+
+  <h2>Why nylon, and which nylon</h2>
+  <p>PA12's melting behaviour — a useful gap between melting and crystallisation temperatures — makes it exceptionally well suited to this process, and it remains the reference SLS material: see the datasheets for <a href="/materials/eos-pa-2200/">EOS PA 2200</a> and <a href="/materials/formlabs-nylon-12-powder/">Formlabs Nylon 12 Powder</a>. <a href="/materials/eos-pa-1101/">PA11</a> trades a little stiffness for much higher ductility and impact resistance. Where stiffness and heat resistance matter more, <a href="/materials/eos-pa-3200-gf/">glass-filled PA12</a> roughly doubles the tensile modulus of unfilled PA12.</p>
+
+  <h2>Strengths and limits</h2>
+  <ul>
+    <li><strong>Strengths:</strong> no supports; true 3D nesting packs the build volume; near-isotropic properties; excellent feature freedom including internal channels and assembled-in-place mechanisms; a wide, mature material set.</li>
+    <li><strong>Limits:</strong> grainy as-built surface compared with moulding; powder handling, cooling time and refresh management add operational overhead; hollow parts need escape holes so trapped powder can be removed (see the <a href="/guides/designing-for-sls-mjf/">design guide</a>).</li>
+  </ul>
+
+  <h2>Machines</h2>
+  <p>SLS systems range from compact units such as the Formlabs Fuse 1+ 30W to industrial EOS platforms — see the <a href="/machines/">machine database</a> for manufacturer-verified specifications.</p>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: November 2026</p>
+</Base>

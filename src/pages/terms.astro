@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base
+  title="Terms of Use | Nylon3DP"
+  description="Nylon3DP terms of use: reference data is reproduced as-is from manufacturer sources; confirm critical values against the current datasheet before use."
+>
+  <p class="crumbs"><a href="/">Home</a> / Terms</p>
+  <h1>Terms of use</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Nylon3DP provides reference information reproduced from manufacturer documentation. It is a starting point for research, not an engineering certification: always confirm critical values against the current manufacturer datasheet before designing or producing parts.</p>
+  </div>
+
+  <h2>Use of the content</h2>
+  <p>You may read, link to and quote this site's content with attribution. Database values originate from manufacturer documents cited on each page; those underlying documents remain the property of their manufacturers, and product names (such as material and machine trade names) are trademarks of their respective owners. Their use here is descriptive only and implies no endorsement by or affiliation with those manufacturers.</p>
+
+  <h2>Accuracy and limits</h2>
+  <ul>
+    <li>We take care to reproduce datasheet values exactly as published and to cite the source of every figure, following our <a href="/editorial/">sourcing policy</a>. Manufacturers may revise documents at any time, so a page can lag a revision until its next check.</li>
+    <li>Material properties depend on machine, parameters, part orientation, post-processing and test method. Datasheet values are reference points measured under the manufacturer's stated conditions, not guarantees for any specific part.</li>
+    <li>Nothing on this site is engineering, safety or regulatory advice. Load-bearing, pressure-bearing, medical, food-contact and other regulated applications require qualified review and the manufacturer's current documentation.</li>
+  </ul>
+
+  <h2>Liability</h2>
+  <p>The site is provided "as is" without warranties of any kind. To the extent permitted by law, Nylon3DP is not liable for losses arising from reliance on reference data that should have been confirmed against primary sources before use.</p>
+
+  <h2>Changes</h2>
+  <p>These terms may be updated; the current version is the one published on this page, with its update date below. Questions go to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

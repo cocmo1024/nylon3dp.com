@@ -1,0 +1,67 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { MACHINES, type Machine } from '../../data/machines';
+import { SITE } from '../../site';
+
+export function getStaticPaths() {
+  return MACHINES.map((m) => ({ params: { slug: m.slug }, props: { machine: m } }));
+}
+
+interface Props {
+  machine: Machine;
+}
+const { machine: m } = Astro.props;
+
+const title = `${m.name} — Specs & Build Volume | Nylon3DP`;
+const description = `${m.name} by ${m.manufacturer} (${m.process}): manufacturer-verified build volume, layer thickness and technology specifications for nylon 3D printing.`;
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: m.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base title={title} description={description} jsonLd={faqLd}>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/machines/">Machines</a> / {m.name}</p>
+  <h1>{m.name}</h1>
+  <p>
+    <span class="tag">{m.process}</span>
+    <span class="tag">{m.manufacturer}</span>
+  </p>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>{m.quickAnswer}</p>
+  </div>
+
+  {m.intro.map((para) => <p>{para}</p>)}
+
+  <h2>Specifications (manufacturer)</h2>
+  <table>
+    <thead>
+      <tr><th>Specification</th><th>Value</th><th>Note</th></tr>
+    </thead>
+    <tbody>
+      {m.specs.map((s) => (
+        <tr><td>{s.label}</td><td><strong>{s.value}</strong></td><td>{s.note ?? ''}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="muted">Specifications the manufacturer does not state in the cited documents are omitted rather than estimated — see the <a href="/editorial/">sourcing policy</a>.</p>
+
+  <h2>Notes</h2>
+  <ul>
+    {m.notes.map((n) => <li>{n}</li>)}
+  </ul>
+
+  <Faq items={m.faqs} />
+
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      {m.sources.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

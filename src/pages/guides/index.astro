@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const guides = [
+  {
+    href: '/guides/pa11-vs-pa12/',
+    name: 'PA11 vs PA12: which nylon powder?',
+    blurb: 'The ductility-versus-balance decision at the heart of powder-bed nylon, settled with EOS, Formlabs and HP datasheet numbers.',
+  },
+  {
+    href: '/guides/how-to-dry-nylon-filament/',
+    name: 'How to dry nylon filament',
+    blurb: 'Why nylon must be dried, the manufacturer-specified temperatures and times for PA6-CF, CoPA and Bambu PA filaments, and how to keep spools dry.',
+  },
+  {
+    href: '/guides/designing-for-sls-mjf/',
+    name: 'Designing parts for SLS & MJF',
+    blurb: 'Wall thickness, hole sizes and powder escape holes from the official Formlabs SLS design guide, plus the design rules both powder processes share.',
+  },
+];
+---
+
+<Base
+  title="Nylon 3D Printing Guides | Nylon3DP"
+  description="Source-cited nylon 3D printing guides: PA11 vs PA12 on datasheet data, drying nylon filament at manufacturer settings, and designing parts for SLS & MJF."
+>
+  <p class="crumbs"><a href="/">Home</a> / Guides</p>
+  <h1>Nylon 3D printing guides</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Start with the decision most nylon users face — <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a>. If you print filament, <a href="/guides/how-to-dry-nylon-filament/">drying</a> is the highest-value skill in nylon FDM. Designing for powder processes? The <a href="/guides/designing-for-sls-mjf/">SLS &amp; MJF design guide</a> collects the official minimums in one place.</p>
+  </div>
+  <div class="cards">
+    {guides.map((g) => (
+      <a class="card" href={g.href}>
+        <h3>{g.name}</h3>
+        <p>{g.blurb}</p>
+      </a>
+    ))}
+  </div>
+  <p>Every guide follows the site's <a href="/editorial/">sourcing policy</a>: numbers come from manufacturer datasheets and official design guidelines, cited in the guide itself. The guide library grows with the databases — post-processing, moisture and dimensional stability, and powder refresh economics are next in the queue.</p>
+  <p class="updated">Last updated: November 2026</p>
+</Base>

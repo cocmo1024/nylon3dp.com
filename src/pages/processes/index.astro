@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const processes = [
+  {
+    href: '/processes/sls/',
+    name: 'SLS — Selective Laser Sintering',
+    blurb: 'The original nylon powder process. A laser sinters PA12 or PA11 powder layer by layer; parts are strong, complex and support-free.',
+  },
+  {
+    href: '/processes/mjf/',
+    name: 'MJF — Multi Jet Fusion',
+    blurb: "HP's agent-and-infrared powder process. Fast builds, fine detail and near-isotropic PA12, PA11 and glass-bead grades.",
+  },
+  {
+    href: '/processes/fdm/',
+    name: 'FDM — Nylon Filament Printing',
+    blurb: 'Extruded nylon filament: PA6, PA12, CoPA and carbon-fibre grades on desktop and industrial machines. The most accessible way to print nylon.',
+  },
+];
+---
+
+<Base
+  title="Nylon 3D Printing Processes: SLS, MJF, SAF & FDM | Nylon3DP"
+  description="The processes used to 3D print nylon: SLS, MJF, SAF powder-bed fusion and FDM filament extrusion — how each works, which nylons each uses and where each fits."
+>
+  <p class="crumbs"><a href="/">Home</a> / Processes</p>
+  <h1>Nylon 3D printing processes</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Nylon is printed four main ways: <strong>SLS</strong> and <strong>MJF</strong> (and Stratasys's <strong>SAF</strong>), which fuse PA11/PA12 powder in a powder bed and dominate professional production; and <strong>FDM</strong>, which extrudes nylon filament and is the route most individuals and small workshops use. Powder processes give support-free, near-isotropic parts; FDM is far cheaper to access but is anisotropic and moisture-sensitive.</p>
+  </div>
+
+  <div class="cards">
+    {processes.map((p) => (
+      <a class="card" href={p.href}>
+        <h3>{p.name}</h3>
+        <p>{p.blurb}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>Powder-bed fusion vs filament extrusion</h2>
+  <p>The split that matters most is between <a href="/glossary/">powder-bed fusion</a> (SLS, MJF, SAF) and extrusion (FDM). In a powder bed, the part is fused inside loose powder that supports it from all sides: there are no support structures, parts can be nested throughout the build volume, and mechanical properties are similar in all directions. The trade-offs are expensive machines, powder handling, and a post-processing step to remove unfused powder. In FDM, a spool of filament feeds a heated nozzle: machines cost a fraction as much, but layer lines make parts weaker across layers, overhangs need supports, and nylon filament must be kept dry to print well.</p>
+  <p>Choosing between the two powder leaders is covered in depth in <a href="/compare/sls-vs-mjf/">SLS vs MJF</a>. SAF, used in the Stratasys H350, is a third powder-bed approach aimed at consistent production manufacturing; it shares the powder workflow described on the SLS and MJF pages and is covered in the <a href="/machines/">machine database</a>.</p>
+
+  <h2>Which nylon does each process use?</h2>
+  <ul>
+    <li><strong>SLS:</strong> PA12 is the standard; PA11, glass-filled PA12 and PA6 powders extend the range. See <a href="/materials/">powder materials</a>.</li>
+    <li><strong>MJF:</strong> HP's High Reusability PA 12, PA 11 and PA 12 Glass Beads.</li>
+    <li><strong>FDM:</strong> PA6, PA12 and copolyamide filaments, very often filled with chopped carbon fibre.</li>
+  </ul>
+  <p class="updated">Last updated: November 2026</p>
+</Base>

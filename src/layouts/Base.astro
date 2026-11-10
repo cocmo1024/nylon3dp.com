@@ -1,0 +1,90 @@
+---
+import { SITE, NAV, FOOTER_NAV } from '../site';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, jsonLd } = Astro.props;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE.name,
+  url: SITE.url,
+  email: SITE.email,
+  description: SITE.description,
+};
+const siteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: `${SITE.name} — ${SITE.tagline}`,
+  url: SITE.url,
+  inLanguage: 'en',
+};
+const extra = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <script type="application/ld+json" set:html={JSON.stringify(orgLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(siteLd)} />
+    {extra.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-in">
+        <a class="brand" href="/">
+          <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="7" fill="#1d7a52"/><path d="M10 22V10l12 12V10" stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Nylon<em>3DP</em></span>
+        </a>
+        <nav class="main-nav" aria-label="Main">
+          {NAV.map((n) => <a href={n.href}>{n.label}</a>)}
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div class="footer-brand">
+          <p class="footer-name">Nylon3DP — The Nylon 3D Printing Reference</p>
+          <p>Independent reference for nylon (polyamide) 3D printing. Every specification on this site is traced to a manufacturer datasheet or official product page — see our <a href="/editorial/">sourcing policy</a>.</p>
+          <p>Contact: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+        </div>
+        {FOOTER_NAV.map((col) => (
+          <nav aria-label={col.title}>
+            <p class="footer-col">{col.title}</p>
+            <ul>
+              {col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+            </ul>
+          </nav>
+        ))}
+      </div>
+      <div class="wrap footer-base">
+        <p>© 2026 Nylon3DP. Reference data belongs to the respective manufacturers; values are reproduced for comparison with sources cited on each page.</p>
+      </div>
+    </footer>
+  </body>
+</html>

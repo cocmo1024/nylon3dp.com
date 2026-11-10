@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { MATERIALS, type Material } from '../../data/materials';
+import { SITE } from '../../site';
+
+export function getStaticPaths() {
+  return MATERIALS.map((m) => ({ params: { slug: m.slug }, props: { material: m } }));
+}
+
+interface Props {
+  material: Material;
+}
+const { material: m } = Astro.props;
+
+const title = `${m.name} Datasheet — Properties | Nylon3DP`;
+const description = `${m.name}: ${m.basePolymer} ${m.form.toLowerCase()} for ${m.process} — manufacturer-sourced datasheet properties and FAQ.`;
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: m.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `${m.name} — ${m.basePolymer} ${m.form} for ${m.process}`,
+  description,
+  about: m.name,
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base title={title} description={description} jsonLd={[articleLd, faqLd]}>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/materials/">Materials</a> / {m.name}</p>
+  <h1>{m.name}</h1>
+  <p>
+    <span class="tag">{m.basePolymer}</span>
+    <span class="tag">{m.form}</span>
+    <span class="tag">{m.process}</span>
+    <span class="tag">{m.manufacturer}</span>
+  </p>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>{m.quickAnswer}</p>
+  </div>
+
+  {m.intro.map((para) => <p>{para}</p>)}
+
+  <h2>Properties (manufacturer datasheet)</h2>
+  <table>
+    <thead>
+      <tr><th>Property</th><th>Value</th><th>Test method / note</th></tr>
+    </thead>
+    <tbody>
+      {m.properties.map((p) => (
+        <tr><td>{p.label}</td><td><strong>{p.value}</strong></td><td>{p.note ?? ''}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="muted">Values are reproduced from the manufacturer source(s) listed below, exactly as published. Properties the manufacturer does not publish are omitted rather than estimated — see the <a href="/editorial/">sourcing policy</a>.</p>
+
+  <h2>Processing notes</h2>
+  <ul>
+    {m.processing.map((note) => <li>{note}</li>)}
+  </ul>
+
+  <h2>Typical applications</h2>
+  <ul>
+    {m.applications.map((app) => <li>{app}</li>)}
+  </ul>
+
+  <Faq items={m.faqs} />
+
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      {m.sources.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

@@ -1,0 +1,77 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+const faq = [
+  { q: 'How do I know my nylon filament is wet?', a: 'Audible popping or sizzling at the nozzle, steam, bubbles in the extruded line, stringing that was not there before, a rough or foamy surface, and parts that feel weaker and snap along layers. If a spool has been sitting in room air for days, assume it needs drying — PA6 especially.' },
+  { q: 'Can I dry nylon filament in a food dehydrator or oven?', a: 'Any dryer that holds the manufacturer-specified temperature steadily and safely works mechanically; dedicated filament dryers add a spool holder and feed port. What matters is following the temperature and duration on the filament\'s datasheet (80-100 °C for the grades tabulated here) and not exceeding your spool\'s temperature limit.' },
+  { q: 'How long does dried filament stay dry?', a: 'In open room air, nylon starts re-absorbing moisture immediately and can return to unprintable levels within days — PA6 fastest. Keep dried spools sealed with desiccant, or print from a dry box so the spool stays dry through the print.' },
+  { q: 'Is drying also needed for powder (SLS/MJF)?', a: 'Powder processes manage moisture at the system level and through powder handling procedures, not by spool-style drying. This guide is about FDM filament; powder users should follow their machine and material documentation.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'How to dry nylon filament: manufacturer temperatures and times',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="How to Dry Nylon Filament — Temperatures & Times | Nylon3DP"
+  description="Manufacturer drying settings for nylon filament: Polymaker PA6-CF 100 °C/10 h, CoPA 100 °C/8 h, Bambu PA6-CF & PAHT-CF 80 °C/8-12 h — plus storage practice."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/guides/">Guides</a> / Drying nylon filament</p>
+  <h1>How to dry nylon filament</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Dry nylon filament at the temperature and duration its manufacturer specifies — for the grades in our database that means <strong>100 °C for 8–10 h</strong> (Polymaker PA6-CF and CoPA) or <strong>80 °C for 8–12 h</strong> (Bambu Lab PA6-CF and PAHT-CF) — then print from a dry box or store the spool sealed with desiccant. Wet nylon pops, strings and delaminates; no slicer setting compensates for it.</p>
+  </div>
+
+  <h2>Why nylon needs drying (and PLA habits fail)</h2>
+  <p>All polyamides are <a href="/glossary/">hygroscopic</a>: the amide groups in the polymer chain bind water from the air. At printing temperatures that water flashes to steam inside the melt, producing bubbles and voids, hydrolysing the polymer (which permanently lowers its molecular weight and strength), and wrecking layer adhesion. Nylon absorbs moisture faster and holds more of it than common filaments like PLA or PETG, so the "leave the spool on the printer" habit that works elsewhere fails within days for PA6 in particular.</p>
+
+  <h2>Manufacturer drying settings</h2>
+  <p>These are the values printed in each manufacturer's own technical data sheet — not community lore. Your filament's datasheet always wins over any generic table.</p>
+  <table>
+    <thead>
+      <tr><th>Filament</th><th>Drying temperature</th><th>Duration</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="/materials/polymaker-polymide-pa6-cf/">Polymaker PolyMide PA6-CF</a> (Fiberon PA6-CF20)</td><td>100 °C</td><td>10 h</td><td>Polymaker TDS v1.1</td></tr>
+      <tr><td><a href="/materials/polymaker-polymide-copa/">Polymaker PolyMide CoPA</a></td><td>100 °C</td><td>8 h</td><td>Polymaker TDS v5.4</td></tr>
+      <tr><td><a href="/materials/bambu-pa6-cf/">Bambu Lab PA6-CF</a></td><td>80 °C</td><td>8–12 h</td><td>Bambu Lab TDS v3.0</td></tr>
+      <tr><td><a href="/materials/bambu-paht-cf/">Bambu Lab PAHT-CF</a></td><td>80 °C</td><td>8–12 h</td><td>Bambu Lab TDS v3.0</td></tr>
+    </tbody>
+  </table>
+  <p>Notice the pattern: drying temperature tracks the polymer's heat resistance. Grades whose datasheets allow 100 °C use it to drive moisture out faster; Bambu's grades specify 80 °C, and exceeding a spool's or polymer's comfort zone to "dry faster" risks deforming the spool or annealing the filament inconsistently. Follow the sheet.</p>
+
+  <h2>Procedure</h2>
+  <ol>
+    <li><strong>Dry before the print, not during the failure.</strong> Run the full datasheet cycle (temperature and duration from the table) in a filament dryer, drying oven or equivalent that holds temperature steadily.</li>
+    <li><strong>Keep it dry while printing.</strong> Feed from a sealed dry box where possible; a long print in humid room air can re-wet the outer wraps of the spool mid-job.</li>
+    <li><strong>Store sealed with desiccant.</strong> Vacuum bags or gasketed boxes with rechargeable desiccant. Label the spool with the date it was last dried.</li>
+    <li><strong>Re-dry on suspicion.</strong> Popping, new stringing, or a matte/foamy surface means moisture is back — another full cycle restores the material; printing on regardless wastes the whole part, not just time.</li>
+  </ol>
+
+  <h2>What dry filament buys you, in datasheet terms</h2>
+  <p>The property tables in the <a href="/materials/">material database</a> — for example PA6-CF's 109.3 MPa tensile strength — are measured on properly dried specimens. Wet-printed parts fall well short of those numbers and fail preferentially between layers. Drying is not a ritual; it is the precondition for the datasheet to describe your part at all.</p>
+
+  <Faq items={faq} />
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      <li><a href="https://polymaker.com/wp-content/uploads/TDS_FIBERON-PA6-CF20_V1.1_EN.pdf" rel="noopener">Polymaker TDS — Fiberon PA6-CF20, v1.1</a></li>
+      <li><a href="https://cdn.shopify.com/s/files/1/0548/7299/7945/files/PolyMide_CoPA_TDS_V5.4.pdf" rel="noopener">Polymaker TDS — PolyMide CoPA, v5.4</a></li>
+      <li><a href="https://store.bblcdn.com/b2abc59ac250492b979a52f1ce3e61b3.pdf" rel="noopener">Bambu Lab TDS — PA6-CF, v3.0</a></li>
+      <li><a href="https://store.bblcdn.com/7166b20bc68f4c87b32c972b856eeb4b.pdf" rel="noopener">Bambu Lab TDS — PAHT-CF, v3.0</a></li>
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

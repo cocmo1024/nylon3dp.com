@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base
+  title="About Nylon3DP — The Nylon 3D Printing Reference"
+  description="Nylon3DP is an independent reference for nylon 3D printing: manufacturer-sourced material data, process explainers, machine specs and design guides."
+>
+  <p class="crumbs"><a href="/">Home</a> / About</p>
+  <h1>About Nylon3DP</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Nylon3DP is an independent, English-language reference dedicated to one material family: nylon (polyamide) in 3D printing. It collects material datasheets, machine specifications, process explainers and design guides for PA11, PA12, PA6 and filled nylon grades — with every number traced to the manufacturer's own documentation.</p>
+  </div>
+
+  <h2>Why one site just for nylon?</h2>
+  <p>Nylon is the workhorse engineering polymer of additive manufacturing. It is the default material family for powder-bed processes such as <a href="/processes/sls/">SLS</a> and <a href="/processes/mjf/">MJF</a>, a staple of high-strength <a href="/processes/fdm/">FDM filament</a>, and the material behind functional end-use parts from living hinges and ducting to gears, brackets and orthotics. Yet its data is scattered across dozens of manufacturer datasheets, each with different test methods and naming. This site exists to gather that information in one place, in a consistent format, with sources attached.</p>
+
+  <h2>What you will find here</h2>
+  <ul>
+    <li><a href="/materials/">Material database</a> — individual pages for nylon powders and filaments, with property tables reproduced from manufacturer datasheets.</li>
+    <li><a href="/machines/">Machine database</a> — SLS, MJF, SAF and FDM systems that print nylon, with build volumes and layer ranges from manufacturer specification pages.</li>
+    <li><a href="/processes/">Process explainers</a> — how SLS, MJF and nylon FDM work, where each fits, and a sourced <a href="/compare/sls-vs-mjf/">SLS vs MJF comparison</a>.</li>
+    <li><a href="/guides/">Guides</a> — practical, sourced articles such as <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a> and <a href="/guides/designing-for-sls-mjf/">designing parts for SLS &amp; MJF</a>.</li>
+    <li><a href="/glossary/">Glossary</a> — short, precise definitions of the terms used across the site.</li>
+  </ul>
+
+  <h2>How the data is handled</h2>
+  <p>Numbers are never invented, estimated or copied from reseller listings. Each database page lists its sources, and values that a manufacturer does not publish are left out rather than filled in. The full rules are in our <a href="/editorial/">editorial and sourcing policy</a>. The database is growing in stages: v1 covers the most widely used powder grades and filaments first, and expands from there — pages state plainly what is covered so far.</p>
+
+  <h2>Contact</h2>
+  <p>Corrections, source updates and suggestions are welcome at <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. See the <a href="/contact/">contact page</a> for details.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

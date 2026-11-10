@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../site';
+---
+
+<Base
+  title="Contact Nylon3DP"
+  description="Contact Nylon3DP by email for corrections, source updates and suggestions about the nylon 3D printing reference database."
+>
+  <p class="crumbs"><a href="/">Home</a> / Contact</p>
+  <h1>Contact</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Email is the only contact channel: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. It reaches the site's editorial desk for corrections, datasheet updates and coverage suggestions.</p>
+  </div>
+
+  <h2>What to write about</h2>
+  <ul>
+    <li><strong>Corrections</strong> — a value on any page that no longer matches the manufacturer's current datasheet. Please include the page address and the datasheet link if you have it; verified corrections are applied promptly.</li>
+    <li><strong>New or revised datasheets</strong> — manufacturers and material suppliers can flag updated documents for grades already listed in the <a href="/materials/">material database</a>.</li>
+    <li><strong>Coverage suggestions</strong> — a widely used nylon grade, machine or topic you expected to find here. Coverage expands in stages, and reader requests influence the order.</li>
+    <li><strong>Source questions</strong> — if a figure's citation is unclear, ask and we will point to the exact document.</li>
+  </ul>
+
+  <h2>What this site does not do</h2>
+  <p>Nylon3DP is a reference publication, not a print service, reseller or consultancy. We cannot quote, print or supply parts or materials, and emails asking for quotes cannot be answered with an offer. For parts, contact a print service or the machine and material manufacturers directly — the <a href="/machines/">machine database</a> and <a href="/materials/">material database</a> link to the manufacturers behind each entry.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

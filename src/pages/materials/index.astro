@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import { MATERIALS } from '../../data/materials';
+
+const headline = (m: (typeof MATERIALS)[number]) =>
+  m.properties.find((p) => /tensile strength/i.test(p.label))?.value ?? '';
+---
+
+<Base
+  title="Nylon 3D Printing Materials Database — PA11, PA12, PA6 | Nylon3DP"
+  description="Datasheet-verified nylon materials: PA12, PA11, glass-filled PA12 and PA6 powders plus PA-CF and CoPA filaments from EOS, Formlabs, HP, BASF and more."
+>
+  <p class="crumbs"><a href="/">Home</a> / Materials</p>
+  <h1>Nylon material database</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Every nylon grade in this database has its own page with a property table taken from the manufacturer's own datasheet — PA12 and PA11 powders for SLS and MJF, glass-filled grades for stiffness, and PA6-CF / CoPA filaments for FDM. No reseller numbers, no estimates: if the manufacturer does not publish a value, the table leaves it out.</p>
+  </div>
+
+  <p>Coverage so far: {MATERIALS.length} grades from {[...new Set(MATERIALS.map((m) => m.manufacturer))].join(', ')}. The database is expanding in stages toward the full nylon landscape — powders, filaments and pellets across all major suppliers — and each addition follows the same rule: a manufacturer datasheet, or it does not go in.</p>
+
+  <h2>All materials</h2>
+  <div class="cards">
+    {MATERIALS.map((m) => (
+      <a class="card" href={`/materials/${m.slug}/`}>
+        <h3>{m.name}</h3>
+        <p class="meta">{m.manufacturer} · {m.basePolymer} · {m.form} · {m.process}</p>
+        <p>{m.quickAnswer.split('.')[0]}.</p>
+        {headline(m) && <p class="meta">Tensile strength: {headline(m)}</p>}
+      </a>
+    ))}
+  </div>
+
+  <h2>How to read the tables</h2>
+  <p>Powder datasheets from EOS use ISO 527 test methods and report "strain at break"; Formlabs and HP typically report ASTM methods. Cross-brand comparisons are therefore indicative rather than laboratory-controlled — each page keeps the manufacturer's own test method next to every value so you can judge comparability yourself. New to the grades themselves? Start with <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a> and the <a href="/glossary/">glossary</a>.</p>
+  <p class="updated">Last updated: November 2026</p>
+</Base>

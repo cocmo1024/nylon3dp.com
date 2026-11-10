@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+const faq = [
+  { q: 'Is PA11 stronger than PA12?', a: 'No — they are in the same strength class (roughly 48-54 MPa tensile across the datasheets on this site). PA11\'s advantage is ductility and impact resistance: elongation at break of 30-40% versus 11-18% for PA12 grades. Choose by failure mode, not by strength.' },
+  { q: 'Why is PA11 called bio-based?', a: 'PA11 is polymerised from a monomer derived from castor oil rather than petroleum. It is still a durable engineering nylon in service — bio-based describes the feedstock, not biodegradability.' },
+  { q: 'Can PA11 and PA12 be printed on the same machine?', a: 'Generally yes on open powder systems, with each material\'s own parameter set — their melting points differ (EOS lists 201 °C for PA 1101 vs 176 °C for PA 2200). Closed systems offer whichever grades the manufacturer has qualified.' },
+  { q: 'Which is better for living hinges?', a: 'PA11, clearly. Living hinges live or die on elongation and fatigue behaviour; PA11\'s 30-40% elongation at break (datasheet) makes it the standard hinge choice in both SLS and MJF.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'PA11 vs PA12: which nylon powder should you choose?',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="PA11 vs PA12: Which Nylon Powder? (Datasheet Comparison) | Nylon3DP"
+  description="PA11 vs PA12 for SLS and MJF on manufacturer data (EOS, Formlabs, HP): elongation 30-40% vs 11-18%, similar strength — different failure modes."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/guides/">Guides</a> / PA11 vs PA12</p>
+  <h1>PA11 vs PA12: which nylon powder?</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Choose <strong>PA11</strong> when the part must bend, snap or survive impact — its datasheet elongation at break is 30–40%, versus 11–18% for PA12. Choose <strong>PA12</strong> for general-purpose parts: it is the balanced, widely available, usually cheaper default, with essentially the same tensile strength (48–54 MPa) and stiffness. PA11 is also bio-based (castor oil) and melts about 25 °C higher in EOS's data.</p>
+  </div>
+
+  <h2>The datasheet comparison</h2>
+  <p>Figures below are the manufacturers' own published values for their flagship grades — full tables and test methods are on each material's page. Cross-brand numbers come from different test standards (ISO 527 for EOS, ASTM D638 for Formlabs), so read them as a consistent picture rather than laboratory rankings.</p>
+  <table>
+    <thead>
+      <tr><th>Grade</th><th>Tensile strength (XY)</th><th>Tensile modulus</th><th>Elongation at break (XY)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="/materials/eos-pa-1101/">EOS PA 1101</a> (PA11)</td><td>50 MPa</td><td>1650 MPa</td><td><strong>30%</strong></td></tr>
+      <tr><td><a href="/materials/formlabs-nylon-11-powder/">Formlabs Nylon 11 Powder</a> (PA11)</td><td>49 MPa</td><td>1600 MPa</td><td><strong>40%</strong></td></tr>
+      <tr><td><a href="/materials/eos-pa-2200/">EOS PA 2200</a> (PA12)</td><td>48 MPa</td><td>1650 MPa</td><td>18%</td></tr>
+      <tr><td><a href="/materials/formlabs-nylon-12-powder/">Formlabs Nylon 12 Powder</a> (PA12)</td><td>50 MPa</td><td>1850 MPa</td><td>11%</td></tr>
+      <tr><td><a href="/materials/hp-pa-12/">HP HR PA 12</a> (PA12, MJF)</td><td>54 MPa</td><td>2150 MPa</td><td>18%</td></tr>
+    </tbody>
+  </table>
+  <p>The pattern is stable across three manufacturers: strength and stiffness barely move between the two polymers; elongation roughly doubles or triples with PA11. The Z-direction tells the same story — EOS lists PA 1101 at 15% Z elongation versus 4% for PA 2200, the largest single gap in the table set.</p>
+
+  <h2>Where the difference comes from</h2>
+  <p>PA11's monomer carries one more methylene unit in its chain than PA12's building blocks, spacing the amide groups slightly further apart. The practical consequences: fewer hydrogen bonds per length, a more flexible chain, lower moisture uptake than PA6-type nylons, and a polymer that yields and stretches instead of cracking. PA11's monomer is produced from castor oil, which is why it is marketed as bio-based. PA12 is fully petrochemical.</p>
+
+  <h2>Decision rules</h2>
+  <ul>
+    <li><strong>Living hinges, clips, snap-fits, buckles:</strong> PA11. These parts are elongation-limited; PA12 will crack early.</li>
+    <li><strong>Impact-loaded parts — guards, covers, sports and orthotic components:</strong> PA11, for its ductility and non-splintering failure.</li>
+    <li><strong>Housings, brackets, ducting, jigs, general production:</strong> PA12. Balanced properties, the widest machine/material availability, typically the lowest powder cost.</li>
+    <li><strong>Stiffness-critical parts:</strong> neither — look at filled grades (<a href="/materials/eos-pa-3200-gf/">glass-filled PA12</a> at 3200 MPa modulus, or <a href="/materials/basf-ultrasint-pa6/">PA6</a> at 3700 MPa dry) rather than choosing between two ~1650 MPa materials.</li>
+    <li><strong>Heat under load:</strong> check the specific datasheet, not the polymer name — Formlabs lists PA11 HDT at 1.8 MPa as just 46 °C, while its PA12 reaches 87 °C at the same load.</li>
+  </ul>
+
+  <h2>Cost and availability</h2>
+  <p>PA12 is the volume material of powder-bed printing: every SLS/MJF platform offers it, and service bureaus stock it as the default. PA11 is a qualified second material on major platforms, typically at a price premium, and not every bureau runs it continuously. If a design depends on PA11's ductility, confirm availability with your bureau before committing — or design the part so PA12's elongation suffices.</p>
+
+  <Faq items={faq} />
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      <li><a href="https://www.eos.info/polymer-solutions/polymer-materials/data-sheets/mds-pa-1101" rel="noopener">EOS Material Data Sheet — PA 1101</a></li>
+      <li><a href="https://www.eos.info/polymer-solutions/polymer-materials/data-sheets/mds-pa-2200" rel="noopener">EOS Material Data Sheet — PA 2200</a></li>
+      <li><a href="https://formlabs-media.formlabs.com/datasheets/2101560-TDS-ENUS-0.pdf" rel="noopener">Formlabs TDS — Nylon 11 Powder</a></li>
+      <li><a href="https://formlabs-media.formlabs.com/datasheets/2201730-TDS-ENUS-0.pdf" rel="noopener">Formlabs TDS — Nylon 12 Powder</a></li>
+      <li><a href="https://www8.hp.com/h20195/v2/GetDocument.aspx?docname=4AA8-5029ENW" rel="noopener">HP Technical Data Sheet — High Reusability PA 12 (4AA8-5029ENW)</a></li>
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>
