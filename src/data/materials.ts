@@ -577,6 +577,56 @@ export const MATERIALS: Material[] = [
       { label: 'Polymaker SDS — PolyMide PA12-CF (fibre content)', url: 'https://polymaker.com.cn/wp-content/tech-docs/PolyMide_PA12-CF_SDS_AU_EN_V1.pdf' },
     ],
   },
+  {
+    slug: 'arkema-rilsan-invent-pa11',
+    name: 'Arkema Rilsan Invent PA11',
+    manufacturer: 'Arkema',
+    basePolymer: 'PA11',
+    form: 'Powder',
+    process: 'SLS',
+    quickAnswer:
+      'Arkema Rilsan Invent PA11 (data sheet grade designation: Rilsan® PA11 Invent Nat) is a 100% bio-based PA11 powder for laser sintering, polymerised from castor oil. Per Arkema\'s technical data sheet it offers 45 MPa tensile strength at break, 1500 MPa tensile modulus and 45% strain at break — the ductility figure, far above any PA12 powder, is the reason this grade exists.',
+    intro: [
+      'Rilsan is Arkema\'s PA11 family, and PA11 itself is Arkema\'s chemistry: the polymer is made from a monomer derived from castor oil, and the data sheet lists bio-based carbon content at 100% (ASTM D6866). The Invent range is the powder line developed for powder bed fusion; the data sheet states the natural grade is designed for use with all laser sintering systems, with build-parameter adjustments depending on the equipment.',
+      'The property profile is the PA11 trade in its clearest form. Against EOS PA 2200 (PA12: 48 MPa, 1650 MPa, 18% elongation), Arkema lists slightly lower strength and stiffness but 45% strain at break — two and a half times the PA12 figure. Against the other PA11 in this database, EOS PA 1101 (50 MPa, 30%), Rilsan Invent gives up a little strength for half again as much elongation. Designers choosing between PA11 grades are really choosing where they sit on that strength-versus-ductility line.',
+      'The weak point is heat deflection. Despite a 201 °C melting temperature, the data sheet lists an HDT of only 44 °C at 1.8 MPa, so loaded parts in warm environments need to be checked against that figure rather than the melting point.',
+    ],
+    processing: [
+      'SLS powder for laser sintering systems; Arkema states the grade is heat stabilised and gives a shelf life of two years from delivery when stored sealed.',
+      'Arkema states a low refreshing factor for the grade — typically 50% — in the data sheet description; as with all refresh figures, the workable ratio depends on part geometry and packing.',
+      'Powder data from the data sheet: median particle size (D50) of 46 µm, bulk apparent density 0.49 g/cm³ (tapped 0.62 g/cm³).',
+      'Arkema labels the figures in its data sheet as typical values; they are reproduced here as published.',
+    ],
+    properties: [
+      { label: 'Tensile strength at break', value: '45 MPa', note: 'Arkema "stress at break", ISO 527-1/-2, dry, 23 °C' },
+      { label: 'Tensile modulus', value: '1500 MPa', note: 'ISO 527-1/-2, dry, 23 °C' },
+      { label: 'Elongation at break', value: '45%', note: 'Arkema "strain at break", ISO 527-1/-2, dry, 23 °C' },
+      { label: 'Flexural modulus', value: '1200 MPa', note: 'ISO 178, 23 °C' },
+      { label: 'Hardness', value: 'Shore D 77', note: 'ISO 868, 23 °C' },
+      { label: 'Heat deflection temperature', value: '44 °C', note: 'ISO 75-1/-2 at 1.8 MPa' },
+      { label: 'Melting temperature', value: '201 °C', note: '20 °C/min per Arkema TDS; Arkema\'s PBF brochure lists the same value under ISO 11357-3' },
+      { label: 'Particle size, median (D50)', value: '46 µm', note: 'ISO 13320; D10: 19 µm, D90: 89 µm' },
+      { label: 'Apparent density (bulk)', value: '0.49 g/cm³', note: 'ISO 1068; tapped: 0.62 g/cm³' },
+      { label: 'Bio-based carbon content', value: '100%', note: 'ASTM D6866' },
+    ],
+    applications: [
+      'Automotive interior parts, including crash-relevant components (Arkema case studies)',
+      'Bicycle helmets and sports protection',
+      'Orthotics and medical devices',
+      'Bearings and other parts that must flex or absorb impact',
+      'Rapid prototyping of small, complex parts (per the data sheet description)',
+    ],
+    faqs: [
+      { q: 'Is Rilsan Invent PA11 really 100% bio-based?', a: 'Per Arkema\'s data sheet, yes in feedstock terms: PA11 is polymerised from a castor-oil-derived monomer and the sheet lists bio-based carbon content at 100% (ASTM D6866). As with other PA11 grades, "bio-based" describes the feedstock, not biodegradability — the finished polymer is a durable engineering nylon.' },
+      { q: 'Rilsan Invent PA11 or EOS PA 1101?', a: 'Both are PA11 SLS powders. Per their data sheets, EOS PA 1101 lists 50 MPa tensile strength and 30% strain at break; Arkema lists 45 MPa and 45%. Choose Rilsan Invent where maximum ductility and impact tolerance dominate, PA 1101 where its higher strength figure matters. Both melt at 201 °C.' },
+      { q: 'What refresh factor does Arkema state for Rilsan Invent PA11?', a: 'The data sheet description states a low refreshing factor, typically 50% — in Arkema\'s framing, roughly half virgin powder in the blend. The ratio a given bureau can actually run depends on geometry, packing density and how the powder has aged.' },
+      { q: 'What is the weak point of Rilsan Invent PA11?', a: 'Heat deflection: the data sheet lists an HDT of only 44 °C at 1.8 MPa despite the 201 °C melting temperature. A part can be far below melting and still deflect under load in a warm environment, so check sustained-load applications against the HDT, not the melting point.' },
+    ],
+    sources: [
+      { label: 'Arkema Technical Data Sheet — Rilsan® PA11 Invent Nat (hpp.arkema.com, retrieved 2026-11-12)', url: 'https://hpp.arkema.com/assets/arkema/TDS_RILSAN%C2%AE%20PA11%20INVENT%20NAT_en_WW.pdf' },
+      { label: 'Arkema brochure — Thermoplastic Powders for Powder Bed Fusion: Rilsan® Invent (arkema.com, © 2022 Arkema Inc., retrieved 2026-11-12)', url: 'https://www.arkema.com/files/live/sites/shared_arkema/files/downloads/products-documentations/technicalpolymers/2022%20-%20Rilsan%20Powder%20Bed%20Fusion.pdf' },
+    ],
+  },
 ];
 
 // Build-time validation: a material may not ship without sources or properties.
