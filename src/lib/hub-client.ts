@@ -22,8 +22,13 @@ interface HubPayload {
   kind: 'materials' | 'machines';
   noun: string;
   compareBase: string;
+  /** Localised rendered strings (B5); templates carry {…} tokens. */
+  ui?: { countFiltered?: string; selected?: string; selectedMore?: string };
   rows: Record<string, HubRowPayload>;
 }
+
+const fillTokens = (tpl: string, vals: Record<string, number | string>): string =>
+  Object.entries(vals).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, String(v)), tpl);
 
 const MAX_COMPARE = 4;
 
@@ -71,7 +76,11 @@ function initHub(root: HTMLElement): void {
       countEl.textContent =
         visible.length === rows.length
           ? `${rows.length} ${payload.noun}`
-          : `Showing ${visible.length} of ${rows.length} ${payload.noun} — filters active`;
+          : fillTokens(payload.ui?.countFiltered ?? 'Showing {visible} of {total} {noun} — filters active', {
+              visible: visible.length,
+              total: rows.length,
+              noun: payload.noun,
+            });
     }
     restripe(visible);
   };
@@ -130,8 +139,11 @@ function initHub(root: HTMLElement): void {
     if (barCount) {
       barCount.textContent =
         selected.size < 2
-          ? `${selected.size} selected — pick ${2 - selected.size} more to compare`
-          : `${selected.size} selected`;
+          ? fillTokens(payload.ui?.selectedMore ?? '{n} selected — pick {m} more to compare', {
+              n: selected.size,
+              m: 2 - selected.size,
+            })
+          : fillTokens(payload.ui?.selected ?? '{n} selected', { n: selected.size });
     }
     if (barLink) {
       barLink.href = `${payload.compareBase}?sel=${[...selected].join(',')}`;

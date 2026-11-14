@@ -1,0 +1,196 @@
+---
+import Base from '../layouts/Base.astro';
+import AdSlot from './AdSlot.astro';
+import { MATERIALS } from '../data/materials';
+import { MACHINES } from '../data/machines';
+import { VENDORS } from '../data/vendors';
+import { PROCESSES } from '../data/processes';
+import { NEWS } from '../data/news';
+import {
+  APPLICATIONS,
+  APPLICATION_INDUSTRIES,
+  APPLICATION_PART_FAMILIES,
+  APPLICATION_MATRIX,
+} from '../data/applications';
+import { SITE } from '../site';
+import {
+  ALL_LOCALES,
+  HOME_ALTERNATES,
+  LOCALE_META,
+  formatPortalDate,
+  homePath,
+  type AnyLocale,
+  type PortalCopy,
+} from '../i18n/home';
+
+// The portal front page, one anatomy for all six locales (rebuild batch
+// B5). All section copy comes from i18n/home.ts (PORTAL_COPY); all counts
+// are read from the data layer, never typed. English reads the lead story
+// and news items from data/news.ts; other locales use the translated
+// strings in their copy and mark the English-only coverage as English.
+
+interface Props {
+  copy: PortalCopy;
+  locale: AnyLocale;
+}
+
+const { copy, locale } = Astro.props;
+const meta = LOCALE_META[locale];
+const isEn = locale === 'en';
+
+const lead = NEWS[0];
+const leadTitle = isEn ? lead.title : copy.leadTitle;
+const leadDek = isEn ? lead.dek : copy.leadDek;
+
+const vendorCounts = VENDORS.map((v) => ({
+  vendor: v,
+  materials: MATERIALS.filter((m) => m.vendorSlug === v.slug).length,
+  machines: MACHINES.filter((m) => m.vendorSlug === v.slug).length,
+}));
+const countLine = (n: number, pair: [string, string]) => `${n} ${n === 1 ? pair[0] : pair[1]}`;
+
+// First-sentence extraction that survives decimal points ("0.45 MPa"):
+// a sentence ends at ., ! or ? followed by a space and an uppercase/digit;
+// CJK text ends at 。！？.
+const firstSentence = (s: string) => {
+  const cjk = s.search(/[。！？]/);
+  const latin = s.match(/^[\s\S]*?[.!?](?=\s+[A-Z0-9"']|$)/);
+  if (cjk >= 0 && (!latin || cjk < latin[0].length)) return s.slice(0, cjk + 1).trim();
+  const t = (latin ? latin[0] : s).trim();
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+};
+
+const newsText = (n: (typeof NEWS)[number]) => {
+  if (isEn) return { title: n.title, rail: firstSentence(n.dek) };
+  const t = copy.newsItems[n.href];
+  return t ? { title: t.title, rail: t.rail } : { title: n.title, rail: firstSentence(n.dek) };
+};
+
+const processBySlug = new Map(PROCESSES.map((p) => [p.slug, p]));
+const depthBody = (item: PortalCopy['depthItems'][number]) =>
+  item.body ?? firstSentence(processBySlug.get(item.processSlug ?? '')?.quickAnswer ?? '');
+
+const plannedCells = APPLICATION_MATRIX.filter((c) => c.status === 'candidate').length;
+
+const fill = (s: string) =>
+  s
+    .replaceAll('{materials}', String(MATERIALS.length))
+    .replaceAll('{machines}', String(MACHINES.length))
+    .replaceAll('{vendors}', String(VENDORS.length))
+    .replaceAll('{industries}', String(APPLICATION_INDUSTRIES.length))
+    .replaceAll('{families}', String(APPLICATION_PART_FAMILIES.length))
+    .replaceAll('{guides}', String(APPLICATIONS.length))
+    .replaceAll('{planned}', String(plannedCells))
+    .replaceAll('{updated}', copy.updated);
+
+const toolsCountsLine = [
+  countLine(MATERIALS.length, copy.toolsCounts.grades),
+  countLine(MACHINES.length, copy.toolsCounts.machines),
+  countLine(VENDORS.length, copy.toolsCounts.vendors),
+].join(' · ');
+---
+
+<Base
+  title={copy.title}
+  description={copy.description}
+  lang={meta.htmlLang}
+  ogLocale={isEn ? undefined : meta.ogLocale}
+  inLanguage={meta.htmlLang}
+  alternates={HOME_ALTERNATES}
+>
+  <nav class="lang-nav" aria-label={copy.langNavLabel}>
+    {ALL_LOCALES.map((code) => (
+      <a href={homePath(code)} aria-current={code === locale ? 'page' : undefined}>{LOCALE_META[code].label}</a>
+    ))}
+  </nav>
+
+  <section class="hero hub-band portal-masthead">
+    <p class="kicker">{copy.mastheadKicker}</p>
+    <h1>{copy.mastheadTitle}</h1>
+    <p class="lede">{copy.mastheadLede}</p>
+  </section>
+
+  <section class="portal-section" data-section="lead">
+    <p class="kicker">{copy.leadKicker} · {copy.leadTag}</p>
+    <h2 class="lead-headline"><a href={lead.href}>{leadTitle}</a></h2>
+    <p class="dateline">{formatPortalDate(lead.date, locale)} · {copy.leadPlace} · {copy.leadKind}</p>
+    <p class="lead-dek">{leadDek}</p>
+    <p><a href={lead.href}>{copy.leadRead}</a> · <a href="/news/">{copy.leadAll}</a>{copy.englishNote && <> <span class="muted">{copy.englishNote}</span></>}</p>
+  </section>
+
+  <AdSlot slot="home-after-lead" />
+
+  <section class="portal-section" data-section="news">
+    <p class="kicker">{copy.newsKicker}</p>
+    <div class="front-grid">
+      <div>
+        <div class="news-list">
+          {NEWS.map((n) => {
+            const t = newsText(n);
+            return (
+              <article class="news-item">
+                <p class="news-date"><time datetime={n.date}>{formatPortalDate(n.date, locale)}</time></p>
+                <div>
+                  <p class="news-meta"><span class="tag">{!isEn && n.href === lead.href ? copy.leadTag : n.tag}</span></p>
+                  <h3 class="news-title"><a href={n.href}>{t.title}</a></h3>
+                  <p>{t.rail}</p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <p><a href="/news/">{copy.newsPageLink}</a></p>
+        {copy.newsLangNote && <p class="muted">{copy.newsLangNote}</p>}
+      </div>
+      <aside class="briefing-box">
+        <p class="kicker">{copy.briefingKicker}</p>
+        <h3>{copy.briefingTitle}</h3>
+        <p>{copy.briefingBody}</p>
+        <p><a class="btn" href={`mailto:${SITE.email}?subject=${encodeURIComponent(copy.briefingSubject)}`}>{copy.briefingButton}</a></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="portal-section" data-section="ecosystem">
+    <p class="kicker">{copy.ecoKicker}</p>
+    <p>{copy.ecoIntro}</p>
+    <ul class="eco-list">
+      {vendorCounts.map(({ vendor: v, materials, machines }) => (
+        <li>
+          <span><a href={`/vendors/${v.slug}/`}>{v.name}</a> <span class="muted">· {v.hqCountry} · {copy.vendorTypes[v.type]}</span></span>
+          <span class="eco-counts">{[materials > 0 ? countLine(materials, copy.gradeNoun) : null, machines > 0 ? countLine(machines, copy.machineNoun) : null].filter(Boolean).join(' · ')}</span>
+        </li>
+      ))}
+    </ul>
+    <p set:html={fill(copy.ecoFooterHtml)} />
+  </section>
+
+  <section class="portal-section" data-section="depth">
+    <p class="kicker">{copy.depthKicker}</p>
+    <div class="depth-list">
+      {copy.depthItems.map((item) => (
+        <article class="depth-item">
+          <h3><a href={item.href}>{item.title}</a></h3>
+          <p>{depthBody(item)}</p>
+        </article>
+      ))}
+    </div>
+    <p set:html={copy.depthFooterHtml} />
+  </section>
+
+  <section class="portal-section" data-section="applications">
+    <p class="kicker">{copy.appKicker}</p>
+    <p set:html={fill(copy.appBodyHtml)} />
+  </section>
+
+  <section class="portal-section tools-module" data-section="data-tools">
+    <p class="kicker">{copy.toolsKicker}</p>
+    <p class="tools-counts">{toolsCountsLine}</p>
+    <p>{copy.toolsBody}</p>
+    <ul class="tools-links">
+      {copy.toolsLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+    </ul>
+  </section>
+
+  <p class="updated" set:html={fill(copy.signoffHtml)} />
+</Base>

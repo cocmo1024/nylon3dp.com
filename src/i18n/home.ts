@@ -5,6 +5,15 @@
 // Spec rule (GOAL.md «多语言»): translations share the English data layer —
 // brand/grade names, process acronyms (SLS/MJF/SAF/FDM), material codes
 // (PA11, PA12, PA6-CF) and every number stay byte-identical to English.
+//
+// Since rebuild batch B5 the homepage is ONE portal anatomy (masthead,
+// lead story, news & briefing, ecosystem, depth, applications landscape,
+// data & tools, sign-off) rendered by components/PortalHome.astro from
+// the per-language copy below. English copy lives here too (single
+// source); the lead story's headline/dek and the news items are read
+// from data/news.ts for English and from the translated strings here
+// for the other locales — the Formnext feature itself is English-only,
+// and the localized homes say so (englishNote / newsLangNote).
 
 export const LOCALE_CODES = ['de', 'es', 'pt', 'ja', 'zh'] as const;
 export type LocaleCode = (typeof LOCALE_CODES)[number];
@@ -49,425 +58,656 @@ export const HOME_ALTERNATES: { hreflang: string; href: string }[] = [
   { hreflang: 'x-default', href: homeUrl('en') },
 ];
 
-export interface HomeCard {
+// --- portal date formatting -------------------------------------------------
+const MONTHS_I18N: Record<AnyLocale, string[]> = {
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+  es: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+  pt: ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+  ja: [],
+  zh: [],
+};
+
+/** '2026-11-14' → the locale's long date form (no Date/timezone involvement). */
+export const formatPortalDate = (iso: string, locale: AnyLocale): string => {
+  const [y, m, d] = iso.split('-').map(Number);
+  switch (locale) {
+    case 'de':
+      return `${d}. ${MONTHS_I18N.de[m - 1]} ${y}`;
+    case 'es':
+      return `${d} de ${MONTHS_I18N.es[m - 1]} de ${y}`;
+    case 'pt':
+      return `${d} de ${MONTHS_I18N.pt[m - 1]} de ${y}`;
+    case 'ja':
+    case 'zh':
+      return `${y}年${m}月${d}日`;
+    default:
+      return `${d} ${MONTHS_I18N.en[m - 1]} ${y}`;
+  }
+};
+
+// --- portal homepage copy ----------------------------------------------------
+
+export interface PortalNewsText {
   title: string;
-  body: string;
-  meta: string;
+  /** full translated dek (lead-story reuse / reference) */
+  dek: string;
+  /** one-sentence standfirst for the homepage news rail, used verbatim */
+  rail: string;
 }
 
-export interface HomeCopy {
+export interface PortalDepthItem {
+  href: string;
+  /** when set and body is omitted, the body is the process quickAnswer's first sentence (English data layer) */
+  processSlug?: string;
+  title: string;
+  body?: string;
+}
+
+export interface PortalCopy {
   title: string;
   description: string;
-  heroTitle: string;
-  heroLede: string;
-  qaLabel: string;
-  /** HTML — carries the process links; identical targets in every locale */
-  qaBody: string;
-  startHeading: string;
-  cards: {
-    materials: HomeCard;
-    machines: HomeCard;
-    processes: HomeCard;
-    guides: HomeCard;
-    glossary: HomeCard;
-    compare: HomeCard;
-  };
-  featuredHeading: string;
-  /**
-   * Translated teaser per material slug for the featured-materials cards.
-   * English omits this and renders from the data layer, as before.
-   * Numbers must match the English datasheet values exactly.
-   */
-  featuredTeasers?: Record<string, string>;
-  coverageHeading: string;
-  /** HTML — carries the /editorial/ link. {materials}/{machines}/{glossary} are counts. */
-  coverageBody: string;
-  trustHeading: string;
-  /** HTML — carries the mailto link */
-  trustBody: string;
-  updatedLine: string;
+  langNavLabel: string;
+  mastheadKicker: string;
+  mastheadTitle: string;
+  mastheadLede: string;
+  leadKicker: string;
+  /** desk tag of the lead item, translated ('Shows' …) */
+  leadTag: string;
+  /** translated lead headline/dek — used for non-English locales only (English reads data/news.ts) */
+  leadTitle: string;
+  leadDek: string;
+  leadPlace: string;
+  leadKind: string;
+  leadRead: string;
+  leadAll: string;
+  /** honesty marker next to the lead links, e.g. '(in English)'; '' for English */
+  englishNote: string;
+  newsKicker: string;
+  /** translated news items by href — used for non-English locales only */
+  newsItems: Record<string, PortalNewsText>;
+  newsPageLink: string;
+  /** honesty line under the news rail, e.g. 'All coverage is published in English.'; '' for English */
+  newsLangNote: string;
+  briefingKicker: string;
+  briefingTitle: string;
+  briefingBody: string;
+  briefingButton: string;
+  /** email subject line for the mailto signup (the copy quotes "Subscribe" in every locale) */
+  briefingSubject: string;
+  ecoKicker: string;
+  ecoIntro: string;
+  vendorTypes: { material: string; machine: string; both: string };
+  gradeNoun: [string, string];
+  machineNoun: [string, string];
+  /** HTML with a {machines} count token; carries the /vendors/ and /machines/ links */
+  ecoFooterHtml: string;
+  depthKicker: string;
+  depthItems: PortalDepthItem[];
+  /** HTML link line under the depth list */
+  depthFooterHtml: string;
+  appKicker: string;
+  /** HTML with {industries}/{families}/{guides}/{planned} count tokens */
+  appBodyHtml: string;
+  toolsKicker: string;
+  toolsCounts: { grades: [string, string]; machines: [string, string]; vendors: [string, string] };
+  toolsBody: string;
+  toolsLinks: { href: string; label: string }[];
+  /** HTML with a {updated} token */
+  signoffHtml: string;
+  updated: string;
 }
 
-const en: HomeCopy = {
-  title: 'Nylon3DP — The Nylon 3D Printing Reference: PA11, PA12, SLS, MJF',
+const en: PortalCopy = {
+  title: 'The Nylon 3D Printing Industry Hub | Nylon3DP',
   description:
-    'The nylon 3D printing reference: PA11/PA12 datasheet database, SLS, MJF, SAF and FDM processes, machine specs and guides — every number manufacturer-sourced.',
-  heroTitle: 'The Nylon 3D Printing Reference',
-  heroLede:
-    "Nylon is the engineering polymer that 3D printing actually builds with — and its data is scattered across dozens of manufacturer datasheets. Nylon3DP gathers it in one place: material properties, machine specifications, process explainers and design guides for PA11, PA12, PA6 and filled nylons, with every number traced to the manufacturer's own documentation.",
-  qaLabel: 'Quick answer — what is nylon 3D printing?',
-  qaBody:
-    'Nylon (polyamide) 3D printing means producing parts from PA12, PA11, PA6 or filled nylon grades, mainly by powder-bed fusion — <a href="/processes/sls/">SLS</a> and <a href="/processes/mjf/">MJF</a> — or by extruding nylon filament (<a href="/processes/fdm/">FDM</a>). Printed nylon is tough, wear-resistant and moderately heat-resistant, which makes it the default choice for functional end-use parts: hinges, clips, gears, ducts, brackets, jigs and orthotics. PA12 is the standard grade; PA11 is the ductile, bio-based alternative.',
-  startHeading: 'Start with the databases',
-  cards: {
-    materials: {
-      title: 'Material database',
-      body: '{materials} nylon grades with full datasheet tables — powders from EOS, Formlabs, HP and BASF, filaments from Polymaker and Bambu Lab.',
-      meta: 'PA12 · PA11 · PA6 · glass-filled · PA-CF · CoPA',
+    "Nylon 3D printing's industry hub: news and show coverage, the vendor ecosystem, datasheet-sourced material and machine databases, and powder-economics tools.",
+  langNavLabel: 'Language',
+  mastheadKicker: 'Nylon3DP · Industry hub',
+  mastheadTitle: 'The nylon 3D printing industry hub',
+  mastheadLede:
+    'News and show coverage, the vendor and equipment ecosystem, materials and process depth — backed by datasheet-sourced databases and powder-economics tools. If it matters to nylon 3D printing, it is covered here, with the sources attached.',
+  leadKicker: 'Lead story',
+  leadTag: 'Shows',
+  leadTitle: 'Formnext 2026: the nylon watchlist',
+  leadDek:
+    'Formnext opens in Frankfurt on Tuesday 17 November, and the nylon side of the hall is unusually dense: EOS unveils a new large-frame polymer SLS platform, Arkema shows next-generation Orgasol PA12 powders, Stratasys unveils a manufacturing-scale system and TPM3D gives its compact CF250 its international debut. The desk’s preview, with vendor claims labelled as claims.',
+  leadPlace: 'Frankfurt',
+  leadKind: 'Preview',
+  leadRead: 'Read the watchlist',
+  leadAll: 'All coverage',
+  englishNote: '',
+  newsKicker: 'News & briefing',
+  newsItems: {},
+  newsPageLink: 'The news page — how the desk works and every item so far',
+  newsLangNote: '',
+  briefingKicker: 'The briefing',
+  briefingTitle: 'Get the nylon briefing by email',
+  briefingBody:
+    'Show reports, vendor moves and new database entries, collected into one occasional email. No daily noise, no third-party list. Signup is by email for now: send a note with “Subscribe” in the subject line.',
+  briefingButton: 'Subscribe by email',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: 'Ecosystem — vendors & equipment',
+  ecoIntro:
+    'The directory tracks the companies behind nylon printing — who makes the powders, who makes the machines, and what of theirs is specified in our databases. Every count below is the live state of the database, not a marketing number.',
+  vendorTypes: { material: 'Materials', machine: 'Machines', both: 'Materials & machines' },
+  gradeNoun: ['grade', 'grades'],
+  machineNoun: ['machine', 'machines'],
+  ecoFooterHtml:
+    '<a href="/vendors/">Vendor directory</a> · <a href="/machines/">Machine database</a> — {machines} production machines fully specified, from the EOS P 396 to the Formlabs Fuse 1+ 30W, with two more platforms being unveiled at Formnext this week.',
+  depthKicker: 'Depth — materials & processes',
+  depthItems: [
+    { href: '/processes/sls/', processSlug: 'sls', title: 'SLS — selective laser sintering' },
+    { href: '/processes/mjf/', processSlug: 'mjf', title: 'MJF — Multi Jet Fusion' },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11 vs PA12: which nylon powder?',
+      body: 'The ductility-versus-balance decision at the heart of powder-bed nylon, settled with EOS, Formlabs and HP datasheet numbers.',
     },
-    machines: {
-      title: 'Machine database',
-      body: '{machines} powder-bed systems with manufacturer-verified build volumes and layer specs.',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: 'Designing parts for SLS & MJF',
+      body: 'Wall thickness, hole sizes and powder escape holes from the official Formlabs SLS design guide, plus the design rules both powder processes share.',
     },
-    processes: {
-      title: 'Processes',
-      body: 'How SLS, MJF, SAF and nylon FDM work, which materials each uses, and where each fits — plus the sourced SLS vs MJF comparison.',
-      meta: 'SLS · MJF · SAF · FDM',
-    },
-    guides: {
-      title: 'Guides',
-      body: 'PA11 vs PA12 decided on datasheet numbers; drying nylon filament at manufacturer settings; designing parts for SLS & MJF from official design guides.',
-      meta: '3 guides at launch, growing',
-    },
-    glossary: {
-      title: 'Glossary',
-      body: '{glossary} definitions — refresh ratio, glass-filled, hygroscopic, HDT and the rest of the vocabulary the datasheets assume.',
-      meta: 'Plain-language, cross-checked against the database',
-    },
-    compare: {
-      title: 'SLS vs MJF',
-      body: "The two production powder processes compared on their manufacturers' own PA12 data: strength, isotropy, colour, materials and economics.",
-      meta: 'Comparison',
-    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">All processes</a> · <a href="/guides/">All guides</a> · <a href="/glossary/">Glossary</a>',
+  appKicker: 'Applications landscape',
+  appBodyHtml:
+    'Nylon’s application map, organised as an industry landscape rather than a parts catalogue: the <a href="/applications/">coverage map</a> spans {industries} industries × {families} part families. {guides} guides are published — the <a href="/applications/drones/">drones &amp; UAV hub</a>, with <a href="/applications/drones/motor-mounts/">motor mounts</a> and <a href="/applications/drones/propeller-guards/">propeller guards</a> worked end to end — and {planned} further cells are planned, each gated on real demand and a complete engineering kernel before it is written.',
+  toolsKicker: 'Data & tools — the service desk',
+  toolsCounts: {
+    grades: ['material grade', 'material grades'],
+    machines: ['machine', 'machines'],
+    vendors: ['vendor', 'vendors'],
   },
-  featuredHeading: 'Featured materials',
-  coverageHeading: 'Coverage so far — stated plainly',
-  coverageBody:
-    'This is v1 of the reference, published November 2026: {materials} materials, {machines} machines, 3 process deep-dives plus a comparison, 3 guides and {glossary} glossary terms. The goal is the complete nylon landscape — every significant powder, filament and machine, every major application area — built in verified stages. What is not yet covered is not guessed at: it is queued. The standard for every page is in the <a href="/editorial/">editorial and sourcing policy</a>.',
-  trustHeading: 'Why trust the numbers here?',
-  trustBody:
-    'Because each one names its source. Property tables reproduce manufacturer datasheets (EOS, Formlabs, HP, BASF, Polymaker, Bambu Lab) with the test method kept next to the value; machine specs come from manufacturers\' specification documents; design minimums come from official design guides. If a manufacturer does not publish a value, the table omits it rather than filling the gap. Corrections are welcome at <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a>.',
-  updatedLine: 'Last updated: November 2026',
+  toolsBody:
+    'Every value from a manufacturer datasheet or official specification, cited on the page; values manufacturers do not publish are omitted, never estimated.',
+  toolsLinks: [
+    { href: '/materials/', label: 'Material database' },
+    { href: '/machines/', label: 'Machine database' },
+    { href: '/compare/materials/', label: 'Compare materials' },
+    { href: '/compare/machines/', label: 'Compare machines' },
+    { href: '/calculators/powder-refresh-ratio/', label: 'Refresh ratio calculator' },
+    { href: '/calculators/part-cost/', label: 'Part cost estimator' },
+    { href: '/calculators/', label: 'All calculators' },
+  ],
+  signoffHtml:
+    'Nylon3DP is an independent industry publication and reference, not affiliated with any manufacturer — see the <a href="/editorial/">sourcing policy</a>. Last updated: {updated}',
+  updated: 'November 2026',
 };
 
-const de: HomeCopy = {
-  title: 'Nylon3DP — Die Referenz für Nylon-3D-Druck: PA11, PA12, SLS, MJF',
+const de: PortalCopy = {
+  title: 'Der Branchen-Hub für Nylon-3D-Druck | Nylon3DP',
   description:
-    'Die Referenz für Nylon-3D-Druck: PA11/PA12-Datenbank mit Herstellerangaben, SLS-, MJF-, SAF- und FDM-Verfahren, Maschinendaten und Konstruktionsleitfäden.',
-  heroTitle: 'Die Referenz für Nylon-3D-Druck',
-  heroLede:
-    'Nylon ist der technische Kunststoff, mit dem im 3D-Druck tatsächlich gebaut wird — doch seine Daten sind über Dutzende von Herstellerdatenblättern verstreut. Nylon3DP führt sie an einem Ort zusammen: Materialeigenschaften, Maschinenspezifikationen, Verfahrenserklärungen und Konstruktionsleitfäden für PA11, PA12, PA6 und gefüllte Nylons, mit jeder Zahl rückverfolgbar zur eigenen Dokumentation des Herstellers.',
-  qaLabel: 'Kurze Antwort — Was ist Nylon-3D-Druck?',
-  qaBody:
-    'Beim Nylon-3D-Druck (Polyamid) werden Bauteile aus PA12, PA11, PA6 oder gefüllten Nylon-Typen gefertigt, hauptsächlich im Pulverbettverfahren — <a href="/processes/sls/">SLS</a> und <a href="/processes/mjf/">MJF</a> — oder durch Extrusion von Nylon-Filament (<a href="/processes/fdm/">FDM</a>). Gedrucktes Nylon ist zäh, verschleißfest und mäßig hitzebeständig — damit ist es die Standardwahl für funktionale Endbauteile: Scharniere, Clips, Zahnräder, Luftkanäle, Halterungen, Vorrichtungen und Orthesen. PA12 ist der Standardtyp; PA11 ist die duktile, biobasierte Alternative.',
-  startHeading: 'Beginnen Sie mit den Datenbanken',
-  cards: {
-    materials: {
-      title: 'Materialdatenbank',
-      body: '{materials} Nylon-Typen mit vollständigen Datenblatt-Tabellen — Pulver von EOS, Formlabs, HP und BASF, Filamente von Polymaker und Bambu Lab.',
-      meta: 'PA12 · PA11 · PA6 · glasgefüllt · PA-CF · CoPA',
-    },
-    machines: {
-      title: 'Maschinendatenbank',
-      body: '{machines} Pulverbett-Anlagen mit vom Hersteller verifizierten Bauräumen und Schichtangaben.',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
-    },
-    processes: {
-      title: 'Verfahren',
-      body: 'Wie SLS, MJF, SAF und Nylon-FDM funktionieren, welche Materialien sie jeweils nutzen und wo sie jeweils passen — plus der quellenbasierte Vergleich SLS vs. MJF.',
-      meta: 'SLS · MJF · SAF · FDM',
-    },
-    guides: {
-      title: 'Leitfäden',
-      body: 'PA11 vs. PA12, entschieden anhand von Datenblatt-Werten; Nylon-Filament mit den Einstellungen des Herstellers trocknen; Bauteile für SLS & MJF nach offiziellen Konstruktionsleitfäden auslegen.',
-      meta: '3 Leitfäden zum Start, wachsend',
-    },
-    glossary: {
-      title: 'Glossar',
-      body: '{glossary} Definitionen — Auffrischrate (Refresh Ratio), glasgefüllt, hygroskopisch, HDT und der übrige Wortschatz, den die Datenblätter voraussetzen.',
-      meta: 'Verständlich erklärt, gegen die Datenbank abgeglichen',
-    },
-    compare: {
-      title: 'SLS vs. MJF',
-      body: 'Die beiden Produktions-Pulververfahren im Vergleich anhand der PA12-Daten ihrer eigenen Hersteller: Festigkeit, Isotropie, Farbe, Materialien und Wirtschaftlichkeit.',
-      meta: 'Vergleich',
+    'News, Messen und das Hersteller-Ökosystem des Nylon-3D-Drucks — plus Material- und Maschinendatenbanken aus Datenblättern und Werkzeuge zur Pulverökonomie.',
+  langNavLabel: 'Sprache',
+  mastheadKicker: 'Nylon3DP · Branchen-Hub',
+  mastheadTitle: 'Der Branchen-Hub für Nylon-3D-Druck',
+  mastheadLede:
+    'News und Messeberichte, das Ökosystem der Hersteller und Anlagen, Tiefe bei Materialien und Verfahren — gestützt auf Datenbanken aus Herstellerdatenblättern und Werkzeuge zur Pulverökonomie. Was für den Nylon-3D-Druck zählt, wird hier behandelt — mit den Quellen dazu.',
+  leadKicker: 'Top-Thema',
+  leadTag: 'Messen',
+  leadTitle: 'Formnext 2026: die Nylon-Beobachtungsliste',
+  leadDek:
+    'Die Formnext öffnet am Dienstag, 17. November, in Frankfurt ihre Tore, und die Nylon-Seite der Halle ist ungewöhnlich dicht besetzt: EOS enthüllt eine neue großformatige Polymer-SLS-Plattform, Arkema zeigt Orgasol-PA12-Pulver der nächsten Generation, Stratasys enthüllt ein System im Produktionsmaßstab, und TPM3D gibt seiner kompakten CF250 ihr internationales Debüt. Die Vorschau der Redaktion — mit Herstellerangaben, die als Angaben gekennzeichnet sind.',
+  leadPlace: 'Frankfurt',
+  leadKind: 'Vorschau',
+  leadRead: 'Zur Beobachtungsliste',
+  leadAll: 'Alle Berichte',
+  englishNote: '(auf Englisch)',
+  newsKicker: 'News & Briefing',
+  newsItems: {
+    '/guides/formnext-2026/': {
+      title: 'Formnext 2026: die Nylon-Beobachtungsliste',
+      dek: 'Die Formnext öffnet am Dienstag, 17. November, in Frankfurt ihre Tore, und die Nylon-Seite der Halle ist ungewöhnlich dicht besetzt: EOS enthüllt eine neue großformatige Polymer-SLS-Plattform, Arkema zeigt Orgasol-PA12-Pulver der nächsten Generation, Stratasys enthüllt ein System im Produktionsmaßstab, und TPM3D gibt seiner kompakten CF250 ihr internationales Debüt. Die Vorschau der Redaktion — mit Herstellerangaben, die als Angaben gekennzeichnet sind.',
+      rail: 'Die Formnext öffnet am Dienstag, 17. November, in Frankfurt ihre Tore — mit einer ungewöhnlich dichten Nylon-Besetzung: EOS enthüllt eine neue großformatige Polymer-SLS-Plattform, Arkema zeigt Orgasol PA12 der nächsten Generation, Stratasys ein System im Produktionsmaßstab und TPM3D gibt der kompakten CF250 ihr internationales Debüt.',
     },
   },
-  featuredHeading: 'Ausgewählte Materialien',
-  featuredTeasers: {
-    'eos-pa-2200':
-      'EOS PA 2200 ist das Referenz-PA12-Pulver für das selektive Lasersintern: ein ausgewogenes, ungefülltes Nylon 12 mit 48 MPa Zugfestigkeit (XY), 1650 MPa Zugmodul und 18% Bruchdehnung in der XY-Ebene, laut aktuellem EOS-Materialdatenblatt.',
-    'eos-pa-1101': 'EOS PA 1101 ist ein biobasiertes PA11-SLS-Pulver, das aus Rizinusöl gewonnen wird.',
-    'eos-pa-3200-gf':
-      'EOS PA 3200 GF ist ein mit Glaskugeln gefülltes PA12-SLS-Pulver (40 wt% Glaskugeln laut EOS).',
-    'formlabs-nylon-12-powder':
-      'Formlabs Nylon 12 Powder ist das Standard-PA12 für die Fuse-SLS-Serie: 50 MPa Zugfestigkeit, 1850 MPa Zugmodul und 11% Bruchdehnung (X/Y) laut technischem Datenblatt von Formlabs, mit einer Wärmeformbeständigkeit (HDT) von 171 °C bei 0.45 MPa.',
-    'formlabs-nylon-11-powder':
-      'Formlabs Nylon 11 Powder ist ein biobasiertes PA11 für die Fuse-Serie, ausgelegt für Bauteile, die sich biegen oder Stöße aufnehmen: 49 MPa Zugfestigkeit, 1600 MPa Modul und 40% Bruchdehnung (X/Y) laut technischem Datenblatt von Formlabs — das duktilste Pulver im Formlabs-Sortiment.',
-    'hp-pa-12':
-      'HP 3D High Reusability PA 12 ist das Standard-Nylon für Multi Jet Fusion: 54 MPa Zugfestigkeit, 2150 MPa Zugmodul und 18% Bruchdehnung in XY (10% in Z), mit einer Dichte von 1.02 g/cm³, laut technischem Datenblatt von HP.',
+  newsPageLink: 'Die News-Seite — wie die Redaktion arbeitet und alle bisherigen Beiträge',
+  newsLangNote: 'Alle Beiträge erscheinen auf Englisch.',
+  briefingKicker: 'Das Briefing',
+  briefingTitle: 'Das Nylon-Briefing per E-Mail erhalten',
+  briefingBody:
+    'Messeberichte, Herstellerbewegungen und neue Datenbankeinträge — gesammelt in einer gelegentlichen E-Mail. Kein täglicher Lärm, keine Weitergabe an Dritte. Die Anmeldung läuft vorerst per E-Mail: Senden Sie eine Nachricht mit „Subscribe“ in der Betreffzeile.',
+  briefingButton: 'Per E-Mail abonnieren',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: 'Ökosystem — Hersteller & Anlagen',
+  ecoIntro:
+    'Das Verzeichnis erfasst die Unternehmen hinter dem Nylon-Druck — wer die Pulver herstellt, wer die Maschinen baut und was davon in unseren Datenbanken spezifiziert ist. Jede Zahl unten ist der aktuelle Stand der Datenbank, keine Marketingzahl.',
+  vendorTypes: { material: 'Materialien', machine: 'Maschinen', both: 'Materialien & Maschinen' },
+  gradeNoun: ['Materialtyp', 'Materialtypen'],
+  machineNoun: ['Maschine', 'Maschinen'],
+  ecoFooterHtml:
+    '<a href="/vendors/">Herstellerverzeichnis</a> · <a href="/machines/">Maschinendatenbank</a> — {machines} Produktionsmaschinen vollständig spezifiziert, von der EOS P 396 bis zur Formlabs Fuse 1+ 30W, dazu zwei weitere Plattformen, die diese Woche auf der Formnext enthüllt werden.',
+  depthKicker: 'Tiefe — Materialien & Verfahren',
+  depthItems: [
+    {
+      href: '/processes/sls/',
+      processSlug: 'sls',
+      title: 'SLS — Selektives Lasersintern',
+      body: 'SLS baut Bauteile, indem ein Laser über ein beheiztes Bett aus Nylonpulver scannt und Querschnitt für Querschnitt sintert.',
+    },
+    {
+      href: '/processes/mjf/',
+      processSlug: 'mjf',
+      title: 'MJF — Multi Jet Fusion',
+      body: 'MJF ist das Pulverbettverfahren von HP: Inkjet-Arrays drucken Fusing- und Detailing-Agentien auf Nylonpulver, und eine Infrarotlampe verschmilzt die bedruckten Bereiche.',
+    },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11 vs. PA12: Welches Nylonpulver?',
+      body: 'Die Entscheidung zwischen Duktilität und Ausgewogenheit im Zentrum des Pulverbett-Nylons — entschieden mit Datenblatt-Werten von EOS, Formlabs und HP.',
+    },
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: 'Bauteile für SLS & MJF konstruieren',
+      body: 'Wandstärken, Bohrungsgrößen und Pulver-Entweichungslöcher aus dem offiziellen Formlabs SLS Design Guide, plus die Konstruktionsregeln, die beide Pulververfahren teilen.',
+    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">Alle Verfahren</a> · <a href="/guides/">Alle Leitfäden</a> · <a href="/glossary/">Glossar</a>',
+  appKicker: 'Anwendungslandschaft',
+  appBodyHtml:
+    'Die Anwendungskarte des Nylons, organisiert als Branchenlandschaft statt als Teilekatalog: Die <a href="/applications/">Abdeckungskarte</a> spannt {industries} Branchen × {families} Teilefamilien auf. {guides} Leitfäden sind veröffentlicht — der <a href="/applications/drones/">Hub für Drohnen &amp; UAV</a> mit <a href="/applications/drones/motor-mounts/">Motorhalterungen</a> und <a href="/applications/drones/propeller-guards/">Propellerschutzkäfigen</a>, durchgehend ausgearbeitet — und {planned} weitere Zellen sind geplant, jede erst nach echter Nachfrage und mit vollständigem Engineering-Kern, bevor sie geschrieben wird.',
+  toolsKicker: 'Daten & Werkzeuge — die Servicetheke',
+  toolsCounts: {
+    grades: ['Materialtyp', 'Materialtypen'],
+    machines: ['Maschine', 'Maschinen'],
+    vendors: ['Hersteller', 'Hersteller'],
   },
-  coverageHeading: 'Aktueller Stand — offen gesagt',
-  coverageBody:
-    'Dies ist Version 1 der Referenz, veröffentlicht im November 2026: {materials} Materialien, {machines} Maschinen, 3 Verfahren im Detail plus ein Vergleich, 3 Leitfäden und {glossary} Glossarbegriffe. Das Ziel ist die vollständige Nylon-Landschaft — jedes wichtige Pulver, Filament und jede Maschine, jeder große Anwendungsbereich — aufgebaut in verifizierten Schritten. Was noch nicht abgedeckt ist, wird nicht erraten: Es steht in der Warteschlange. Der Maßstab für jede Seite steht in der <a href="/editorial/">Redaktions- und Quellenrichtlinie</a>.',
-  trustHeading: 'Warum diesen Zahlen vertrauen?',
-  trustBody:
-    'Weil jede einzelne ihre Quelle nennt. Die Eigenschaftstabellen geben die Datenblätter der Hersteller wieder (EOS, Formlabs, HP, BASF, Polymaker, Bambu Lab) — mit der Prüfmethode direkt neben dem Wert; die Maschinendaten stammen aus den Spezifikationsdokumenten der Hersteller; die Konstruktionsminima aus offiziellen Konstruktionsleitfäden. Veröffentlicht ein Hersteller einen Wert nicht, lässt die Tabelle ihn aus, statt die Lücke zu füllen. Korrekturen sind willkommen unter <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a>.',
-  updatedLine: 'Zuletzt aktualisiert: November 2026',
+  toolsBody:
+    'Jeder Wert stammt aus einem Herstellerdatenblatt oder einer offiziellen Spezifikation und ist auf der Seite zitiert; Werte, die Hersteller nicht veröffentlichen, werden weggelassen, niemals geschätzt.',
+  toolsLinks: [
+    { href: '/materials/', label: 'Materialdatenbank' },
+    { href: '/machines/', label: 'Maschinendatenbank' },
+    { href: '/compare/materials/', label: 'Materialien vergleichen' },
+    { href: '/compare/machines/', label: 'Maschinen vergleichen' },
+    { href: '/calculators/powder-refresh-ratio/', label: 'Rechner für die Auffrischrate' },
+    { href: '/calculators/part-cost/', label: 'Kostenrechner pro Bauteil' },
+    { href: '/calculators/', label: 'Alle Rechner' },
+  ],
+  signoffHtml:
+    'Nylon3DP ist eine unabhängige Branchenpublikation und Referenz, mit keinem Hersteller verbunden — siehe die <a href="/editorial/">Quellenrichtlinie</a>. Zuletzt aktualisiert: {updated}',
+  updated: 'November 2026',
 };
 
-const es: HomeCopy = {
-  title: 'Nylon3DP — La referencia del nailon en 3D: PA11, PA12, SLS, MJF',
+const es: PortalCopy = {
+  title: 'El centro del sector de la impresión 3D de nailon | Nylon3DP',
   description:
-    'La referencia en impresión 3D de nailon: base de datos de PA11/PA12 con fichas de fabricantes, procesos SLS, MJF, SAF y FDM, máquinas y guías de diseño.',
-  heroTitle: 'La referencia en impresión 3D de nailon',
-  heroLede:
-    'El nailon es el polímero de ingeniería con el que realmente se construye en impresión 3D, pero sus datos están dispersos en decenas de fichas técnicas de fabricantes. Nylon3DP los reúne en un solo lugar: propiedades de materiales, especificaciones de máquinas, explicaciones de procesos y guías de diseño para PA11, PA12, PA6 y nailones con carga, con cada cifra rastreable hasta la documentación del propio fabricante.',
-  qaLabel: 'Respuesta rápida — ¿qué es la impresión 3D de nailon?',
-  qaBody:
-    'La impresión 3D de nailon (poliamida) consiste en producir piezas de PA12, PA11, PA6 o grados de nailon con carga, principalmente por fusión en lecho de polvo — <a href="/processes/sls/">SLS</a> y <a href="/processes/mjf/">MJF</a> — o extruyendo filamento de nailon (<a href="/processes/fdm/">FDM</a>). El nailon impreso es tenaz, resistente al desgaste y moderadamente resistente al calor, lo que lo convierte en la opción habitual para piezas funcionales de uso final: bisagras, clips, engranajes, conductos, soportes, utillajes y órtesis. PA12 es el grado estándar; PA11 es la alternativa dúctil y de origen biológico.',
-  startHeading: 'Empieza por las bases de datos',
-  cards: {
-    materials: {
-      title: 'Base de datos de materiales',
-      body: '{materials} grados de nailon con tablas completas de ficha técnica: polvos de EOS, Formlabs, HP y BASF, filamentos de Polymaker y Bambu Lab.',
-      meta: 'PA12 · PA11 · PA6 · con carga de vidrio · PA-CF · CoPA',
-    },
-    machines: {
-      title: 'Base de datos de máquinas',
-      body: '{machines} sistemas de lecho de polvo con volúmenes de construcción y datos de capa verificados por el fabricante.',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
-    },
-    processes: {
-      title: 'Procesos',
-      body: 'Cómo funcionan SLS, MJF, SAF y el FDM con nailon, qué materiales usa cada uno y dónde encaja cada cual — además de la comparativa SLS vs. MJF con fuentes.',
-      meta: 'SLS · MJF · SAF · FDM',
-    },
-    guides: {
-      title: 'Guías',
-      body: 'PA11 frente a PA12, decidido con las cifras de las fichas técnicas; secado del filamento de nailon con los ajustes del fabricante; diseño de piezas para SLS y MJF desde las guías oficiales de diseño.',
-      meta: '3 guías en el lanzamiento, en aumento',
-    },
-    glossary: {
-      title: 'Glosario',
-      body: '{glossary} definiciones: tasa de renovación del polvo, carga de vidrio, higroscópico, HDT y el resto del vocabulario que las fichas técnicas dan por sentado.',
-      meta: 'En lenguaje claro, contrastado con la base de datos',
-    },
-    compare: {
-      title: 'SLS vs. MJF',
-      body: 'Los dos procesos de polvo de producción, comparados con los datos de PA12 de sus propios fabricantes: resistencia, isotropía, color, materiales y economía.',
-      meta: 'Comparativa',
+    'Noticias y ferias, el ecosistema de fabricantes y bases de datos de materiales y máquinas basadas en fichas técnicas para la impresión 3D de nailon.',
+  langNavLabel: 'Idioma',
+  mastheadKicker: 'Nylon3DP · Centro del sector',
+  mastheadTitle: 'El centro del sector de la impresión 3D de nailon',
+  mastheadLede:
+    'Noticias y cobertura de ferias, el ecosistema de fabricantes y equipos, y profundidad en materiales y procesos — con el respaldo de bases de datos basadas en fichas técnicas y herramientas de economía del polvo. Si es importante para la impresión 3D de nailon, está aquí, con las fuentes adjuntas.',
+  leadKicker: 'Tema principal',
+  leadTag: 'Ferias',
+  leadTitle: 'Formnext 2026: la lista de seguimiento del nailon',
+  leadDek:
+    'Formnext abre en Fráncfort el martes 17 de noviembre, y el lado del nailon del pabellón está inusualmente denso: EOS presenta una nueva plataforma SLS de polímero de gran formato, Arkema muestra polvos Orgasol PA12 de próxima generación, Stratasys presenta un sistema a escala de fabricación y TPM3D da a su compacta CF250 su debut internacional. El avance de la redacción, con las afirmaciones de los fabricantes etiquetadas como afirmaciones.',
+  leadPlace: 'Fráncfort',
+  leadKind: 'Avance',
+  leadRead: 'Leer la lista de seguimiento',
+  leadAll: 'Toda la cobertura',
+  englishNote: '(en inglés)',
+  newsKicker: 'Noticias y briefing',
+  newsItems: {
+    '/guides/formnext-2026/': {
+      title: 'Formnext 2026: la lista de seguimiento del nailon',
+      dek: 'Formnext abre en Fráncfort el martes 17 de noviembre, y el lado del nailon del pabellón está inusualmente denso: EOS presenta una nueva plataforma SLS de polímero de gran formato, Arkema muestra polvos Orgasol PA12 de próxima generación, Stratasys presenta un sistema a escala de fabricación y TPM3D da a su compacta CF250 su debut internacional. El avance de la redacción, con las afirmaciones de los fabricantes etiquetadas como afirmaciones.',
+      rail: 'Formnext abre en Fráncfort el martes 17 de noviembre, y el lado del nailon del pabellón está inusualmente denso: EOS presenta una nueva plataforma SLS de gran formato, Arkema muestra polvos Orgasol PA12 de próxima generación, Stratasys presenta un sistema a escala de fabricación y TPM3D da a su compacta CF250 su debut internacional.',
     },
   },
-  featuredHeading: 'Materiales destacados',
-  featuredTeasers: {
-    'eos-pa-2200':
-      'EOS PA 2200 es el polvo de PA12 de referencia para la sinterización selectiva por láser: un nailon 12 equilibrado y sin carga, con 48 MPa de resistencia a la tracción (XY), 1650 MPa de módulo de tracción y 18% de alargamiento a la rotura en el plano XY, según la ficha técnica actual de EOS.',
-    'eos-pa-1101': 'EOS PA 1101 es un polvo de PA11 de origen biológico para SLS, derivado del aceite de ricino.',
-    'eos-pa-3200-gf':
-      'EOS PA 3200 GF es un polvo de PA12 para SLS con carga de microesferas de vidrio (40 wt% de microesferas, según EOS).',
-    'formlabs-nylon-12-powder':
-      'Formlabs Nylon 12 Powder es el PA12 estándar de la serie Fuse de SLS: 50 MPa de resistencia máxima a la tracción, 1850 MPa de módulo de tracción y 11% de alargamiento a la rotura (X/Y) según la ficha técnica de Formlabs, con una HDT de 171 °C a 0.45 MPa.',
-    'formlabs-nylon-11-powder':
-      'Formlabs Nylon 11 Powder es un PA11 de origen biológico para la serie Fuse, pensado para piezas que se flexionan o reciben impactos: 49 MPa de resistencia a la tracción, 1600 MPa de módulo y 40% de alargamiento a la rotura (X/Y) según la ficha técnica de Formlabs — el polvo más dúctil de la gama Formlabs.',
-    'hp-pa-12':
-      'HP 3D High Reusability PA 12 es el nailon estándar para Multi Jet Fusion: 54 MPa de resistencia a la tracción, 2150 MPa de módulo de tracción y 18% de alargamiento a la rotura en XY (10% en Z), con una densidad de 1.02 g/cm³, según la ficha técnica de HP.',
+  newsPageLink: 'La página de noticias: cómo trabaja la redacción y todos los artículos hasta ahora',
+  newsLangNote: 'Todos los artículos se publican en inglés.',
+  briefingKicker: 'El briefing',
+  briefingTitle: 'Recibe el briefing de nailon por correo',
+  briefingBody:
+    'Informes de ferias, movimientos de fabricantes y nuevas entradas en las bases de datos, reunidos en un correo ocasional. Sin ruido diario, sin listas de terceros. El registro es por correo por ahora: envía un mensaje con «Subscribe» en el asunto.',
+  briefingButton: 'Suscribirse por correo',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: 'Ecosistema — fabricantes y equipos',
+  ecoIntro:
+    'El directorio sigue a las empresas detrás de la impresión de nailon: quién fabrica los polvos, quién fabrica las máquinas y qué productos suyos están especificados en nuestras bases de datos. Cada cifra siguiente es el estado actual de la base de datos, no un número de marketing.',
+  vendorTypes: { material: 'Materiales', machine: 'Máquinas', both: 'Materiales y máquinas' },
+  gradeNoun: ['grado', 'grados'],
+  machineNoun: ['máquina', 'máquinas'],
+  ecoFooterHtml:
+    '<a href="/vendors/">Directorio de fabricantes</a> · <a href="/machines/">Base de datos de máquinas</a> — {machines} máquinas de producción totalmente especificadas, desde la EOS P 396 hasta la Formlabs Fuse 1+ 30W, con dos plataformas más que se presentan esta semana en Formnext.',
+  depthKicker: 'Profundidad — materiales y procesos',
+  depthItems: [
+    {
+      href: '/processes/sls/',
+      processSlug: 'sls',
+      title: 'SLS — sinterización selectiva por láser',
+      body: 'El SLS construye piezas escaneando un láser sobre un lecho caliente de polvo de nailon, sinterizando una sección tras otra.',
+    },
+    {
+      href: '/processes/mjf/',
+      processSlug: 'mjf',
+      title: 'MJF — Multi Jet Fusion',
+      body: 'MJF es el proceso de fusión en lecho de polvo de HP: los cabezales inkjet imprimen agentes de fusión y de detalle sobre el polvo de nailon, y una lámpara infrarroja fusiona las zonas impresas.',
+    },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11 frente a PA12: ¿qué polvo de nailon?',
+      body: 'La decisión entre ductilidad y equilibrio en el corazón del nailon de lecho de polvo, resuelta con las cifras de las fichas técnicas de EOS, Formlabs y HP.',
+    },
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: 'Diseño de piezas para SLS y MJF',
+      body: 'Espesores de pared, tamaños de agujeros y agujeros de escape de polvo de la guía oficial de diseño SLS de Formlabs, además de las reglas de diseño que comparten ambos procesos de polvo.',
+    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">Todos los procesos</a> · <a href="/guides/">Todas las guías</a> · <a href="/glossary/">Glosario</a>',
+  appKicker: 'Panorama de aplicaciones',
+  appBodyHtml:
+    'El mapa de aplicaciones del nailon, organizado como un panorama del sector y no como un catálogo de piezas: el <a href="/applications/">mapa de cobertura</a> abarca {industries} sectores × {families} familias de piezas. Hay {guides} guías publicadas — el <a href="/applications/drones/">centro de drones y UAV</a>, con <a href="/applications/drones/motor-mounts/">soportes de motor</a> y <a href="/applications/drones/propeller-guards/">protectores de hélice</a> trabajados de principio a fin — y {planned} celdas más están planificadas, cada una condicionada a una demanda real y a un núcleo de ingeniería completo antes de escribirse.',
+  toolsKicker: 'Datos y herramientas — el mostrador de servicio',
+  toolsCounts: {
+    grades: ['grado de material', 'grados de material'],
+    machines: ['máquina', 'máquinas'],
+    vendors: ['fabricante', 'fabricantes'],
   },
-  coverageHeading: 'Cobertura hasta ahora, sin rodeos',
-  coverageBody:
-    'Esta es la v1 de la referencia, publicada en noviembre de 2026: {materials} materiales, {machines} máquinas, 3 procesos en profundidad más una comparativa, 3 guías y {glossary} términos de glosario. El objetivo es el panorama completo del nailon —cada polvo, filamento y máquina relevantes, cada gran área de aplicación— construido en etapas verificadas. Lo que aún no está cubierto no se adivina: está en cola. El criterio aplicado a cada página está en la <a href="/editorial/">política editorial y de fuentes</a>.',
-  trustHeading: '¿Por qué confiar en estas cifras?',
-  trustBody:
-    'Porque cada una nombra su fuente. Las tablas de propiedades reproducen las fichas técnicas de los fabricantes (EOS, Formlabs, HP, BASF, Polymaker, Bambu Lab) con el método de ensayo junto al valor; las especificaciones de las máquinas proceden de los documentos de especificaciones de los fabricantes; los mínimos de diseño, de las guías oficiales de diseño. Si un fabricante no publica un valor, la tabla lo omite en lugar de rellenar el hueco. Las correcciones son bienvenidas en <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a>.',
-  updatedLine: 'Última actualización: noviembre de 2026',
+  toolsBody:
+    'Cada valor procede de una ficha técnica del fabricante o de una especificación oficial, citada en la página; los valores que los fabricantes no publican se omiten, nunca se estiman.',
+  toolsLinks: [
+    { href: '/materials/', label: 'Base de datos de materiales' },
+    { href: '/machines/', label: 'Base de datos de máquinas' },
+    { href: '/compare/materials/', label: 'Comparar materiales' },
+    { href: '/compare/machines/', label: 'Comparar máquinas' },
+    { href: '/calculators/powder-refresh-ratio/', label: 'Calculadora de tasa de renovación' },
+    { href: '/calculators/part-cost/', label: 'Estimador de coste por pieza' },
+    { href: '/calculators/', label: 'Todas las calculadoras' },
+  ],
+  signoffHtml:
+    'Nylon3DP es una publicación y referencia independiente del sector, sin afiliación con ningún fabricante — consulta la <a href="/editorial/">política de fuentes</a>. Última actualización: {updated}',
+  updated: 'noviembre de 2026',
 };
 
-const pt: HomeCopy = {
-  title: 'Nylon3DP — Referência em impressão 3D de nylon: PA11, PA12, SLS, MJF',
+const pt: PortalCopy = {
+  title: 'O centro do setor de impressão 3D de nylon | Nylon3DP',
   description:
-    'A referência em impressão 3D de nylon: banco de dados de PA11/PA12 com dados dos fabricantes, processos SLS, MJF, SAF e FDM, máquinas e guias.',
-  heroTitle: 'A referência em impressão 3D de nylon',
-  heroLede:
-    'O nylon é o polímero de engenharia com o qual a impressão 3D realmente constrói — mas os seus dados estão espalhados por dezenas de fichas técnicas de fabricantes. O Nylon3DP os reúne em um só lugar: propriedades de materiais, especificações de máquinas, explicações de processos e guias de design para PA11, PA12, PA6 e nylons com carga, com cada número rastreável até a documentação do próprio fabricante.',
-  qaLabel: 'Resposta rápida — o que é a impressão 3D de nylon?',
-  qaBody:
-    'Impressão 3D de nylon (poliamida) significa produzir peças em PA12, PA11, PA6 ou graus de nylon com carga, principalmente por fusão em leito de pó — <a href="/processes/sls/">SLS</a> e <a href="/processes/mjf/">MJF</a> — ou pela extrusão de filamento de nylon (<a href="/processes/fdm/">FDM</a>). O nylon impresso é tenaz, resistente ao desgaste e moderadamente resistente ao calor, o que o torna a escolha padrão para peças funcionais de uso final: dobradiças, clipes, engrenagens, dutos, suportes, gabaritos e órteses. O PA12 é o grau padrão; o PA11 é a alternativa dúctil e de base biológica.',
-  startHeading: 'Comece pelos bancos de dados',
-  cards: {
-    materials: {
-      title: 'Banco de dados de materiais',
-      body: '{materials} graus de nylon com tabelas completas de ficha técnica — pós da EOS, Formlabs, HP e BASF, filamentos da Polymaker e da Bambu Lab.',
-      meta: 'PA12 · PA11 · PA6 · com carga de vidro · PA-CF · CoPA',
-    },
-    machines: {
-      title: 'Banco de dados de máquinas',
-      body: '{machines} sistemas de leito de pó com volumes de construção e especificações de camada verificados pelo fabricante.',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
-    },
-    processes: {
-      title: 'Processos',
-      body: 'Como funcionam o SLS, o MJF, o SAF e o FDM com nylon, quais materiais cada um usa e onde cada um se encaixa — além da comparação SLS vs. MJF com fontes.',
-      meta: 'SLS · MJF · SAF · FDM',
-    },
-    guides: {
-      title: 'Guias',
-      body: 'PA11 vs. PA12 decidido pelos números das fichas técnicas; secagem do filamento de nylon nas configurações do fabricante; projeto de peças para SLS e MJF a partir dos guias oficiais de design.',
-      meta: '3 guias no lançamento, em crescimento',
-    },
-    glossary: {
-      title: 'Glossário',
-      body: '{glossary} definições — taxa de renovação do pó, carga de vidro, higroscópico, HDT e o restante do vocabulário que as fichas técnicas pressupõem.',
-      meta: 'Linguagem simples, conferido com o banco de dados',
-    },
-    compare: {
-      title: 'SLS vs. MJF',
-      body: 'Os dois processos de pó de produção comparados com os dados de PA12 dos próprios fabricantes: resistência, isotropia, cor, materiais e economia.',
-      meta: 'Comparação',
+    'Notícias e feiras, o ecossistema de fabricantes e bancos de dados de materiais e máquinas baseados em fichas técnicas — o centro da impressão 3D de nylon.',
+  langNavLabel: 'Idioma',
+  mastheadKicker: 'Nylon3DP · Centro do setor',
+  mastheadTitle: 'O centro do setor de impressão 3D de nylon',
+  mastheadLede:
+    'Notícias e cobertura de feiras, o ecossistema de fabricantes e equipamentos e profundidade em materiais e processos — com o respaldo de bancos de dados baseados em fichas técnicas e ferramentas de economia do pó. Se é importante para a impressão 3D de nylon, está coberto aqui, com as fontes anexadas.',
+  leadKicker: 'Destaque',
+  leadTag: 'Feiras',
+  leadTitle: 'Formnext 2026: a lista de observação do nylon',
+  leadDek:
+    'A Formnext abre em Frankfurt na terça-feira, 17 de novembro, e o lado do nylon do pavilhão está excepcionalmente denso: a EOS apresenta uma nova plataforma SLS de polímero de grande formato, a Arkema mostra pós Orgasol PA12 de próxima geração, a Stratasys apresenta um sistema em escala de manufatura e a TPM3D dá à sua compacta CF250 a estreia internacional. A prévia da redação, com as alegações dos fabricantes rotuladas como alegações.',
+  leadPlace: 'Frankfurt',
+  leadKind: 'Prévia',
+  leadRead: 'Ler a lista de observação',
+  leadAll: 'Toda a cobertura',
+  englishNote: '(em inglês)',
+  newsKicker: 'Notícias e briefing',
+  newsItems: {
+    '/guides/formnext-2026/': {
+      title: 'Formnext 2026: a lista de observação do nylon',
+      dek: 'A Formnext abre em Frankfurt na terça-feira, 17 de novembro, e o lado do nylon do pavilhão está excepcionalmente denso: a EOS apresenta uma nova plataforma SLS de polímero de grande formato, a Arkema mostra pós Orgasol PA12 de próxima geração, a Stratasys apresenta um sistema em escala de manufatura e a TPM3D dá à sua compacta CF250 a estreia internacional. A prévia da redação, com as alegações dos fabricantes rotuladas como alegações.',
+      rail: 'A Formnext abre em Frankfurt na terça-feira, 17 de novembro, e o lado do nylon do pavilhão está excepcionalmente denso: a EOS apresenta uma nova plataforma SLS de grande formato, a Arkema mostra pós Orgasol PA12 de próxima geração, a Stratasys apresenta um sistema em escala de manufatura e a TPM3D dá à sua compacta CF250 a estreia internacional.',
     },
   },
-  featuredHeading: 'Materiais em destaque',
-  featuredTeasers: {
-    'eos-pa-2200':
-      'O EOS PA 2200 é o pó de PA12 de referência para a sinterização seletiva a laser: um nylon 12 equilibrado e sem carga, com 48 MPa de resistência à tração (XY), 1650 MPa de módulo de tração e 18% de alongamento na ruptura no plano XY, conforme a ficha técnica atual da EOS.',
-    'eos-pa-1101': 'O EOS PA 1101 é um pó de PA11 de base biológica para SLS, derivado do óleo de mamona.',
-    'eos-pa-3200-gf':
-      'O EOS PA 3200 GF é um pó de PA12 para SLS com carga de microesferas de vidro (40 wt% de microesferas, segundo a EOS).',
-    'formlabs-nylon-12-powder':
-      'O Formlabs Nylon 12 Powder é o PA12 padrão da série Fuse de SLS: 50 MPa de resistência máxima à tração, 1850 MPa de módulo de tração e 11% de alongamento na ruptura (X/Y), conforme a ficha técnica da Formlabs, com HDT de 171 °C a 0.45 MPa.',
-    'formlabs-nylon-11-powder':
-      'O Formlabs Nylon 11 Powder é um PA11 de base biológica para a série Fuse, feito para peças que flexionam ou sofrem impacto: 49 MPa de resistência à tração, 1600 MPa de módulo e 40% de alongamento na ruptura (X/Y), conforme a ficha técnica da Formlabs — o pó mais dúctil da linha Formlabs.',
-    'hp-pa-12':
-      'O HP 3D High Reusability PA 12 é o nylon padrão para Multi Jet Fusion: 54 MPa de resistência à tração, 2150 MPa de módulo de tração e 18% de alongamento na ruptura em XY (10% em Z), com densidade de 1.02 g/cm³, conforme a ficha técnica da HP.',
+  newsPageLink: 'A página de notícias — como a redação trabalha e todos os itens até agora',
+  newsLangNote: 'Todos os itens são publicados em inglês.',
+  briefingKicker: 'O briefing',
+  briefingTitle: 'Receba o briefing de nylon por e-mail',
+  briefingBody:
+    'Relatórios de feiras, movimentos de fabricantes e novas entradas nos bancos de dados, reunidos em um e-mail ocasional. Sem ruído diário, sem lista de terceiros. A inscrição é por e-mail por enquanto: envie uma mensagem com “Subscribe” no assunto.',
+  briefingButton: 'Assinar por e-mail',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: 'Ecossistema — fabricantes e equipamentos',
+  ecoIntro:
+    'O diretório acompanha as empresas por trás da impressão em nylon — quem fabrica os pós, quem fabrica as máquinas e o que delas está especificado nos nossos bancos de dados. Cada número abaixo é o estado atual do banco de dados, não um número de marketing.',
+  vendorTypes: { material: 'Materiais', machine: 'Máquinas', both: 'Materiais e máquinas' },
+  gradeNoun: ['grau', 'graus'],
+  machineNoun: ['máquina', 'máquinas'],
+  ecoFooterHtml:
+    '<a href="/vendors/">Diretório de fabricantes</a> · <a href="/machines/">Banco de dados de máquinas</a> — {machines} máquinas de produção totalmente especificadas, da EOS P 396 à Formlabs Fuse 1+ 30W, com mais duas plataformas sendo apresentadas esta semana na Formnext.',
+  depthKicker: 'Profundidade — materiais e processos',
+  depthItems: [
+    {
+      href: '/processes/sls/',
+      processSlug: 'sls',
+      title: 'SLS — sinterização seletiva a laser',
+      body: 'O SLS constrói peças escaneando um laser sobre um leito aquecido de pó de nylon, sinterizando uma seção de cada vez.',
+    },
+    {
+      href: '/processes/mjf/',
+      processSlug: 'mjf',
+      title: 'MJF — Multi Jet Fusion',
+      body: 'O MJF é o processo de fusão em leito de pó da HP: matrizes inkjet imprimem agentes de fusão e de detalhamento sobre o pó de nylon, e uma lâmpada infravermelha funde as áreas impressas.',
+    },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11 vs. PA12: qual pó de nylon?',
+      body: 'A decisão entre ductilidade e equilíbrio no coração do nylon em leito de pó, resolvida com os números das fichas técnicas da EOS, da Formlabs e da HP.',
+    },
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: 'Projeto de peças para SLS e MJF',
+      body: 'Espessuras de parede, tamanhos de furos e furos de escape de pó do guia oficial de design SLS da Formlabs, além das regras de design que os dois processos de pó compartilham.',
+    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">Todos os processos</a> · <a href="/guides/">Todos os guias</a> · <a href="/glossary/">Glossário</a>',
+  appKicker: 'Panorama de aplicações',
+  appBodyHtml:
+    'O mapa de aplicações do nylon, organizado como um panorama do setor e não como um catálogo de peças: o <a href="/applications/">mapa de cobertura</a> abrange {industries} setores × {families} famílias de peças. Há {guides} guias publicados — o <a href="/applications/drones/">hub de drones e UAV</a>, com <a href="/applications/drones/motor-mounts/">suportes de motor</a> e <a href="/applications/drones/propeller-guards/">protetores de hélice</a> trabalhados de ponta a ponta — e mais {planned} células estão planejadas, cada uma condicionada a uma demanda real e a um núcleo de engenharia completo antes de ser escrita.',
+  toolsKicker: 'Dados e ferramentas — o balcão de serviços',
+  toolsCounts: {
+    grades: ['grau de material', 'graus de material'],
+    machines: ['máquina', 'máquinas'],
+    vendors: ['fabricante', 'fabricantes'],
   },
-  coverageHeading: 'Cobertura até agora — dita com franqueza',
-  coverageBody:
-    'Esta é a v1 da referência, publicada em novembro de 2026: {materials} materiais, {machines} máquinas, 3 processos em profundidade mais uma comparação, 3 guias e {glossary} termos de glossário. O objetivo é o panorama completo do nylon — cada pó, filamento e máquina relevantes, cada grande área de aplicação — construído em etapas verificadas. O que ainda não está coberto não é chutado: está na fila. O padrão de cada página está na <a href="/editorial/">política editorial e de fontes</a>.',
-  trustHeading: 'Por que confiar nos números daqui?',
-  trustBody:
-    'Porque cada um nomeia a sua fonte. As tabelas de propriedades reproduzem as fichas técnicas dos fabricantes (EOS, Formlabs, HP, BASF, Polymaker, Bambu Lab) com o método de ensaio ao lado do valor; as especificações das máquinas vêm dos documentos de especificação dos fabricantes; os mínimos de design, dos guias oficiais de design. Se um fabricante não publica um valor, a tabela o omite em vez de preencher a lacuna. Correções são bem-vindas em <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a>.',
-  updatedLine: 'Última atualização: novembro de 2026',
+  toolsBody:
+    'Cada valor vem de uma ficha técnica do fabricante ou de uma especificação oficial, citada na página; valores que os fabricantes não publicam são omitidos, nunca estimados.',
+  toolsLinks: [
+    { href: '/materials/', label: 'Banco de dados de materiais' },
+    { href: '/machines/', label: 'Banco de dados de máquinas' },
+    { href: '/compare/materials/', label: 'Comparar materiais' },
+    { href: '/compare/machines/', label: 'Comparar máquinas' },
+    { href: '/calculators/powder-refresh-ratio/', label: 'Calculadora de taxa de renovação' },
+    { href: '/calculators/part-cost/', label: 'Estimador de custo por peça' },
+    { href: '/calculators/', label: 'Todas as calculadoras' },
+  ],
+  signoffHtml:
+    'O Nylon3DP é uma publicação e referência independente do setor, sem afiliação com nenhum fabricante — veja a <a href="/editorial/">política de fontes</a>. Última atualização: {updated}',
+  updated: 'novembro de 2026',
 };
 
-const ja: HomeCopy = {
-  title: 'Nylon3DP — ナイロン3Dプリントのリファレンス：PA11・PA12・SLS・MJF',
+const ja: PortalCopy = {
+  title: 'ナイロン3Dプリント業界ハブ | Nylon3DP',
   description:
-    'ナイロン3Dプリントの総合リファレンス。PA11/PA12のメーカー公式データシートに基づく材料データベース、SLS・MJF・SAF・FDMの各プロセス、装置仕様と設計ガイドを収録しています。',
-  heroTitle: 'ナイロン3Dプリントのリファレンス',
-  heroLede:
-    'ナイロンは、3Dプリントが実際にものづくりに使うエンジニアリングポリマーです。しかしそのデータは、メーカー各社のデータシートに散らばっています。Nylon3DPはそれを一か所に集約します。PA11、PA12、PA6、充填ナイロンの材料特性、装置仕様、プロセス解説、設計ガイドを収録し、すべての数値はメーカー自身のドキュメントまでたどることができます。',
-  qaLabel: 'クイックアンサー ― ナイロン3Dプリントとは？',
-  qaBody:
-    'ナイロン（ポリアミド）3Dプリントとは、PA12、PA11、PA6、または充填ナイロングレードから部品を作ることです。主流は粉末床溶融結合（パウダーベッドフュージョン）である<a href="/processes/sls/">SLS</a>と<a href="/processes/mjf/">MJF</a>、あるいはナイロンフィラメントを押し出す<a href="/processes/fdm/">FDM</a>です。造形したナイロンは靭性が高く、耐摩耗性に優れ、適度な耐熱性も備えるため、ヒンジ、クリップ、ギア、ダクト、ブラケット、治具、装具といった機能性最終部品の標準的な選択肢となっています。PA12が標準グレード、PA11は延性に優れたバイオベースの代替グレードです。',
-  startHeading: 'データベースから始める',
-  cards: {
-    materials: {
-      title: '材料データベース',
-      body: '{materials}種類のナイロングレードを、データシートの全項目付きで収録 — 粉末はEOS、Formlabs、HP、BASF、フィラメントはPolymakerとBambu Lab。',
-      meta: 'PA12 ・ PA11 ・ PA6 ・ ガラス充填 ・ PA-CF ・ CoPA',
-    },
-    machines: {
-      title: '装置データベース',
-      body: 'メーカー確認済みの造形体積と積層仕様を備えた、粉末床方式の装置{machines}機種。',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
-    },
-    processes: {
-      title: 'プロセス',
-      body: 'SLS、MJF、SAF、ナイロンFDMの仕組み、各プロセスが使う材料、適した用途を解説。出典を明記したSLSとMJFの比較も収録しています。',
-      meta: 'SLS ・ MJF ・ SAF ・ FDM',
-    },
-    guides: {
-      title: 'ガイド',
-      body: 'PA11とPA12をデータシートの数値で比較判断すること、ナイロンフィラメントをメーカー設定で乾燥させること、公式設計ガイドに基づくSLS・MJF向け部品設計を扱います。',
-      meta: '公開時3本、順次追加',
-    },
-    glossary: {
-      title: '用語集',
-      body: 'リフレッシュ比率、ガラス充填、吸湿性、HDTなど、データシートが前提とする用語を{glossary}項目定義しています。',
-      meta: '平易な言葉で、データベースと照合済み',
-    },
-    compare: {
-      title: 'SLS vs MJF',
-      body: '量産向け粉末プロセスの2方式を、各メーカー自身のPA12データで比較します：強度、等方性、色、材料、経済性。',
-      meta: '比較',
+    'ナイロン3Dプリントの業界ハブ。ニュースと展示会レポート、メーカーのエコシステム、データシートに基づく材料・装置データベースと粉末経済ツールを収録。',
+  langNavLabel: '言語',
+  mastheadKicker: 'Nylon3DP · 業界ハブ',
+  mastheadTitle: 'ナイロン3Dプリント業界ハブ',
+  mastheadLede:
+    'ニュースと展示会レポート、メーカーと装置のエコシステム、材料とプロセスの深掘り——データシートに基づくデータベースと粉末経済ツールに裏打ちされています。ナイロン3Dプリントにとって重要なことは、出典付きでここに収録します。',
+  leadKicker: 'トップストーリー',
+  leadTag: '展示会',
+  leadTitle: 'Formnext 2026：ナイロンの注目リスト',
+  leadDek:
+    'Formnextは11月17日（火）にフランクフルトで開幕します。ホールのナイロン側は例年になく密度の高い顔ぶれです。EOSは大型ポリマーSLSプラットフォームを発表し、Arkemaは次世代Orgasol PA12粉末を展示、Stratasysは製造スケールのシステムを発表し、TPM3Dは小型機CF250の国際デビューを果たします。メーカーの主張には主張である旨を明記した、編集部のプレビューです。',
+  leadPlace: 'フランクフルト',
+  leadKind: 'プレビュー',
+  leadRead: '注目リストを読む',
+  leadAll: 'すべての記事',
+  englishNote: '（英語）',
+  newsKicker: 'ニュースとブリーフィング',
+  newsItems: {
+    '/guides/formnext-2026/': {
+      title: 'Formnext 2026：ナイロンの注目リスト',
+      dek: 'Formnextは11月17日（火）にフランクフルトで開幕します。ホールのナイロン側は例年になく密度の高い顔ぶれです。EOSは大型ポリマーSLSプラットフォームを発表し、Arkemaは次世代Orgasol PA12粉末を展示、Stratasysは製造スケールのシステムを発表し、TPM3Dは小型機CF250の国際デビューを果たします。メーカーの主張には主張である旨を明記した、編集部のプレビューです。',
+      rail: 'Formnextは11月17日（火）にフランクフルトで開幕し、EOSの大型SLSプラットフォーム、Arkemaの次世代Orgasol PA12、Stratasysの製造スケールシステム、TPM3D CF250の国際デビューと、ナイロン勢が例年になく充実しています。',
     },
   },
-  featuredHeading: '注目の材料',
-  featuredTeasers: {
-    'eos-pa-2200':
-      'EOS PA 2200は、選択的レーザー焼結（SLS）の基準となるPA12粉末です。バランスの取れた無充填のナイロン12で、引張強さ48 MPa（XY）、引張弾性率1650 MPa、XY面での破断伸び18%を備えます（現行のEOS材料データシートによる）。',
-    'eos-pa-1101': 'EOS PA 1101は、ヒマシ油由来のバイオベースPA11のSLS用粉末です。',
-    'eos-pa-3200-gf':
-      'EOS PA 3200 GFは、ガラスビーズを充填したPA12のSLS用粉末です（EOSによればガラスビーズ40 wt%）。',
-    'formlabs-nylon-12-powder':
-      'Formlabs Nylon 12 Powderは、FuseシリーズSLSの標準PA12です。引張強さ50 MPa、引張弾性率1850 MPa、破断伸び11%（X/Y）を備え、HDTは0.45 MPaで171 °Cです（Formlabsの技術データシートによる）。',
-    'formlabs-nylon-11-powder':
-      'Formlabs Nylon 11 Powderは、Fuseシリーズ向けのバイオベースPA11で、曲げや衝撃を受ける部品のために設計されています。引張強さ49 MPa、弾性率1600 MPa、破断伸び40%（X/Y）を備え、Formlabsの製品群で最も延性の高い粉末です（Formlabsの技術データシートによる）。',
-    'hp-pa-12':
-      'HP 3D High Reusability PA 12は、Multi Jet Fusionの標準ナイロンです。引張強さ54 MPa、引張弾性率2150 MPa、破断伸びはXYで18%（Zで10%）、密度1.02 g/cm³です（HPの技術データシートによる）。',
+  newsPageLink: 'ニュースページ ― 編集部の進め方とこれまでの全記事',
+  newsLangNote: '記事はすべて英語で公開されています。',
+  briefingKicker: 'ブリーフィング',
+  briefingTitle: 'ナイロン・ブリーフィングをメールで受け取る',
+  briefingBody:
+    '展示会レポート、メーカーの動向、新しいデータベース登録を、時折届く1通のメールにまとめます。毎日のノイズも、第三者のリストもありません。登録は当面メールで受け付けています。件名に「Subscribe」と書いてお送りください。',
+  briefingButton: 'メールで登録する',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: 'エコシステム ― メーカーと装置',
+  ecoIntro:
+    'このディレクトリは、ナイロン印刷の背後にいる企業を追います。誰が粉末を作り、誰が装置を作り、そのうち何が当サイトのデータベースに仕様として収録されているか。下記の数字はすべてデータベースの現在の状態であり、マーケティング上の数字ではありません。',
+  vendorTypes: { material: '材料', machine: '装置', both: '材料と装置' },
+  gradeNoun: ['グレード', 'グレード'],
+  machineNoun: ['機種', '機種'],
+  ecoFooterHtml:
+    '<a href="/vendors/">メーカーディレクトリ</a> · <a href="/machines/">装置データベース</a> — EOS P 396からFormlabs Fuse 1+ 30Wまで、量産装置{machines}機種を完全に仕様収録。さらに今週のFormnextで2つのプラットフォームが発表されます。',
+  depthKicker: '深掘り ― 材料とプロセス',
+  depthItems: [
+    {
+      href: '/processes/sls/',
+      processSlug: 'sls',
+      title: 'SLS ― 選択的レーザー焼結',
+      body: 'SLSは、加熱したナイロン粉末のベッド上をレーザーで走査し、断面を1層ずつ焼結して部品を造形します。',
+    },
+    {
+      href: '/processes/mjf/',
+      processSlug: 'mjf',
+      title: 'MJF ― Multi Jet Fusion',
+      body: 'MJFはHPの粉末床溶融結合プロセスです。インクジェットアレイがナイロン粉末上に溶融剤とディテール剤を印刷し、赤外線ランプが印刷部分を溶融します。',
+    },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11とPA12：どちらのナイロン粉末か',
+      body: '粉末床ナイロンの核心にある、延性とバランスの判断。EOS、Formlabs、HPのデータシートの数値で決着をつけます。',
+    },
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: 'SLS・MJF向け部品設計',
+      body: 'Formlabs公式SLS設計ガイドに基づく壁厚、穴径、粉末逃がし穴に、両粉末プロセスに共通する設計ルールを加えました。',
+    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">すべてのプロセス</a> · <a href="/guides/">すべてのガイド</a> · <a href="/glossary/">用語集</a>',
+  appKicker: 'アプリケーション全景',
+  appBodyHtml:
+    'ナイロンのアプリケーションマップを、部品カタログではなく業界の全景として整理しました。<a href="/applications/">カバレッジマップ</a>は{industries}業界 × {families}部品ファミリーにわたります。公開済みのガイドは{guides}本——<a href="/applications/drones/">ドローン・UAVハブ</a>で、<a href="/applications/drones/motor-mounts/">モーターマウント</a>と<a href="/applications/drones/propeller-guards/">プロペラガード</a>を端から端まで検証しました——さらに{planned}セルが計画中で、各セルは実需と完全なエンジニアリングカーネルを執筆の条件としています。',
+  toolsKicker: 'データとツール ― サービスデスク',
+  toolsCounts: {
+    grades: ['グレード', 'グレード'],
+    machines: ['機種', '機種'],
+    vendors: ['社', '社'],
   },
-  coverageHeading: '現在のカバレッジ ― 率直に',
-  coverageBody:
-    '本サイトは、2026年11月に公開したリファレンスのv1です。材料{materials}種、装置{machines}機種、プロセス解説3本と比較1本、ガイド3本、用語{glossary}項目を収録しています。目標はナイロンの全体像 — 主要な粉末、フィラメント、装置のすべてと、主要な応用分野のすべて — を、検証済みの段階を積み重ねて構築することです。まだカバーしていないものは推測で埋めず、キューに入れています。各ページの基準は<a href="/editorial/">編集・出典ポリシー</a>に記載しています。',
-  trustHeading: 'なぜここの数値を信頼できるのか',
-  trustBody:
-    'すべての数値に出典があるからです。特性表はメーカーのデータシート（EOS、Formlabs、HP、BASF、Polymaker、Bambu Lab）を再現し、値の横に試験方法を併記しています。装置仕様はメーカーの仕様書、設計最小値は公式設計ガイドが出典です。メーカーが公表していない値は、空白を埋めずに表から省いています。修正のご連絡は <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a> までお寄せください。',
-  updatedLine: '最終更新：2026年11月',
+  toolsBody:
+    'すべての値はメーカーのデータシートまたは公式仕様から取り、ページに出典を明記しています。メーカーが公表していない値は、推定で埋めずに省略します。',
+  toolsLinks: [
+    { href: '/materials/', label: '材料データベース' },
+    { href: '/machines/', label: '装置データベース' },
+    { href: '/compare/materials/', label: '材料を比較する' },
+    { href: '/compare/machines/', label: '装置を比較する' },
+    { href: '/calculators/powder-refresh-ratio/', label: 'リフレッシュ比率カリキュレーター' },
+    { href: '/calculators/part-cost/', label: '部品コスト見積もり' },
+    { href: '/calculators/', label: 'すべてのカリキュレーター' },
+  ],
+  signoffHtml:
+    'Nylon3DPは独立した業界出版物・リファレンスであり、いずれのメーカーとも提携していません。詳しくは<a href="/editorial/">出典ポリシー</a>をご覧ください。最終更新：{updated}',
+  updated: '2026年11月',
 };
 
-const zh: HomeCopy = {
-  title: 'Nylon3DP — 尼龙3D打印参考：PA11、PA12、SLS、MJF',
-  description:
-    '尼龙3D打印综合参考：基于厂家数据手册的PA11/PA12材料数据库、SLS、MJF、SAF与FDM工艺、设备规格与设计指南，每个数字均可溯源至厂家文档。',
-  heroTitle: '尼龙3D打印参考',
-  heroLede:
-    '尼龙是3D打印真正用来制造功能零件的工程聚合物，但它的数据散落在几十家厂家的材料数据手册里。Nylon3DP把这些数据汇集到一处：PA11、PA12、PA6与填充尼龙的材料性能、设备规格、工艺讲解与设计指南，每个数字都能溯源到厂家自己的文档。',
-  qaLabel: '快速解答——什么是尼龙3D打印？',
-  qaBody:
-    '尼龙（聚酰胺）3D打印是指用PA12、PA11、PA6或填充尼龙牌号制造零件，主要采用粉末床熔融工艺——<a href="/processes/sls/">SLS</a>和<a href="/processes/mjf/">MJF</a>——或挤出尼龙线材的<a href="/processes/fdm/">FDM</a>。打印出的尼龙韧性好、耐磨、耐热性适中，因此成为功能性最终用途零件的默认选择：铰链、卡扣、齿轮、风管、支架、工装夹具和矫形器。PA12是标准牌号；PA11是韧性更好、生物基的替代牌号。',
-  startHeading: '从数据库开始',
-  cards: {
-    materials: {
-      title: '材料数据库',
-      body: '{materials}个尼龙牌号，附完整数据手册参数表——粉末来自EOS、Formlabs、HP和BASF，线材来自Polymaker和Bambu Lab。',
-      meta: 'PA12 · PA11 · PA6 · 玻纤填充 · PA-CF · CoPA',
-    },
-    machines: {
-      title: '设备数据库',
-      body: '{machines}台粉末床设备，成型尺寸与层厚规格均经厂家核实。',
-      meta: 'HP Jet Fusion · EOS Formiga · Formlabs Fuse · Stratasys H350',
-    },
-    processes: {
-      title: '工艺',
-      body: 'SLS、MJF、SAF与尼龙FDM如何工作、各自使用哪些材料、适合什么场景，另有附来源的SLS与MJF对比。',
-      meta: 'SLS · MJF · SAF · FDM',
-    },
-    guides: {
-      title: '指南',
-      body: '用数据手册的数字判定PA11与PA12；按厂家参数干燥尼龙线材；依据官方设计指南为SLS与MJF设计零件。',
-      meta: '上线时3篇，持续增加',
-    },
-    glossary: {
-      title: '术语表',
-      body: '{glossary}条定义——刷新比、玻纤填充、吸湿性、HDT，以及数据手册里默认你已经懂的其余术语。',
-      meta: '通俗表述，并与数据库交叉核对',
-    },
-    compare: {
-      title: 'SLS 与 MJF 对比',
-      body: '用两大工艺各自厂家的PA12数据，对比两种生产级粉末工艺：强度、各向同性、颜色、材料与经济性。',
-      meta: '对比',
+const zh: PortalCopy = {
+  title: '尼龙3D打印行业中枢 | Nylon3DP',
+  description: '尼龙3D打印行业中枢：新闻与展会报道、厂家生态系统、基于数据手册的材料与设备数据库，以及粉末经济性工具。',
+  langNavLabel: '语言',
+  mastheadKicker: 'Nylon3DP · 行业中枢',
+  mastheadTitle: '尼龙3D打印行业中枢',
+  mastheadLede:
+    '新闻与展会报道、厂家与设备生态系统、材料与工艺深度解析——背后是基于数据手册的数据库与粉末经济性工具。凡是对尼龙3D打印重要的事，这里都有报道，并附上来源。',
+  leadKicker: '头条',
+  leadTag: '展会',
+  leadTitle: 'Formnext 2026：尼龙观察名单',
+  leadDek:
+    'Formnext将于11月17日（周二）在法兰克福开幕，展馆里尼龙这一侧异常密集：EOS将发布一台大型聚合物SLS平台，Arkema将展示新一代Orgasol PA12粉末，Stratasys将发布一台生产级系统，TPM3D紧凑型CF250将迎来国际首秀。这是编辑部的展前预览，厂家的说法均已标注为厂家说法。',
+  leadPlace: '法兰克福',
+  leadKind: '预览',
+  leadRead: '查看观察名单',
+  leadAll: '全部报道',
+  englishNote: '（英文）',
+  newsKicker: '新闻与简报',
+  newsItems: {
+    '/guides/formnext-2026/': {
+      title: 'Formnext 2026：尼龙观察名单',
+      dek: 'Formnext将于11月17日（周二）在法兰克福开幕，展馆里尼龙这一侧异常密集：EOS将发布一台大型聚合物SLS平台，Arkema将展示新一代Orgasol PA12粉末，Stratasys将发布一台生产级系统，TPM3D紧凑型CF250将迎来国际首秀。这是编辑部的展前预览，厂家的说法均已标注为厂家说法。',
+      rail: 'Formnext将于11月17日（周二）在法兰克福开幕，尼龙阵容异常密集：EOS将发布大型聚合物SLS平台，Arkema将展示新一代Orgasol PA12粉末，Stratasys将发布生产级系统，TPM3D紧凑型CF250将迎来国际首秀。',
     },
   },
-  featuredHeading: '精选材料',
-  featuredTeasers: {
-    'eos-pa-2200':
-      'EOS PA 2200是选择性激光烧结的基准PA12粉末：一种性能均衡的无填充尼龙12，拉伸强度48 MPa（XY）、拉伸模量1650 MPa、XY平面断裂伸长率18%，数据来自EOS现行材料数据手册。',
-    'eos-pa-1101': 'EOS PA 1101是一种生物基PA11 SLS粉末，源自蓖麻油。',
-    'eos-pa-3200-gf': 'EOS PA 3200 GF是一种玻璃微珠填充的PA12 SLS粉末（据EOS数据，玻璃微珠含量为40 wt%）。',
-    'formlabs-nylon-12-powder':
-      'Formlabs Nylon 12 Powder是Fuse系列SLS的标准PA12：极限拉伸强度50 MPa、拉伸模量1850 MPa、断裂伸长率11%（X/Y），HDT为171 °C（0.45 MPa），数据来自Formlabs技术数据手册。',
-    'formlabs-nylon-11-powder':
-      'Formlabs Nylon 11 Powder是Fuse系列的生物基PA11，专为需要弯折或承受冲击的零件而设计：拉伸强度49 MPa、模量1600 MPa、断裂伸长率40%（X/Y），是Formlabs产品线中韧性最好的粉末，数据来自Formlabs技术数据手册。',
-    'hp-pa-12':
-      'HP 3D High Reusability PA 12是Multi Jet Fusion的标准尼龙：拉伸强度54 MPa、拉伸模量2150 MPa、断裂伸长率XY方向18%（Z方向10%），密度1.02 g/cm³，数据来自HP技术数据手册。',
+  newsPageLink: '新闻页——编辑部如何运作，以及迄今的全部条目',
+  newsLangNote: '全部报道以英文发布。',
+  briefingKicker: '简报',
+  briefingTitle: '通过邮件获取尼龙简报',
+  briefingBody:
+    '展会报告、厂家动态与数据库新条目，汇总成一封不定期邮件。没有每日噪声，不使用第三方名单。目前通过邮件订阅：在主题行写上“Subscribe”，发送一封邮件即可。',
+  briefingButton: '通过邮件订阅',
+  briefingSubject: 'Subscribe — Nylon3DP briefing',
+  ecoKicker: '生态系统——厂家与设备',
+  ecoIntro:
+    '本目录跟踪尼龙打印背后的公司——谁生产粉末，谁制造设备，以及他们的哪些产品已收录进我们的数据库。下面的每个数字都是数据库的实时状态，不是营销数字。',
+  vendorTypes: { material: '材料', machine: '设备', both: '材料与设备' },
+  gradeNoun: ['个牌号', '个牌号'],
+  machineNoun: ['台设备', '台设备'],
+  ecoFooterHtml:
+    '<a href="/vendors/">厂家目录</a> · <a href="/machines/">设备数据库</a>——{machines}台生产设备已完整收录规格，从EOS P 396到Formlabs Fuse 1+ 30W，另有两台平台将于本周在Formnext上发布。',
+  depthKicker: '深度——材料与工艺',
+  depthItems: [
+    {
+      href: '/processes/sls/',
+      processSlug: 'sls',
+      title: 'SLS——选择性激光烧结',
+      body: 'SLS通过激光在加热的尼龙粉末床上扫描，逐层烧结截面来构建零件。',
+    },
+    {
+      href: '/processes/mjf/',
+      processSlug: 'mjf',
+      title: 'MJF——Multi Jet Fusion',
+      body: 'MJF是HP的粉末床熔融工艺：喷墨阵列将熔合剂与精细剂打印到尼龙粉末上，红外灯将打印区域熔合。',
+    },
+    {
+      href: '/guides/pa11-vs-pa12/',
+      title: 'PA11 与 PA12：选哪种尼龙粉末？',
+      body: '粉末床尼龙核心的韧性与均衡之争，用EOS、Formlabs和HP数据手册的数字来判定。',
+    },
+    {
+      href: '/guides/designing-for-sls-mjf/',
+      title: '为SLS与MJF设计零件',
+      body: '壁厚、孔径与粉末排出孔取自Formlabs官方SLS设计指南，另加两种粉末工艺共有的设计规则。',
+    },
+  ],
+  depthFooterHtml:
+    '<a href="/processes/">全部工艺</a> · <a href="/guides/">全部指南</a> · <a href="/glossary/">术语表</a>',
+  appKicker: '应用版图',
+  appBodyHtml:
+    '尼龙的应用地图，按行业版图而非零件目录来组织：<a href="/applications/">覆盖地图</a>横跨{industries}个行业 × {families}个零件族。已发布{guides}篇指南——<a href="/applications/drones/">无人机与UAV中心</a>，其中<a href="/applications/drones/motor-mounts/">电机座</a>与<a href="/applications/drones/propeller-guards/">桨叶保护罩</a>已完整做通——另有{planned}个单元格在规划中，每个都必须先有真实需求和完整的工程内核才动笔。',
+  toolsKicker: '数据与工具——服务台',
+  toolsCounts: {
+    grades: ['个材料牌号', '个材料牌号'],
+    machines: ['台设备', '台设备'],
+    vendors: ['家厂家', '家厂家'],
   },
-  coverageHeading: '目前的覆盖范围——如实说明',
-  coverageBody:
-    '这是本参考站的v1，于2026年11月发布：{materials}种材料、{machines}台设备、3篇工艺深度解析加1篇对比、3篇指南、{glossary}条术语。目标是完整的尼龙全景——每种重要的粉末、线材和设备，每个主要应用领域——以经过核实的步骤逐步建成。尚未覆盖的内容不会凭猜测填充，而是排入队列。每一页的标准见<a href="/editorial/">编辑与来源政策</a>。',
-  trustHeading: '为什么可以信任这里的数字？',
-  trustBody:
-    '因为每个数字都注明了来源。性能表复现厂家数据手册（EOS、Formlabs、HP、BASF、Polymaker、Bambu Lab），并在数值旁保留测试方法；设备规格来自厂家的规格文档；设计最小值来自官方设计指南。如果厂家没有公布某个数值，表格会将其省略，而不是填补空白。欢迎通过 <a href="mailto:cqq365@gmail.com">cqq365@gmail.com</a> 提出更正。',
-  updatedLine: '最后更新：2026年11月',
+  toolsBody: '每个数值都来自厂家数据手册或官方规格，并在页面上注明来源；厂家未公布的数值一律省略，绝不估算。',
+  toolsLinks: [
+    { href: '/materials/', label: '材料数据库' },
+    { href: '/machines/', label: '设备数据库' },
+    { href: '/compare/materials/', label: '对比材料' },
+    { href: '/compare/machines/', label: '对比设备' },
+    { href: '/calculators/powder-refresh-ratio/', label: '刷新比计算器' },
+    { href: '/calculators/part-cost/', label: '零件成本估算' },
+    { href: '/calculators/', label: '全部计算器' },
+  ],
+  signoffHtml:
+    'Nylon3DP是一家独立的行业出版物与参考站，与任何厂家均无隶属关系——见<a href="/editorial/">来源政策</a>。最后更新：{updated}',
+  updated: '2026年11月',
 };
 
-export const HOME_COPY: Record<AnyLocale, HomeCopy> = { en, de, es, pt, ja, zh };
+export const PORTAL_COPY: Record<AnyLocale, PortalCopy> = { en, de, es, pt, ja, zh };

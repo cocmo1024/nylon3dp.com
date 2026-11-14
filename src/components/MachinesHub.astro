@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro';
+import { MACHINES } from '../data/machines';
+import { VENDORS } from '../data/vendors';
+import { PROCESSES } from '../data/processes';
+import { pickSpec, fmtSpec, buildVolumeString } from '../lib/specs';
+import { machineHubRow } from '../lib/payload';
+import { LOCALE_META, homePath } from '../i18n/home';
+import { MACHINES_HUB_COPY, hubUrl, indexAlternates, type HubLocale } from '../i18n/hub';
+
+// The machines database index, one component for the English page and
+// the German pilot (B5). Chrome comes from i18n/hub.ts; every value in
+// the table and payload comes from the shared data layer, unchanged.
+
+interface Props {
+  locale: HubLocale;
+}
+
+const { locale } = Astro.props;
+const copy = MACHINES_HUB_COPY[locale];
+const meta = LOCALE_META[locale];
+
+// Index columns come from the structured data layer (B1). Layer
+// thickness falls back to the legacy spec string where the values are a
+// manufacturer list rather than a single figure (EOS P 396, see B0).
+const layerCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'layerThickness');
+  if (s) return fmtSpec(s);
+  return m.specs.find((x) => /layer/i.test(x.label))?.value ?? copy.layerFallback;
+};
+const laserCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'laserPower');
+  return s ? fmtSpec(s) : '—';
+};
+const capacityCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'buildVolumeCapacity');
+  return s ? fmtSpec(s) : '—';
+};
+
+// Dataset JSON-LD, generated from the data layer so the count, measured
+// variables and keywords can never drift from the entries actually listed.
+const MEASURED_RENAMES: Record<string, string> = {
+  'Effective build volume': 'Build volume',
+  'Effective build size': 'Build volume',
+};
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: copy.datasetName,
+  description: copy.datasetDescription.replaceAll('{machines}', String(MACHINES.length)),
+  url: hubUrl(locale, '/machines/'),
+  creator: { '@id': 'https://nylon3dp.com/#organization' },
+  // Entries carry no per-entry date field in the data layer; this is the
+  // database's last editorial update and moves with each database batch.
+  dateModified: '2026-11-14',
+  variableMeasured: [
+    ...new Set(MACHINES.flatMap((m) => m.specs.map((s) => MEASURED_RENAMES[s.label] ?? s.label))),
+  ].sort(),
+  keywords: [
+    'Nylon 3D printers',
+    ...new Set(MACHINES.map((m) => m.process)),
+    'Manufacturer specification sheet',
+  ],
+};
+
+// B2 database UX: filter/sort payload for the hub island (see the
+// materials index for the pattern; payloads come from structuredSpecs).
+// The `ui` strings localize the island's rendered text (B5).
+const hubPayload = {
+  kind: 'machines',
+  noun: copy.noun,
+  compareBase: '/compare/machines/',
+  ui: copy.ui,
+  rows: Object.fromEntries(MACHINES.map((m) => [m.slug, machineHubRow(m)])),
+};
+const processOptions = PROCESSES.filter((p) => MACHINES.some((m) => m.processSlug === p.slug));
+const vendorOptions = VENDORS.filter((v) => MACHINES.some((m) => m.vendorSlug === v.slug));
+const COLUMN_DEFS = [
+  { key: 'name', num: false },
+  { key: 'manufacturer', num: false },
+  { key: 'process', num: false },
+  { key: 'buildVolume', num: true },
+  { key: 'capacity', num: true },
+  { key: 'layerThickness', num: true },
+  { key: 'laserPower', num: true },
+];
+const COLUMNS = COLUMN_DEFS.map((c, i) => ({ ...c, label: copy.columns[i] }));
+const coverageHtml = copy.coverageHtml.replaceAll('{machines}', String(MACHINES.length));
+---
+
+<Base
+  title={copy.title}
+  description={copy.description}
+  lang={meta.htmlLang}
+  ogLocale={locale === 'en' ? undefined : meta.ogLocale}
+  inLanguage={meta.htmlLang}
+  alternates={indexAlternates('/machines/')}
+  jsonLd={datasetLd}
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href={homePath(locale)}>{copy.crumbHome}</a> / {copy.crumbHere}</p>
+    <h1>{copy.h1}</h1>
+  </div>
+  <div class="quick-answer">
+    <p class="qa-label">{copy.qaLabel}</p>
+    <p>{copy.qaBody}</p>
+  </div>
+
+  <p set:html={coverageHtml} />
+
+  <h2>{copy.allHeading}</h2>
+  <p set:html={copy.allIntroHtml} />
+  <div data-hub>
+    <form class="filter-bar" data-filter-form>
+      <div class="filter-field">
+        <label for="m-process">{copy.filters.process}</label>
+        <select id="m-process" data-filter="process">
+          <option value="">{copy.filters.allProcesses}</option>
+          {processOptions.map((p) => <option value={p.slug}>{p.name}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="m-vendor">{copy.filters.vendor}</label>
+        <select id="m-vendor" data-filter="vendor">
+          <option value="">{copy.filters.allVendors}</option>
+          {vendorOptions.map((v) => <option value={v.slug}>{v.name}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="m-envelope">{copy.filters.envelopeLabel}</label>
+        <input id="m-envelope" type="number" min="0" step="any" inputmode="decimal" placeholder={copy.filters.envelopePlaceholder} data-filter-num="envelopeL" />
+      </div>
+      <div class="filter-actions">
+        <button type="button" class="btn" data-reset>{copy.reset}</button>
+        <p class="result-count" data-count aria-live="polite">{MACHINES.length} {copy.noun}</p>
+      </div>
+    </form>
+    <div class="compare-bar" data-compare-bar hidden>
+      <span data-compare-count></span>
+      <a class="btn" data-compare-link href="/compare/machines/">{copy.compareSelected}</a>
+      <button type="button" class="btn btn-quiet" data-compare-clear>{copy.clearSelection}</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table hub-table">
+        <thead>
+          <tr>
+            <th scope="col" class="cmp-col"><span class="sr-only">{copy.compareSr}</span></th>
+            {COLUMNS.map((c) => (
+              <th scope="col" class={c.num ? 'num-col' : undefined}>
+                <button type="button" class="th-sort" data-sort={c.key}>{c.label}<span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {MACHINES.map((m) => (
+            <tr data-slug={m.slug}>
+              <td class="cmp-cell"><input type="checkbox" class="cmp-check" value={m.slug} aria-label={copy.compareAria.replace('{name}', m.name)} /></td>
+              <td><a href={`/machines/${m.slug}/`}>{m.name}</a></td>
+              <td>{m.manufacturer}</td>
+              <td>{m.process}</td>
+              <td class="num">{buildVolumeString(m) ?? '—'}</td>
+              <td class="num">{capacityCell(m)}</td>
+              <td class="num">{layerCell(m)}</td>
+              <td class="num">{laserCell(m)}</td>
+            </tr>
+          ))}
+          <tr class="no-matches" data-no-matches hidden>
+            <td colspan="8">{copy.noMatches} <button type="button" class="btn btn-quiet" data-reset>{copy.reset}</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script type="application/json" data-hub-data set:html={JSON.stringify(hubPayload)} />
+  </div>
+  <p class="muted">{copy.afterNote}</p>
+  <p class="updated">{copy.updatedLine}</p>
+  <script>
+    import '../lib/hub-client';
+  </script>
+</Base>

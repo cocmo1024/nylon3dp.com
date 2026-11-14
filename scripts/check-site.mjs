@@ -34,6 +34,12 @@
 //   ItemList; the Formnext lead feature renders with its sourced
 //   claims labelled; sponsorship slots are disabled, so no
 //   "Sponsored" text may appear anywhere in dist
+// - i18n (B5): all six homepages render the portal anatomy (the six
+//   data-section markers) with their locale's masthead headline; the
+//   German database index pilot (/de/materials/, /de/machines/) pairs
+//   hreflang with its English counterpart both ways — in the pages and
+//   in the sitemap — carries the hub payload and German chrome, and a
+//   Dataset JSON-LD under the localized URL
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -118,7 +124,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 63; // 61 + B4.5: /news/ + /guides/formnext-2026/ (the lead feature, published this batch as a sourced preview) (2 new)
+const EXPECTED_SITEMAP_URLS = 65; // 63 + B5: /de/materials/ + /de/machines/ (German database index pilot)
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -490,6 +496,86 @@ for (const f of htmlFiles) {
     const html = readFileSync(file, 'utf8');
     for (const v of ['the nylon watchlist', 'Hall 12.0', 'D71', 'Orgasol', 'claims are labelled as claims', 'up to 50%']) {
       if (!html.includes(v)) errors.push(`${path}: expected content "${v}" not rendered`);
+    }
+  }
+}
+
+// --- i18n portal + German hub pilot (B5) -----------------------------------
+// All six homepages render the unified portal anatomy: the six section
+// markers, in the locale's own masthead language (mirrors PORTAL_COPY).
+const PORTAL_SECTIONS = ['lead', 'news', 'ecosystem', 'depth', 'applications', 'data-tools'];
+const PORTAL_H1 = {
+  en: 'The nylon 3D printing industry hub',
+  de: 'Der Branchen-Hub für Nylon-3D-Druck',
+  es: 'El centro del sector de la impresión 3D de nailon',
+  pt: 'O centro do setor de impressão 3D de nylon',
+  ja: 'ナイロン3Dプリント業界ハブ',
+  zh: '尼龙3D打印行业中枢',
+};
+for (const [code, path] of Object.entries(HOME_CLUSTER)) {
+  const file = path === '/' ? join(DIST, 'index.html') : join(DIST, path, 'index.html');
+  if (!existsSync(file)) continue; // missing homepages already reported above
+  const html = readFileSync(file, 'utf8');
+  for (const section of PORTAL_SECTIONS) {
+    if (!html.includes(`data-section="${section}"`)) {
+      errors.push(`${path}: portal section "${section}" missing (B5 unified homepage)`);
+    }
+  }
+  if (!html.includes(PORTAL_H1[code])) errors.push(`${path}: portal masthead headline (${code}) not rendered`);
+  if (html.includes('Featured materials')) errors.push(`${path}: still carries the pre-B5 "Featured materials" home structure`);
+}
+// German database index pilot: each DE index pairs hreflang with its EN
+// counterpart (en + de + x-default → EN), on both pages and in the
+// sitemap; the DE pages carry the hub payload, German chrome and a
+// Dataset JSON-LD under the localized URL.
+for (const [base, entries] of [['/materials/', 14], ['/machines/', 5]]) {
+  const pair = { en: SITE + base, de: `${SITE}/de${base}`, 'x-default': SITE + base };
+  for (const path of [base, `/de${base}`]) {
+    const file = join(DIST, path, 'index.html');
+    if (!existsSync(file)) { errors.push(`${path}: missing in dist (B5 index-pair check)`); continue; }
+    const html = readFileSync(file, 'utf8');
+    const alts = new Map(
+      [...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"/g)].map((m) => [m[1], m[2]]),
+    );
+    for (const [lang, url] of Object.entries(pair)) {
+      if (alts.get(lang) !== url) errors.push(`${path}: hreflang ${lang} = ${alts.get(lang)}, expected ${url}`);
+    }
+    if (alts.size !== 3) errors.push(`${path}: ${alts.size} alternate links, expected 3 (en/de/x-default)`);
+    const block = sitemapXmlAll.split('<url>').find((b) => b.includes(`<loc>${SITE + path}</loc>`));
+    if (!block) { errors.push(`sitemap: no <url> entry for ${path}`); continue; }
+    const smAlts = new Map(
+      [...block.matchAll(/hreflang="([^"]+)" href="([^"]+)"/g)].map((m) => [m[1], m[2]]),
+    );
+    for (const [lang, url] of Object.entries(pair)) {
+      if (smAlts.get(lang) !== url) errors.push(`sitemap ${path}: hreflang ${lang} = ${smAlts.get(lang)}, expected ${url}`);
+    }
+    if (smAlts.size !== 3) errors.push(`sitemap ${path}: ${smAlts.size} alternate links, expected 3`);
+  }
+  const dePath = `/de${base}`;
+  const deFile = join(DIST, dePath, 'index.html');
+  if (existsSync(deFile)) {
+    const html = readFileSync(deFile, 'utf8');
+    if (!html.includes('data-hub')) errors.push(`${dePath}: no [data-hub] island root`);
+    if (!html.includes('Filter zurücksetzen')) errors.push(`${dePath}: German filter chrome (reset) not rendered`);
+    if (!html.includes('Verfahren')) errors.push(`${dePath}: German filter chrome (process label) not rendered`);
+    const payloadMatch = html.match(/<script type="application\/json" data-hub-data>([\s\S]*?)<\/script>/);
+    if (!payloadMatch) errors.push(`${dePath}: no hub JSON payload script`);
+    else {
+      try {
+        const payload = JSON.parse(payloadMatch[1]);
+        const slugs = Object.keys(payload.rows ?? {});
+        if (slugs.length !== entries) errors.push(`${dePath}: hub payload has ${slugs.length} rows, expected ${entries}`);
+        if (!payload.ui?.countFiltered) errors.push(`${dePath}: hub payload carries no localised ui strings`);
+      } catch {
+        errors.push(`${dePath}: hub JSON payload does not parse`);
+      }
+    }
+    const blocks = parseLd(html, dePath);
+    const ds = blocks.find((b) => b['@type'] === 'Dataset');
+    if (!ds) errors.push(`${dePath}: no Dataset JSON-LD`);
+    else {
+      if (ds.url !== `${SITE}${dePath}`) errors.push(`${dePath}: Dataset url ${ds.url}, expected ${SITE}${dePath}`);
+      if (ds.creator?.['@id'] !== ORG_ID) errors.push(`${dePath}: Dataset creator @id ${ds.creator?.['@id']}, expected ${ORG_ID}`);
     }
   }
 }
