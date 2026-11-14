@@ -19,6 +19,8 @@ export const GET: APIRoute = () => {
     `- [Machine database](${SITE.url}/machines/): Powder-bed printers with manufacturer specifications`,
     `- [Processes](${SITE.url}/processes/): SLS, MJF, SAF and FDM explained`,
     `- [SLS vs MJF](${SITE.url}/compare/sls-vs-mjf/): The two production powder processes compared on manufacturer data`,
+    `- [Material comparison tool](${SITE.url}/compare/materials/): Side-by-side datasheet comparison of any 2–4 materials in the database (selection carried in the URL, e.g. ?sel=eos-pa-2200,hp-pa-12)`,
+    `- [Machine comparison tool](${SITE.url}/compare/machines/): Side-by-side manufacturer-specification comparison of any 2–4 machines in the database`,
     `- [Glossary](${SITE.url}/glossary/): Definitions of nylon 3D printing terms`,
     `- [Editorial & sourcing policy](${SITE.url}/editorial/): How data is sourced and verified`,
     '',

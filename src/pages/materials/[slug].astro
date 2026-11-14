@@ -7,7 +7,7 @@ import { MATERIALS, type Material } from '../../data/materials';
 import { MACHINES } from '../../data/machines';
 import { VENDORS } from '../../data/vendors';
 import { PROCESSES } from '../../data/processes';
-import { materialFallbackRows } from '../../lib/specs';
+import { materialFallbackRows, materialNoteRows } from '../../lib/specs';
 import { SITE } from '../../site';
 
 export function getStaticPaths() {
@@ -28,6 +28,7 @@ const specifiedOn: RelatedLink[] = MACHINES.filter((mc) => mc.supportedMaterials
   meta: mc.process,
 }));
 const fallbackRows = materialFallbackRows(m);
+const noteRows = materialNoteRows(m);
 
 const title = `${m.name} Datasheet — Properties | Nylon3DP`;
 const description = `${m.name}: ${m.basePolymer} ${m.form.toLowerCase()} for ${m.process} — manufacturer-sourced datasheet properties and FAQ.`;
@@ -64,7 +65,7 @@ const articleLd = {
   {m.intro.map((para) => <p>{para}</p>)}
 
   <h2>Properties (manufacturer datasheet)</h2>
-  <SpecTable labelHeader="Property" specs={m.structuredSpecs} fallback={fallbackRows} />
+  <SpecTable labelHeader="Property" specs={m.structuredSpecs} fallback={fallbackRows} notes={noteRows} />
   <p class="muted">Values are reproduced from the manufacturer source(s) listed below, exactly as published. Properties the manufacturer does not publish are omitted rather than estimated — see the <a href="/editorial/">sourcing policy</a>.</p>
 
   <h2>Processing notes</h2>

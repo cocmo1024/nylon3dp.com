@@ -104,6 +104,56 @@ export function machineFallbackRows(m: Machine): Machine['specs'] {
   });
 }
 
+// --- datasheet-note incidentals (B2 decision) ------------------------------
+// B1's rendering switch dropped three classes of note text that live in
+// the NOTES of legacy rows which DO have a structured counterpart (so the
+// fallback rows above never see them): ± tolerances in filament property
+// notes, imperial conversions in machine build/layer notes, and the Fuse
+// laser's "Class 1 …" phrase. Decision (B2): those incidentals stay OUT
+// of the hub tables and the comparison tool (which show structured values
+// only), but they are manufacturer-published text, so entity pages restore
+// them verbatim in a "Datasheet notes" section via the derivations below.
+// The derivations are pattern-based and exhaustive over the current data:
+// tolerances are the only ± figures in covered material notes; on the
+// machine side the only covered notes carrying a standalone "in"/"gallon"
+// conversion or a "Class N" phrase are the ones B1 dropped — notes that
+// were carried into structured specs ("Per EOS system data sheet",
+// "Single specified value, per Formlabs", …) match none of the patterns.
+
+export interface NoteRow {
+  label: string;
+  text: string;
+}
+
+const TOLERANCE_RE = /±\s*\d+(?:\.\d+)?/g;
+
+/** ± tolerance figures from covered material property notes, verbatim. */
+export function materialNoteRows(m: Material): NoteRow[] {
+  const keys = new Set(m.structuredSpecs.map((s) => s.key));
+  const rows: NoteRow[] = [];
+  for (const p of m.properties) {
+    const k = materialRowKey(p.label);
+    if (k === null || !keys.has(k) || !p.note) continue;
+    const tolerances = p.note.match(TOLERANCE_RE);
+    if (tolerances?.length) rows.push({ label: p.label, text: tolerances.join(', ') });
+  }
+  return rows;
+}
+
+/** Conversion / laser-class note text from covered machine spec rows. */
+export function machineNoteRows(m: Machine): NoteRow[] {
+  const keys = new Set(m.structuredSpecs.map((s) => s.key));
+  const rows: NoteRow[] = [];
+  for (const row of m.specs) {
+    const k = machineRowKey(row);
+    if (k === null || !keys.has(k) || !row.note) continue;
+    if (/\bClass\s*\d/.test(row.note) || /\bin\b/.test(row.note) || /\bgallon\b/.test(row.note)) {
+      rows.push({ label: row.label, text: row.note });
+    }
+  }
+  return rows;
+}
+
 // --- index-page column picks ----------------------------------------------
 
 /** Pick one representative spec for a database-index column: prefer a

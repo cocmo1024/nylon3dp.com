@@ -1,0 +1,31 @@
+---
+import CompareTool from '../../components/CompareTool.astro';
+import { MACHINES } from '../../data/machines';
+import { machineCompareEntry } from '../../lib/payload';
+
+const payload = {
+  kind: 'machines',
+  base: '/machines/',
+  entries: MACHINES.map(machineCompareEntry),
+};
+const items = MACHINES.map((m) => ({
+  slug: m.slug,
+  name: m.name,
+  meta: `${m.process} · ${m.manufacturer}`,
+}));
+---
+
+<CompareTool
+  title="Compare Nylon 3D Printers Side by Side | Nylon3DP"
+  description="Side-by-side comparison of nylon-capable 3D printers: manufacturer-stated build volume, layer thickness and laser specifications for SLS, MJF and SAF machines."
+  h1="Compare nylon 3D printers"
+  crumbHref="/machines/"
+  crumbLabel="Machines"
+  action="/compare/machines/"
+  noun="machines"
+  quickAnswer="Pick any two to four machines and this tool lines up their manufacturer-stated specifications — build volume, layer thickness, laser power and wavelength — side by side. Anything a manufacturer does not state shows as a dash, never an estimate."
+  items={items}
+  payload={payload}
+>
+  <p>SAF machines such as the Stratasys H350 have no laser specification — the process fuses with a flood infrared exposure — so the laser rows are dashes for them by design, not by omission. Grades have their own <a href="/compare/materials/">material comparison tool</a>.</p>
+</CompareTool>

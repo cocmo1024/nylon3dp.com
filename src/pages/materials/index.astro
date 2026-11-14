@@ -1,7 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MATERIALS } from '../../data/materials';
+import { VENDORS } from '../../data/vendors';
+import { PROCESSES } from '../../data/processes';
 import { pickSpec, fmtVal } from '../../lib/specs';
+import { materialHubRow } from '../../lib/payload';
 
 // Index columns are picked from the structured data layer (B1): the
 // in-plane (XY / X-Y / X, dry) variant where a datasheet splits by
@@ -45,6 +48,41 @@ const datasetLd = {
     'Technical data sheet',
   ],
 };
+
+// B2 database UX: filter/sort payload, serialised from structuredSpecs at
+// build time for the hub island (lib/hub-client.ts). The static table
+// below is the full database — the island only enhances it.
+const hubPayload = {
+  kind: 'materials',
+  noun: 'materials',
+  compareBase: '/compare/materials/',
+  rows: Object.fromEntries(MATERIALS.map((m) => [m.slug, materialHubRow(m)])),
+};
+const presentIn = <T,>(values: T[]): T[] => [...new Set(values)];
+const processOptions = PROCESSES.filter((p) => MATERIALS.some((m) => m.processSlug === p.slug));
+const polymerOptions = presentIn(MATERIALS.map((m) => m.basePolymer)).sort();
+const formOptions = presentIn(MATERIALS.map((m) => m.form));
+const vendorOptions = VENDORS.filter((v) => MATERIALS.some((m) => m.vendorSlug === v.slug));
+const FILLER_LABELS: Record<string, string> = {
+  Unfilled: 'Unfilled',
+  GF: 'Glass-filled (GF)',
+  CF: 'Carbon fibre (CF)',
+  GB: 'Glass beads (GB)',
+};
+const fillerOptions = presentIn(MATERIALS.map((m) => materialHubRow(m).f.filler));
+const sortTh = (key: string, label: string, num = false) => ({ key, label, num });
+const COLUMNS = [
+  sortTh('name', 'Material'),
+  sortTh('manufacturer', 'Manufacturer'),
+  sortTh('polymer', 'Polymer'),
+  sortTh('form', 'Form'),
+  sortTh('process', 'Process'),
+  sortTh('tensileStrength', 'Tensile strength (MPa)', true),
+  sortTh('tensileModulus', 'Tensile modulus (MPa)', true),
+  sortTh('elongationAtBreak', 'Elongation at break (%)', true),
+  sortTh('hdt', 'HDT (°C)', true),
+  sortTh('density', 'Density (g/cm³)', true),
+];
 ---
 
 <Base
@@ -64,43 +102,104 @@ const datasetLd = {
   <p>Coverage so far: {MATERIALS.length} grades from {[...new Set(MATERIALS.map((m) => m.manufacturer))].join(', ')}. The database is expanding in stages toward the full nylon landscape — powders, filaments and pellets across all major suppliers — and each addition follows the same rule: a manufacturer datasheet, or it does not go in.</p>
 
   <h2>All materials</h2>
-  <div class="table-scroll">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col">Material</th>
-          <th scope="col">Manufacturer</th>
-          <th scope="col">Polymer</th>
-          <th scope="col">Form</th>
-          <th scope="col">Process</th>
-          <th scope="col" class="num-col">Tensile strength (MPa)</th>
-          <th scope="col" class="num-col">Tensile modulus (MPa)</th>
-          <th scope="col" class="num-col">Elongation at break (%)</th>
-          <th scope="col" class="num-col">HDT (°C)</th>
-          <th scope="col" class="num-col">Density (g/cm³)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {MATERIALS.map((m) => (
+  <p>Filter and sort the database below, or tick up to four grades and open them in the <a href="/compare/materials/">material comparison tool</a> for a full side-by-side datasheet table.</p>
+  <div data-hub>
+    <form class="filter-bar" data-filter-form>
+      <div class="filter-field">
+        <label for="f-process">Process</label>
+        <select id="f-process" data-filter="process">
+          <option value="">All processes</option>
+          {processOptions.map((p) => <option value={p.slug}>{p.name}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="f-polymer">Polymer</label>
+        <select id="f-polymer" data-filter="polymer">
+          <option value="">All polymers</option>
+          {polymerOptions.map((p) => <option value={p}>{p}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="f-form">Form</label>
+        <select id="f-form" data-filter="form">
+          <option value="">All forms</option>
+          {formOptions.map((f) => <option value={f}>{f}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="f-vendor">Manufacturer</label>
+        <select id="f-vendor" data-filter="vendor">
+          <option value="">All manufacturers</option>
+          {vendorOptions.map((v) => <option value={v.slug}>{v.name}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="f-filler">Filler</label>
+        <select id="f-filler" data-filter="filler">
+          <option value="">Any filler</option>
+          {fillerOptions.map((f) => <option value={f}>{FILLER_LABELS[f]}</option>)}
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="f-ts">Min. tensile strength (MPa)</label>
+        <input id="f-ts" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 50" data-filter-num="ts" />
+      </div>
+      <div class="filter-field">
+        <label for="f-hdt">Min. HDT at 1.8 MPa (°C)</label>
+        <input id="f-hdt" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 100" data-filter-num="hdt" />
+      </div>
+      <div class="filter-actions">
+        <button type="button" class="btn" data-reset>Reset filters</button>
+        <p class="result-count" data-count aria-live="polite">{MATERIALS.length} materials</p>
+      </div>
+    </form>
+    <div class="compare-bar" data-compare-bar hidden>
+      <span data-compare-count></span>
+      <a class="btn" data-compare-link href="/compare/materials/">Compare selected</a>
+      <button type="button" class="btn btn-quiet" data-compare-clear>Clear selection</button>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table hub-table">
+        <thead>
           <tr>
-            <td><a href={`/materials/${m.slug}/`}>{m.name}</a></td>
-            <td>{m.manufacturer}</td>
-            <td>{m.basePolymer}</td>
-            <td>{m.form}</td>
-            <td>{m.process}</td>
-            <td class="num">{cell(m, 'tensileStrength', { orientations: ORIENT_PREF })}</td>
-            <td class="num">{cell(m, 'tensileModulus', { orientations: ORIENT_PREF })}</td>
-            <td class="num">{cell(m, 'elongationAtBreak', { orientations: ORIENT_PREF })}</td>
-            <td class="num">{cell(m, 'hdt', { noteIncludes: '1.8 MPa' })}</td>
-            <td class="num">{cell(m, 'density')}</td>
+            <th scope="col" class="cmp-col"><span class="sr-only">Select to compare</span></th>
+            {COLUMNS.map((c) => (
+              <th scope="col" class={c.num ? 'num-col' : undefined}>
+                <button type="button" class="th-sort" data-sort={c.key}>{c.label}<span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {MATERIALS.map((m) => (
+            <tr data-slug={m.slug}>
+              <td class="cmp-cell"><input type="checkbox" class="cmp-check" value={m.slug} aria-label={`Compare ${m.name}`} /></td>
+              <td><a href={`/materials/${m.slug}/`}>{m.name}</a></td>
+              <td>{m.manufacturer}</td>
+              <td>{m.basePolymer}</td>
+              <td>{m.form}</td>
+              <td>{m.process}</td>
+              <td class="num">{cell(m, 'tensileStrength', { orientations: ORIENT_PREF })}</td>
+              <td class="num">{cell(m, 'tensileModulus', { orientations: ORIENT_PREF })}</td>
+              <td class="num">{cell(m, 'elongationAtBreak', { orientations: ORIENT_PREF })}</td>
+              <td class="num">{cell(m, 'hdt', { noteIncludes: '1.8 MPa' })}</td>
+              <td class="num">{cell(m, 'density')}</td>
+            </tr>
+          ))}
+          <tr class="no-matches" data-no-matches hidden>
+            <td colspan="11">No materials match the current filters. <button type="button" class="btn btn-quiet" data-reset>Reset filters</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script type="application/json" data-hub-data set:html={JSON.stringify(hubPayload)} />
   </div>
-  <p class="muted">Key values are the in-plane (XY / X) variant where a datasheet splits by orientation, and the HDT at 1.8 MPa where two loads are published. Full property sets, all orientations and test methods are on each grade's own page.</p>
+  <p class="muted">Key values are the in-plane (XY / X) variant where a datasheet splits by orientation, and the HDT at 1.8 MPa where two loads are published. Full property sets, all orientations and test methods are on each grade's own page. Grades whose datasheet does not publish a value never pass a minimum-value filter for it.</p>
 
   <h2>How to read the tables</h2>
   <p>Powder datasheets from EOS use ISO 527 test methods and report "strain at break"; Formlabs and HP typically report ASTM methods. Cross-brand comparisons are therefore indicative rather than laboratory-controlled — each page keeps the manufacturer's own test method next to every value so you can judge comparability yourself. New to the grades themselves? Start with <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a> and the <a href="/glossary/">glossary</a>.</p>
   <p class="updated">Last updated: November 2026</p>
+  <script>
+    import '../../lib/hub-client';
+  </script>
 </Base>

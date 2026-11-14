@@ -1,0 +1,68 @@
+---
+// Comparison tool shell (rebuild batch B2). Server-rendered: page frame,
+// quick answer, picker form and footnotes — all crawlable. The side-by-side
+// table itself is built by lib/compare-client.ts from the JSON payload
+// (structuredSpecs serialised at build time, see lib/payload.ts); the
+// selection travels in the ?sel= query string so comparisons are linkable,
+// and the picker is a plain GET form so the selection survives even with
+// JavaScript disabled (the table itself needs the island).
+import Base from '../layouts/Base.astro';
+
+interface PickerItem {
+  slug: string;
+  name: string;
+  meta: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  h1: string;
+  crumbHref: string;
+  crumbLabel: string;
+  action: string;
+  noun: string;
+  quickAnswer: string;
+  items: PickerItem[];
+  payload: unknown;
+}
+
+const { title, description, h1, crumbHref, crumbLabel, action, noun, quickAnswer, items, payload } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <p class="crumbs"><a href="/">Home</a> / <a href={crumbHref}>{crumbLabel}</a> / Compare</p>
+  <h1>{h1}</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>{quickAnswer}</p>
+  </div>
+
+  <div data-compare>
+    <form data-picker method="get" action={action}>
+      <fieldset class="picker">
+        <legend>Select 2–4 {noun} to compare</legend>
+        <div class="picker-grid">
+          {items.map((i) => (
+            <label class="picker-item">
+              <input type="checkbox" name="sel" value={i.slug} />
+              <span><strong>{i.name}</strong> <span class="picker-meta">{i.meta}</span></span>
+            </label>
+          ))}
+        </div>
+        <button type="submit" class="btn">Compare selected</button>
+      </fieldset>
+    </form>
+    <p class="compare-status" data-status aria-live="polite">Select 2–4 {noun} above to build the comparison. The selection is carried in the page URL, so any comparison can be bookmarked or shared.</p>
+    <div data-result></div>
+    <script type="application/json" data-compare-data set:html={JSON.stringify(payload)} />
+  </div>
+
+  <h2>How to read this comparison</h2>
+  <p>A dash (—) means the manufacturer does not publish that value in the documents this database cites — values are never estimated or carried over from a similar product. Each cell keeps the manufacturer's own test standard and specimen orientation or condition next to the value, because cross-brand datasheet comparisons are indicative rather than laboratory-controlled: an ISO 527 figure and an ASTM D638 figure for the "same" property were not measured the same way.</p>
+  <p>The table shows the structured datasheet values. Ranges and text-only values (for example nozzle-temperature ranges and drying settings) and datasheet note text such as tolerances and unit conversions are reproduced in full on each entry's own page — follow the links in the table header or the bottom row.</p>
+  <slot />
+  <script>
+    import '../lib/compare-client';
+  </script>
+</Base>

@@ -29,6 +29,8 @@ export const FOOTER_NAV = [
       { href: '/machines/', label: 'Machine database' },
       { href: '/processes/', label: 'Processes' },
       { href: '/compare/sls-vs-mjf/', label: 'SLS vs MJF' },
+      { href: '/compare/materials/', label: 'Compare materials' },
+      { href: '/compare/machines/', label: 'Compare machines' },
       { href: '/glossary/', label: 'Glossary' },
     ],
   },

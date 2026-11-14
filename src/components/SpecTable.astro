@@ -5,7 +5,7 @@
 // by any legacy rows that have no structured counterpart (ranges and
 // text rows), rendered verbatim under their own subheading row.
 import type { StructuredSpec } from '../data/types';
-import { groupSpecs, fmtSpec, specBasis } from '../lib/specs';
+import { groupSpecs, fmtSpec, specBasis, type NoteRow } from '../lib/specs';
 
 export interface FallbackRow {
   label: string;
@@ -18,9 +18,12 @@ interface Props {
   labelHeader: string;
   specs: StructuredSpec[];
   fallback: FallbackRow[];
+  /** Verbatim datasheet-note incidentals restored in B2 (± tolerances,
+   * unit conversions, laser-class phrases — see lib/specs.ts). */
+  notes?: NoteRow[];
 }
 
-const { labelHeader, specs, fallback } = Astro.props;
+const { labelHeader, specs, fallback, notes = [] } = Astro.props;
 const groups = groupSpecs(specs);
 ---
 
@@ -54,6 +57,19 @@ const groups = groupSpecs(specs);
             <th scope="row">{r.label}</th>
             <td colspan="2">{r.value}</td>
             <td>{r.note ?? ''}</td>
+          </tr>
+        ))}
+      </>
+    )}
+    {notes.length > 0 && (
+      <>
+        <tr class="spec-subhead">
+          <th scope="colgroup" colspan="4">Datasheet notes — tolerances &amp; conversions, as published</th>
+        </tr>
+        {notes.map((n) => (
+          <tr>
+            <th scope="row">{n.label}</th>
+            <td colspan="3">{n.text}</td>
           </tr>
         ))}
       </>

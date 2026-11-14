@@ -11,6 +11,11 @@
 //   count equals the number of material entries linked from the index table
 // - rendering switch (B1): spot-checked entity pages render a .spec-table
 //   containing known structured values with their units
+// - database UX (B2): hub pages carry the build-time JSON payload for the
+//   filter/sort island and one compare checkbox per entry; the comparison
+//   tool pages carry their picker shell + payload; the B1-dropped
+//   datasheet-note incidentals (± tolerances, unit conversions, laser
+//   class) are restored verbatim on the entity pages
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -95,7 +100,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 43; // 37 English URLs + 5 localized homepages + Arkema Rilsan Invent PA11
+const EXPECTED_SITEMAP_URLS = 45; // 43 + B2 comparison tools (/compare/materials/, /compare/machines/)
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -180,6 +185,75 @@ for (const { path, values } of SPEC_SPOT_CHECKS) {
   if (!html.includes('class="spec-table"')) errors.push(`${path}: no .spec-table rendered`);
   for (const v of values) {
     if (!html.includes(v)) errors.push(`${path}: structured value "${v}" not rendered`);
+  }
+}
+
+// --- database UX checks (B2) ---------------------------------------------
+// Hub pages: the filter/sort island payload is serialised at build time
+// (application/json, NOT ld+json), the static table exposes one row and
+// one compare checkbox per entry, and rows are keyed by slug.
+for (const [path, entries] of [['/materials/', 14], ['/machines/', 5]]) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 hub check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('data-hub')) errors.push(`${path}: no [data-hub] island root`);
+  const payloadMatch = html.match(/<script type="application\/json" data-hub-data>([\s\S]*?)<\/script>/);
+  if (!payloadMatch) { errors.push(`${path}: no hub JSON payload script`); continue; }
+  try {
+    const payload = JSON.parse(payloadMatch[1]);
+    const slugs = Object.keys(payload.rows ?? {});
+    if (slugs.length !== entries) errors.push(`${path}: hub payload has ${slugs.length} rows, expected ${entries}`);
+    for (const slug of slugs) {
+      if (!html.includes(`data-slug="${slug}"`)) errors.push(`${path}: payload row ${slug} has no table row`);
+      if (!html.includes(`class="cmp-check" value="${slug}"`)) errors.push(`${path}: no compare checkbox for ${slug}`);
+    }
+  } catch {
+    errors.push(`${path}: hub JSON payload does not parse`);
+  }
+  if (!html.includes('data-no-matches')) errors.push(`${path}: no explicit no-matches state`);
+}
+
+// Comparison tool pages: picker shell (GET form with one checkbox per
+// entry) + payload + result container must all be server-rendered.
+for (const [path, entries] of [['/compare/materials/', 14], ['/compare/machines/', 5]]) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 compare check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('data-compare')) errors.push(`${path}: no [data-compare] island root`);
+  if (!html.includes('data-picker')) errors.push(`${path}: no picker form`);
+  if (!html.includes('data-result')) errors.push(`${path}: no result container`);
+  const checks = (html.match(/<input[^>]*name="sel"/g) || []).length;
+  if (checks !== entries) errors.push(`${path}: picker has ${checks} checkboxes, expected ${entries}`);
+  const payloadMatch = html.match(/<script type="application\/json" data-compare-data>([\s\S]*?)<\/script>/);
+  if (!payloadMatch) { errors.push(`${path}: no compare JSON payload script`); continue; }
+  try {
+    const payload = JSON.parse(payloadMatch[1]);
+    if ((payload.entries ?? []).length !== entries) {
+      errors.push(`${path}: compare payload has ${(payload.entries ?? []).length} entries, expected ${entries}`);
+    }
+  } catch {
+    errors.push(`${path}: compare JSON payload does not parse`);
+  }
+  if (!html.includes('does not publish')) errors.push(`${path}: missing "manufacturer does not publish" footnote`);
+}
+
+// --- datasheet-note incidentals restored (B2) -----------------------------
+// B1 dropped these verbatim note fragments; B2 restores them on the
+// entity pages (and only there — hubs/compare show structured values).
+const NOTE_SPOT_CHECKS = [
+  { path: '/materials/polymaker-polymide-pa6-cf/', values: ['±2.4', '±211'] },
+  { path: '/materials/bambu-paht-cf/', values: ['±230'] },
+  { path: '/machines/hp-jet-fusion-5200/', values: ['15 × 11.2 × 15 in'] },
+  { path: '/machines/formlabs-fuse-1-plus-30w/', values: ['Class 1 laser product per EN 60825-1:2014'] },
+  { path: '/machines/stratasys-h350/', values: ['5.07 gallon', '0.004 in'] },
+];
+for (const { path, values } of NOTE_SPOT_CHECKS) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 note check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('Datasheet notes')) errors.push(`${path}: no "Datasheet notes" section`);
+  for (const v of values) {
+    if (!html.includes(v)) errors.push(`${path}: datasheet-note text "${v}" not restored`);
   }
 }
 

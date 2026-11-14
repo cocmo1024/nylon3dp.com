@@ -1,0 +1,31 @@
+---
+import CompareTool from '../../components/CompareTool.astro';
+import { MATERIALS } from '../../data/materials';
+import { materialCompareEntry } from '../../lib/payload';
+
+const payload = {
+  kind: 'materials',
+  base: '/materials/',
+  entries: MATERIALS.map(materialCompareEntry),
+};
+const items = MATERIALS.map((m) => ({
+  slug: m.slug,
+  name: m.name,
+  meta: `${m.basePolymer} · ${m.form} · ${m.process}`,
+}));
+---
+
+<CompareTool
+  title="Compare Nylon Materials Side by Side | Nylon3DP"
+  description="Side-by-side comparison of nylon 3D printing materials: full manufacturer datasheet values for any 2–4 PA11, PA12, PA6 and carbon-fibre grades."
+  h1="Compare nylon materials"
+  crumbHref="/materials/"
+  crumbLabel="Materials"
+  action="/compare/materials/"
+  noun="materials"
+  quickAnswer="Pick any two to four grades and this tool lines up their complete manufacturer datasheet values — every structured property, with its test standard and specimen orientation — side by side. Anything a manufacturer does not publish shows as a dash, never an estimate."
+  items={items}
+  payload={payload}
+>
+  <p>Comparing processes rather than grades? The <a href="/compare/sls-vs-mjf/">SLS vs MJF comparison</a> works through the two production powder processes on flagship PA12 data, and <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a> explains when the polymer choice matters more than the grade. Machines have their own <a href="/compare/machines/">machine comparison tool</a>.</p>
+</CompareTool>

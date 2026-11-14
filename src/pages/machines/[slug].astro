@@ -7,7 +7,7 @@ import { MACHINES, type Machine } from '../../data/machines';
 import { MATERIALS } from '../../data/materials';
 import { VENDORS } from '../../data/vendors';
 import { PROCESSES } from '../../data/processes';
-import { machineFallbackRows } from '../../lib/specs';
+import { machineFallbackRows, machineNoteRows } from '../../lib/specs';
 import { SITE } from '../../site';
 
 export function getStaticPaths() {
@@ -27,6 +27,7 @@ const supported: RelatedLink[] = m.supportedMaterials
   .filter((mt) => mt !== undefined)
   .map((mt) => ({ href: `/materials/${mt.slug}/`, name: mt.name, meta: `${mt.basePolymer} · ${mt.form}` }));
 const fallbackRows = machineFallbackRows(m);
+const noteRows = machineNoteRows(m);
 
 const title = `${m.name} — Specs & Build Volume | Nylon3DP`;
 const description = `${m.name} by ${m.manufacturer} (${m.process}): manufacturer-verified build volume, layer thickness and technology specifications for nylon 3D printing.`;
@@ -53,7 +54,7 @@ const faqLd = {
   {m.intro.map((para) => <p>{para}</p>)}
 
   <h2>Specifications (manufacturer)</h2>
-  <SpecTable labelHeader="Specification" specs={m.structuredSpecs} fallback={fallbackRows} />
+  <SpecTable labelHeader="Specification" specs={m.structuredSpecs} fallback={fallbackRows} notes={noteRows} />
   <p class="muted">Specifications the manufacturer does not state in the cited documents are omitted rather than estimated — see the <a href="/editorial/">sourcing policy</a>.</p>
 
   <h2>Notes</h2>
