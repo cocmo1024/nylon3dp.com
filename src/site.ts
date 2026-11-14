@@ -9,7 +9,7 @@ export const SITE = {
     'Nylon3DP is an independent reference for nylon 3D printing: PA11 and PA12 material data from manufacturer datasheets, SLS, MJF and FDM processes, machines, design guides and a glossary.',
   locale: 'en-US',
   email: 'cqq365@gmail.com',
-  themeColor: '#10231c',
+  themeColor: '#121a2c',
   lastUpdated: 'November 2026',
 } as const;
 

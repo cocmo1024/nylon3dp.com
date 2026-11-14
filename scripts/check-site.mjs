@@ -8,7 +8,9 @@
 //   the English homepage); total sitemap URL count matches EXPECTED_SITEMAP_URLS
 // - structured data: /materials/ and /machines/ carry a Dataset JSON-LD whose
 //   creator @id is the site Organization @id; the materials Dataset entry
-//   count equals the number of material cards rendered on the page
+//   count equals the number of material entries linked from the index table
+// - rendering switch (B1): spot-checked entity pages render a .spec-table
+//   containing known structured values with their units
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -154,12 +156,30 @@ for (const path of ['/materials/', '/machines/']) {
     errors.push(`${path}: Dataset creator @id ${ds.creator?.['@id']}, expected ${ORG_ID}`);
   }
   if (path === '/materials/') {
-    const cards = (html.match(/<a class="card" href="\/materials\/[^"]+\/">/g) || []).length;
+    const entries = (html.match(/<a href="\/materials\/[a-z0-9-]+\/">/g) || []).length;
     const stated = ds.description?.match(/for (\d+) nylon 3D printing materials/)?.[1];
     if (!stated) errors.push('/materials/: Dataset description states no entry count');
-    else if (Number(stated) !== cards) {
-      errors.push(`/materials/: Dataset states ${stated} materials, page renders ${cards} cards`);
+    else if (Number(stated) !== entries) {
+      errors.push(`/materials/: Dataset states ${stated} materials, index table links ${entries} entries`);
     }
+  }
+}
+
+// --- structured-spec rendering (B1 rendering switch) --------------------
+// Entity pages must render their spec table FROM structuredSpecs: the
+// table exists and known structured value+unit pairs appear in it.
+const SPEC_SPOT_CHECKS = [
+  { path: '/materials/eos-pa-2200/', values: ['48 MPa', '42 MPa', '1650 MPa'] },
+  { path: '/materials/arkema-rilsan-invent-pa11/', values: ['46 µm', '0.49 g/cm³', '45 MPa'] },
+  { path: '/machines/hp-jet-fusion-5200/', values: ['380 mm', '284 mm', '0.08 mm'] },
+];
+for (const { path, values } of SPEC_SPOT_CHECKS) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (spec rendering check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('class="spec-table"')) errors.push(`${path}: no .spec-table rendered`);
+  for (const v of values) {
+    if (!html.includes(v)) errors.push(`${path}: structured value "${v}" not rendered`);
   }
 }
 

@@ -1,0 +1,62 @@
+---
+// Structured spec table (rebuild batch B1). Renders an entity's
+// structuredSpecs grouped by key — value, orientation/condition and
+// test basis as separate columns, values in tabular numerals — followed
+// by any legacy rows that have no structured counterpart (ranges and
+// text rows), rendered verbatim under their own subheading row.
+import type { StructuredSpec } from '../data/types';
+import { groupSpecs, fmtSpec, specBasis } from '../lib/specs';
+
+export interface FallbackRow {
+  label: string;
+  value: string;
+  note?: string;
+}
+
+interface Props {
+  /** First-column header, e.g. 'Property' or 'Specification'. */
+  labelHeader: string;
+  specs: StructuredSpec[];
+  fallback: FallbackRow[];
+}
+
+const { labelHeader, specs, fallback } = Astro.props;
+const groups = groupSpecs(specs);
+---
+
+<table class="spec-table">
+  <thead>
+    <tr>
+      <th scope="col">{labelHeader}</th>
+      <th scope="col" class="num-col">Value</th>
+      <th scope="col">Orientation / condition</th>
+      <th scope="col">Test standard / note</th>
+    </tr>
+  </thead>
+  <tbody>
+    {groups.map((g) => (
+      g.specs.map((s, i) => (
+        <tr>
+          {i === 0 && <th scope="row" rowspan={g.specs.length}>{g.label}</th>}
+          <td class="num spec-val">{fmtSpec(s)}</td>
+          <td>{s.orientation ?? ''}</td>
+          <td>{specBasis(s)}</td>
+        </tr>
+      ))
+    ))}
+    {fallback.length > 0 && (
+      <>
+        <tr class="spec-subhead">
+          <th scope="colgroup" colspan="4">Further values, as published (ranges &amp; text)</th>
+        </tr>
+        {fallback.map((r) => (
+          <tr>
+            <th scope="row">{r.label}</th>
+            <td colspan="2">{r.value}</td>
+            <td>{r.note ?? ''}</td>
+          </tr>
+        ))}
+      </>
+    )}
+  </tbody>
+</table>

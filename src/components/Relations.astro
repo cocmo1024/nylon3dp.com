@@ -1,0 +1,74 @@
+---
+// Cross-link module rendered from data-layer relations (rebuild B1):
+// the entity's vendor and process, plus related entities derived from
+// reverse references (machines specified for a material / materials a
+// machine is specified for).
+//
+// VENDOR LINK DECISION (B1): /vendors/<slug>/ pages ship in batch B3, so
+// the vendor card deliberately does NOT link internally yet — it renders
+// the vendor's facts and its official website (external). B3 turns the
+// vendor name into the internal link when the routes exist.
+import type { Vendor } from '../data/vendors';
+import type { Process } from '../data/processes';
+
+export interface RelatedLink {
+  href: string;
+  name: string;
+  meta: string;
+}
+
+interface Props {
+  vendor: Vendor;
+  process: Process;
+  /** Heading of the third card, e.g. 'Machines specified for this material'. Omit to render two cards. */
+  relatedTitle?: string;
+  related?: RelatedLink[];
+  /** Factual note shown when the related list is empty (never a placeholder). */
+  relatedEmptyNote?: string;
+  relatedEmptyHref?: string;
+  relatedEmptyLinkLabel?: string;
+}
+
+const { vendor, process, relatedTitle, related = [], relatedEmptyNote, relatedEmptyHref, relatedEmptyLinkLabel } = Astro.props;
+const vendorType = { material: 'Material maker', machine: 'Machine maker', both: 'Materials & machines' }[vendor.type];
+const vendorMeta = [vendor.hqCountry, vendor.founded ? `founded ${vendor.founded}` : null, vendorType]
+  .filter(Boolean)
+  .join(' · ');
+const siteHost = vendor.officialSite.replace(/^https:\/\//, '').replace(/\/$/, '');
+---
+
+<section class="relations" aria-label="Manufacturer, process and related entries">
+  <h2>Manufacturer, process &amp; related entries</h2>
+  <div class="rel-grid">
+    <div class="rel-card">
+      <p class="rel-label">Manufacturer</p>
+      <p class="rel-name">{vendor.name}</p>
+      <p class="rel-meta">{vendorMeta}</p>
+      <p>{vendor.intro}</p>
+      <p><a href={vendor.officialSite} rel="noopener">Official website — {siteHost}</a></p>
+    </div>
+    <div class="rel-card">
+      <p class="rel-label">Process</p>
+      <p class="rel-name"><a href={`/processes/${process.slug}/`}>{process.name} — {process.fullName}</a></p>
+      <p class="rel-meta">{process.family}</p>
+      <p>{process.fusionMechanism}</p>
+    </div>
+    {relatedTitle && (
+      <div class="rel-card">
+        <p class="rel-label">{relatedTitle}</p>
+        {related.length > 0 ? (
+          <ul class="rel-list">
+            {related.map((r) => (
+              <li><a href={r.href}>{r.name}</a> <span class="rel-meta">{r.meta}</span></li>
+            ))}
+          </ul>
+        ) : (
+          <>
+            <p>{relatedEmptyNote}</p>
+            {relatedEmptyHref && <p><a href={relatedEmptyHref}>{relatedEmptyLinkLabel}</a></p>}
+          </>
+        )}
+      </div>
+    )}
+  </div>
+</section>

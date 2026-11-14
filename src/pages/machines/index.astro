@@ -1,6 +1,24 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MACHINES } from '../../data/machines';
+import { pickSpec, fmtSpec, buildVolumeString } from '../../lib/specs';
+
+// Index columns come from the structured data layer (B1). Layer
+// thickness falls back to the legacy spec string where the values are a
+// manufacturer list rather than a single figure (EOS P 396, see B0).
+const layerCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'layerThickness');
+  if (s) return fmtSpec(s);
+  return m.specs.find((x) => /layer/i.test(x.label))?.value ?? 'Not stated by manufacturer';
+};
+const laserCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'laserPower');
+  return s ? fmtSpec(s) : '—';
+};
+const capacityCell = (m: (typeof MACHINES)[number]) => {
+  const s = pickSpec(m.structuredSpecs, 'buildVolumeCapacity');
+  return s ? fmtSpec(s) : '—';
+};
 
 // Dataset JSON-LD, generated from the data layer so the count, measured
 // variables and keywords can never drift from the entries actually listed.
@@ -34,8 +52,10 @@ const datasetLd = {
   description="Manufacturer-verified specs for nylon printers: HP Jet Fusion 5200 (MJF), EOS P 396 and Formiga P 110, Formlabs Fuse 1+ 30W (SLS), Stratasys H350 (SAF)."
   jsonLd={datasetLd}
 >
-  <p class="crumbs"><a href="/">Home</a> / Machines</p>
-  <h1>Nylon 3D printer database</h1>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / Machines</p>
+    <h1>Nylon 3D printer database</h1>
+  </div>
   <div class="quick-answer">
     <p class="qa-label">Quick answer</p>
     <p>Professional nylon printing runs on powder-bed machines: SLS systems from EOS and Formlabs, HP's MJF platform, and Stratasys's SAF production printer. This database lists each machine's build volume, layer thickness and energy source exactly as the manufacturer states them.</p>
@@ -43,31 +63,35 @@ const datasetLd = {
 
   <p>Coverage so far: {MACHINES.length} machines. The database expands toward the full landscape of nylon-capable systems — industrial SLS, MJF and SAF platforms first, then high-temperature FDM machines — and a machine is only listed once its specification sheet has been verified against the manufacturer's own documents.</p>
 
-  <h2>At a glance</h2>
-  <table>
-    <thead>
-      <tr><th>Machine</th><th>Process</th><th>Build volume / size</th><th>Layer thickness</th></tr>
-    </thead>
-    <tbody>
-      {MACHINES.map((m) => (
+  <h2>All machines</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
         <tr>
-          <td><a href={`/machines/${m.slug}/`}>{m.name}</a></td>
-          <td>{m.process}</td>
-          <td>{m.specs.find((s) => /build/i.test(s.label))?.value ?? ''}</td>
-          <td>{m.specs.find((s) => /layer/i.test(s.label))?.value ?? 'Not stated by manufacturer'}</td>
+          <th scope="col">Machine</th>
+          <th scope="col">Manufacturer</th>
+          <th scope="col">Process</th>
+          <th scope="col" class="num-col">Build volume X × Y × Z (mm)</th>
+          <th scope="col" class="num-col">Build capacity</th>
+          <th scope="col" class="num-col">Layer thickness</th>
+          <th scope="col" class="num-col">Laser power</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
-
-  <div class="cards">
-    {MACHINES.map((m) => (
-      <a class="card" href={`/machines/${m.slug}/`}>
-        <h3>{m.name}</h3>
-        <p class="meta">{m.manufacturer} · {m.process}</p>
-        <p>{m.quickAnswer.split('.')[0]}.</p>
-      </a>
-    ))}
+      </thead>
+      <tbody>
+        {MACHINES.map((m) => (
+          <tr>
+            <td><a href={`/machines/${m.slug}/`}>{m.name}</a></td>
+            <td>{m.manufacturer}</td>
+            <td>{m.process}</td>
+            <td class="num">{buildVolumeString(m) ?? '—'}</td>
+            <td class="num">{capacityCell(m)}</td>
+            <td class="num">{layerCell(m)}</td>
+            <td class="num">{laserCell(m)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
+  <p class="muted">Build volume is the manufacturer's effective X × Y × Z figure; the full specification set, including technology and notes, is on each machine's own page. A dash means the manufacturer does not state the value in the documents this database cites.</p>
   <p class="updated">Last updated: November 2026</p>
 </Base>

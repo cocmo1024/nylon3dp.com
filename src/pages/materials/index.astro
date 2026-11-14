@@ -1,9 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MATERIALS } from '../../data/materials';
+import { pickSpec, fmtVal } from '../../lib/specs';
 
-const headline = (m: (typeof MATERIALS)[number]) =>
-  m.properties.find((p) => /tensile strength/i.test(p.label))?.value ?? '';
+// Index columns are picked from the structured data layer (B1): the
+// in-plane (XY / X-Y / X, dry) variant where a datasheet splits by
+// orientation, and the 1.8 MPa HDT where two loads are published.
+const ORIENT_PREF = ['XY', 'X-Y', 'X'];
+const cell = (m: (typeof MATERIALS)[number], key: string, opts?: Parameters<typeof pickSpec>[2]) => {
+  const s = pickSpec(m.structuredSpecs, key, opts);
+  return s ? fmtVal(s.value) : '—';
+};
 
 // Dataset JSON-LD, generated from the data layer so the count, measured
 // variables and keywords can never drift from the entries actually listed.
@@ -45,8 +52,10 @@ const datasetLd = {
   description="Datasheet-verified nylon materials: PA12, PA11, glass-filled PA12 and PA6 powders plus PA-CF and CoPA filaments from EOS, Formlabs, HP, BASF and more."
   jsonLd={datasetLd}
 >
-  <p class="crumbs"><a href="/">Home</a> / Materials</p>
-  <h1>Nylon material database</h1>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / Materials</p>
+    <h1>Nylon material database</h1>
+  </div>
   <div class="quick-answer">
     <p class="qa-label">Quick answer</p>
     <p>Every nylon grade in this database has its own page with a property table taken from the manufacturer's own datasheet — PA12 and PA11 powders for SLS and MJF, glass-filled grades for stiffness, and PA6-CF / CoPA filaments for FDM. No reseller numbers, no estimates: if the manufacturer does not publish a value, the table leaves it out.</p>
@@ -55,16 +64,41 @@ const datasetLd = {
   <p>Coverage so far: {MATERIALS.length} grades from {[...new Set(MATERIALS.map((m) => m.manufacturer))].join(', ')}. The database is expanding in stages toward the full nylon landscape — powders, filaments and pellets across all major suppliers — and each addition follows the same rule: a manufacturer datasheet, or it does not go in.</p>
 
   <h2>All materials</h2>
-  <div class="cards">
-    {MATERIALS.map((m) => (
-      <a class="card" href={`/materials/${m.slug}/`}>
-        <h3>{m.name}</h3>
-        <p class="meta">{m.manufacturer} · {m.basePolymer} · {m.form} · {m.process}</p>
-        <p>{m.quickAnswer.split('.')[0]}.</p>
-        {headline(m) && <p class="meta">Tensile strength: {headline(m)}</p>}
-      </a>
-    ))}
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Material</th>
+          <th scope="col">Manufacturer</th>
+          <th scope="col">Polymer</th>
+          <th scope="col">Form</th>
+          <th scope="col">Process</th>
+          <th scope="col" class="num-col">Tensile strength (MPa)</th>
+          <th scope="col" class="num-col">Tensile modulus (MPa)</th>
+          <th scope="col" class="num-col">Elongation at break (%)</th>
+          <th scope="col" class="num-col">HDT (°C)</th>
+          <th scope="col" class="num-col">Density (g/cm³)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {MATERIALS.map((m) => (
+          <tr>
+            <td><a href={`/materials/${m.slug}/`}>{m.name}</a></td>
+            <td>{m.manufacturer}</td>
+            <td>{m.basePolymer}</td>
+            <td>{m.form}</td>
+            <td>{m.process}</td>
+            <td class="num">{cell(m, 'tensileStrength', { orientations: ORIENT_PREF })}</td>
+            <td class="num">{cell(m, 'tensileModulus', { orientations: ORIENT_PREF })}</td>
+            <td class="num">{cell(m, 'elongationAtBreak', { orientations: ORIENT_PREF })}</td>
+            <td class="num">{cell(m, 'hdt', { noteIncludes: '1.8 MPa' })}</td>
+            <td class="num">{cell(m, 'density')}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </div>
+  <p class="muted">Key values are the in-plane (XY / X) variant where a datasheet splits by orientation, and the HDT at 1.8 MPa where two loads are published. Full property sets, all orientations and test methods are on each grade's own page.</p>
 
   <h2>How to read the tables</h2>
   <p>Powder datasheets from EOS use ISO 527 test methods and report "strain at break"; Formlabs and HP typically report ASTM methods. Cross-brand comparisons are therefore indicative rather than laboratory-controlled — each page keeps the manufacturer's own test method next to every value so you can judge comparability yourself. New to the grades themselves? Start with <a href="/guides/pa11-vs-pa12/">PA11 vs PA12</a> and the <a href="/glossary/">glossary</a>.</p>

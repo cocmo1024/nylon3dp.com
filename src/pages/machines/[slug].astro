@@ -1,7 +1,13 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Faq from '../../components/Faq.astro';
+import SpecTable from '../../components/SpecTable.astro';
+import Relations, { type RelatedLink } from '../../components/Relations.astro';
 import { MACHINES, type Machine } from '../../data/machines';
+import { MATERIALS } from '../../data/materials';
+import { VENDORS } from '../../data/vendors';
+import { PROCESSES } from '../../data/processes';
+import { machineFallbackRows } from '../../lib/specs';
 import { SITE } from '../../site';
 
 export function getStaticPaths() {
@@ -12,6 +18,15 @@ interface Props {
   machine: Machine;
 }
 const { machine: m } = Astro.props;
+
+// Relations, resolved from the data layer (B1 rendering switch).
+const vendor = VENDORS.find((v) => v.slug === m.vendorSlug)!;
+const process = PROCESSES.find((p) => p.slug === m.processSlug)!;
+const supported: RelatedLink[] = m.supportedMaterials
+  .map((slug) => MATERIALS.find((mt) => mt.slug === slug))
+  .filter((mt) => mt !== undefined)
+  .map((mt) => ({ href: `/materials/${mt.slug}/`, name: mt.name, meta: `${mt.basePolymer} · ${mt.form}` }));
+const fallbackRows = machineFallbackRows(m);
 
 const title = `${m.name} — Specs & Build Volume | Nylon3DP`;
 const description = `${m.name} by ${m.manufacturer} (${m.process}): manufacturer-verified build volume, layer thickness and technology specifications for nylon 3D printing.`;
@@ -38,22 +53,23 @@ const faqLd = {
   {m.intro.map((para) => <p>{para}</p>)}
 
   <h2>Specifications (manufacturer)</h2>
-  <table>
-    <thead>
-      <tr><th>Specification</th><th>Value</th><th>Note</th></tr>
-    </thead>
-    <tbody>
-      {m.specs.map((s) => (
-        <tr><td>{s.label}</td><td><strong>{s.value}</strong></td><td>{s.note ?? ''}</td></tr>
-      ))}
-    </tbody>
-  </table>
+  <SpecTable labelHeader="Specification" specs={m.structuredSpecs} fallback={fallbackRows} />
   <p class="muted">Specifications the manufacturer does not state in the cited documents are omitted rather than estimated — see the <a href="/editorial/">sourcing policy</a>.</p>
 
   <h2>Notes</h2>
   <ul>
     {m.notes.map((n) => <li>{n}</li>)}
   </ul>
+
+  <Relations
+    vendor={vendor}
+    process={process}
+    relatedTitle="Supported materials"
+    related={supported}
+    relatedEmptyNote="No manufacturer-stated material list is recorded for this machine in the documents cited on this page; the materials it runs are covered in the notes above."
+    relatedEmptyHref="/materials/"
+    relatedEmptyLinkLabel="Browse the material database"
+  />
 
   <Faq items={m.faqs} />
 
