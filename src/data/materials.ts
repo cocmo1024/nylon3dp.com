@@ -1,6 +1,14 @@
 // Material database. HARD RULE: every numeric value below was read from the
 // manufacturer's own datasheet/product page listed in `sources`.
 // Values a manufacturer does not publish are omitted, never estimated.
+//
+// Rebuild B0: each entry also carries relations (vendorSlug, processSlug,
+// relatedApplications) and `structuredSpecs` — the machine-readable form of
+// the legacy free-text `properties`. CONSERVATION: every structured value
+// is parsed verbatim out of the entry's own legacy property strings;
+// scripts/validate-data.mjs proves the subset relation on every verify.
+
+import type { StructuredSpec } from './types';
 
 export interface MaterialProperty {
   label: string;
@@ -17,13 +25,23 @@ export interface Material {
   slug: string;
   name: string;
   manufacturer: string;
+  /** Vendor entity slug (vendors.ts); must resolve and match `manufacturer`. */
+  vendorSlug: string;
+  /** Filler description where the manufacturer publishes one, e.g. 'Glass beads', 'Carbon fibre'. */
+  filler?: string;
   basePolymer: string;
   form: 'Powder' | 'Filament';
   process: string;
+  /** Process entity slug (processes.ts), derived from `process`. */
+  processSlug: string;
+  /** Application entity slugs (applications.ts); empty until applications are promoted. */
+  relatedApplications: string[];
   quickAnswer: string;
   intro: string[];
   processing: string[];
   properties: MaterialProperty[];
+  /** Machine-readable specs parsed verbatim from `properties` (see header). */
+  structuredSpecs: StructuredSpec[];
   applications: string[];
   faqs: { q: string; a: string }[];
   sources: MaterialSource[];
@@ -34,9 +52,12 @@ export const MATERIALS: Material[] = [
     slug: 'eos-pa-2200',
     name: 'EOS PA 2200',
     manufacturer: 'EOS',
+    vendorSlug: 'eos',
     basePolymer: 'PA12',
     form: 'Powder',
     process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'EOS PA 2200 is the reference PA12 powder for selective laser sintering: a balanced, unfilled nylon 12 with 48 MPa tensile strength (XY), 1650 MPa tensile modulus and 18% elongation at break in the XY plane, per the current EOS material data sheet.',
     intro: [
@@ -54,6 +75,15 @@ export const MATERIALS: Material[] = [
       { label: 'Elongation at break (X/Y)', value: '18%', note: 'EOS "strain at break", ISO 527-1/-2; Z: 4%' },
       { label: 'Density', value: '0.93 g/cm³', note: 'EOS method' },
       { label: 'Melting temperature', value: '176 °C', note: 'ISO 11357-1/-3' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 48, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'XY' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 42, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1650, unit: 'MPa', standard: 'ISO 527-1/-2', note: 'All orientations' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 18, unit: '%', standard: 'ISO 527-1/-2', orientation: 'XY', note: 'EOS "strain at break"' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 4, unit: '%', standard: 'ISO 527-1/-2', orientation: 'Z', note: 'EOS "strain at break"' },
+      { key: 'density', label: 'Density', value: 0.93, unit: 'g/cm³', note: 'EOS method' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 176, unit: '°C', standard: 'ISO 11357-1/-3' },
     ],
     applications: [
       'Production equipment such as grippers, jigs and fixtures',
@@ -75,9 +105,12 @@ export const MATERIALS: Material[] = [
     slug: 'eos-pa-1101',
     name: 'EOS PA 1101',
     manufacturer: 'EOS',
+    vendorSlug: 'eos',
     basePolymer: 'PA11',
     form: 'Powder',
     process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'EOS PA 1101 is a bio-based PA11 SLS powder derived from castor oil. Per the EOS data sheet it offers 50 MPa tensile strength (XY), 1650 MPa modulus and 30% elongation at break — its ductility and impact resistance, not stiffness, are the reason to choose it over PA12.',
     intro: [
@@ -95,6 +128,15 @@ export const MATERIALS: Material[] = [
       { label: 'Elongation at break (X/Y)', value: '30%', note: 'EOS "strain at break", ISO 527-1/-2; Z: 15%' },
       { label: 'Density', value: '1.03 g/cm³', note: 'ISO 1183-1' },
       { label: 'Melting temperature', value: '201 °C', note: 'ISO 11357-1/-3' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 50, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'XY' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 48, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1650, unit: 'MPa', standard: 'ISO 527-1/-2', note: 'All orientations' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 30, unit: '%', standard: 'ISO 527-1/-2', orientation: 'XY', note: 'EOS "strain at break"' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 15, unit: '%', standard: 'ISO 527-1/-2', orientation: 'Z', note: 'EOS "strain at break"' },
+      { key: 'density', label: 'Density', value: 1.03, unit: 'g/cm³', standard: 'ISO 1183-1' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 201, unit: '°C', standard: 'ISO 11357-1/-3' },
     ],
     applications: [
       'Impact-resistant housings and coverings that must not splinter',
@@ -115,9 +157,13 @@ export const MATERIALS: Material[] = [
     slug: 'eos-pa-3200-gf',
     name: 'EOS PA 3200 GF',
     manufacturer: 'EOS',
+    vendorSlug: 'eos',
+    filler: 'Glass beads',
     basePolymer: 'PA12, glass-filled',
     form: 'Powder',
     process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'EOS PA 3200 GF is a glass-bead-filled PA12 SLS powder (40 wt% glass beads per EOS). Filling raises tensile modulus to 3200 MPa — roughly double unfilled PA 2200 — with 51 MPa tensile strength and 9% elongation at break, for stiff housings and wear-resistant machine components.',
     intro: [
@@ -135,6 +181,16 @@ export const MATERIALS: Material[] = [
       { label: 'Elongation at break (X/Y)', value: '9%', note: 'EOS "strain at break", ISO 527-1/-2; Z: 5.5%' },
       { label: 'Density', value: '1.22 g/cm³', note: 'EOS method' },
       { label: 'Glass content', value: '40 wt% glass beads', note: 'Per EOS data sheet' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 51, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'XY' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 47, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 3200, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'XY' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 2500, unit: 'MPa', standard: 'ISO 527-1/-2', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 9, unit: '%', standard: 'ISO 527-1/-2', orientation: 'XY', note: 'EOS "strain at break"' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 5.5, unit: '%', standard: 'ISO 527-1/-2', orientation: 'Z', note: 'EOS "strain at break"' },
+      { key: 'density', label: 'Density', value: 1.22, unit: 'g/cm³', note: 'EOS method' },
+      { key: 'fillerContent', label: 'Glass content', value: 40, unit: 'wt%', note: 'Glass beads, per EOS data sheet' },
     ],
     applications: [
       'Machine components needing enhanced stiffness under load, e.g. housings',
@@ -154,9 +210,12 @@ export const MATERIALS: Material[] = [
     slug: 'formlabs-nylon-12-powder',
     name: 'Formlabs Nylon 12 Powder',
     manufacturer: 'Formlabs',
+    vendorSlug: 'formlabs',
     basePolymer: 'PA12',
     form: 'Powder',
     process: 'SLS (Fuse series)',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'Formlabs Nylon 12 Powder is the standard PA12 for the Fuse SLS series: 50 MPa ultimate tensile strength, 1850 MPa tensile modulus and 11% elongation at break (X/Y) per the Formlabs technical data sheet, with an HDT of 171 °C at 0.45 MPa.',
     intro: [
@@ -174,6 +233,14 @@ export const MATERIALS: Material[] = [
       { label: 'Elongation at break (X/Y)', value: '11%', note: 'ASTM D638 Type 1; Z: 6%' },
       { label: 'HDT @ 1.8 MPa', value: '87 °C', note: 'ASTM D648' },
       { label: 'HDT @ 0.45 MPa', value: '171 °C', note: 'ASTM D648' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Ultimate tensile strength', value: 50, unit: 'MPa', standard: 'ASTM D638', note: 'Type 1' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1850, unit: 'MPa', standard: 'ASTM D638', note: 'Type 1' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 11, unit: '%', standard: 'ASTM D638', orientation: 'XY', note: 'Type 1' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 6, unit: '%', standard: 'ASTM D638', orientation: 'Z', note: 'Type 1' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 87, unit: '°C', standard: 'ASTM D648', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 171, unit: '°C', standard: 'ASTM D648', note: '@ 0.45 MPa' },
     ],
     applications: [
       'Functional prototyping and end-use production of complex assemblies',
@@ -196,9 +263,12 @@ export const MATERIALS: Material[] = [
     slug: 'formlabs-nylon-11-powder',
     name: 'Formlabs Nylon 11 Powder',
     manufacturer: 'Formlabs',
+    vendorSlug: 'formlabs',
     basePolymer: 'PA11',
     form: 'Powder',
     process: 'SLS (Fuse series)',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'Formlabs Nylon 11 Powder is a bio-based PA11 for the Fuse series, built for parts that bend or take impact: 49 MPa tensile strength, 1600 MPa modulus and 40% elongation at break (X/Y) per the Formlabs technical data sheet — the most ductile powder in the Formlabs range.',
     intro: [
@@ -216,6 +286,13 @@ export const MATERIALS: Material[] = [
       { label: 'Elongation at break (X/Y)', value: '40%', note: 'ASTM D638-14 Type 1; Z not published' },
       { label: 'HDT @ 1.8 MPa', value: '46 °C', note: 'ASTM D648-16' },
       { label: 'HDT @ 0.45 MPa', value: '182 °C', note: 'ASTM D648-16' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Ultimate tensile strength', value: 49, unit: 'MPa', standard: 'ASTM D638-14', note: 'Type 1' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1600, unit: 'MPa', standard: 'ASTM D638-14', note: 'Type 1' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 40, unit: '%', standard: 'ASTM D638-14', orientation: 'XY', note: 'Type 1; Z not published' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 46, unit: '°C', standard: 'ASTM D648-16', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 182, unit: '°C', standard: 'ASTM D648-16', note: '@ 0.45 MPa' },
     ],
     applications: [
       'Impact-resistant prototypes, jigs and fixtures',
@@ -238,9 +315,12 @@ export const MATERIALS: Material[] = [
     slug: 'hp-pa-12',
     name: 'HP 3D High Reusability PA 12',
     manufacturer: 'HP',
+    vendorSlug: 'hp',
     basePolymer: 'PA12',
     form: 'Powder',
     process: 'MJF',
+    processSlug: 'mjf',
+    relatedApplications: [],
     quickAnswer:
       'HP 3D High Reusability PA 12 is the standard nylon for Multi Jet Fusion: 54 MPa tensile strength, 2150 MPa tensile modulus and 18% elongation at break in XY (10% in Z), with a density of 1.02 g/cm³, per HP\'s technical data sheet. "High Reusability" refers to HP\'s powder-refresh economics: surplus powder is recovered and reused at a set refresh ratio.',
     intro: [
@@ -257,6 +337,13 @@ export const MATERIALS: Material[] = [
       { label: 'Tensile modulus', value: '2150 MPa', note: 'Per HP data sheet; same value listed for XY and Z' },
       { label: 'Elongation at break (XY)', value: '18%', note: 'Per HP data sheet; Z: 10%' },
       { label: 'Density', value: '1.02 g/cm³', note: 'Per HP data sheet' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 54, unit: 'MPa', note: 'Per HP data sheet; same value listed for XY and Z' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 2150, unit: 'MPa', note: 'Per HP data sheet; same value listed for XY and Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 18, unit: '%', orientation: 'XY', note: 'Per HP data sheet' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 10, unit: '%', orientation: 'Z', note: 'Per HP data sheet' },
+      { key: 'density', label: 'Density', value: 1.02, unit: 'g/cm³', note: 'Per HP data sheet' },
     ],
     applications: [
       'Functional prototypes and end-use production parts',
@@ -278,9 +365,12 @@ export const MATERIALS: Material[] = [
     slug: 'basf-ultrasint-pa6',
     name: 'BASF Forward AM Ultrasint PA6',
     manufacturer: 'BASF Forward AM',
+    vendorSlug: 'basf-forward-am',
     basePolymer: 'PA6',
     form: 'Powder',
     process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'Ultrasint PA6 is BASF Forward AM\'s unfilled PA6 powder for laser sintering — the high-temperature, high-stiffness alternative to PA12 powders. Per BASF\'s TDS (v14.2): 66 MPa tensile strength and 3700 MPa modulus (X, dry), HDT of 103 °C at 1.8 MPa, and a 220 °C melting temperature — but only 2.0% elongation at break when dry.',
     intro: [
@@ -300,6 +390,19 @@ export const MATERIALS: Material[] = [
       { label: 'HDT @ 0.45 MPa', value: '192 °C', note: 'ISO 75-2 (HDT/B)' },
       { label: 'Density (printed part)', value: '1.15 g/cm³', note: 'DIN EN ISO 1183-1' },
       { label: 'Melting temperature', value: '220 °C', note: 'ISO 11357' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 66, unit: 'MPa', standard: 'ISO 527-2', orientation: 'X', note: 'Dry, at 23 °C' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 47, unit: 'MPa', standard: 'ISO 527-2', orientation: 'X', note: 'Conditioned' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 56, unit: 'MPa', standard: 'ISO 527-2', orientation: 'Z', note: 'Dry' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 3700, unit: 'MPa', standard: 'ISO 527-2', orientation: 'X', note: 'Dry, at 23 °C' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1700, unit: 'MPa', standard: 'ISO 527-2', orientation: 'X', note: 'Conditioned' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 2, unit: '%', standard: 'ISO 527-2', orientation: 'X', note: 'Dry, at 23 °C (2.0% as printed)' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 16, unit: '%', standard: 'ISO 527-2', orientation: 'X', note: 'Conditioned' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 103, unit: '°C', standard: 'ISO 75-2', note: '@ 1.8 MPa (HDT/A)' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 192, unit: '°C', standard: 'ISO 75-2', note: '@ 0.45 MPa (HDT/B)' },
+      { key: 'density', label: 'Density', value: 1.15, unit: 'g/cm³', standard: 'DIN EN ISO 1183-1', note: 'Printed part' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 220, unit: '°C', standard: 'ISO 11357' },
     ],
     applications: [
       'Engine compartment parts',
@@ -322,9 +425,13 @@ export const MATERIALS: Material[] = [
     slug: 'polymaker-polymide-pa6-cf',
     name: 'Polymaker PolyMide PA6-CF',
     manufacturer: 'Polymaker',
+    vendorSlug: 'polymaker',
+    filler: 'Carbon fibre',
     basePolymer: 'PA6, carbon-fibre filled',
     form: 'Filament',
     process: 'FDM',
+    processSlug: 'fdm',
+    relatedApplications: [],
     quickAnswer:
       'Polymaker\'s carbon-fibre PA6 filament — now sold as Fiberon PA6-CF20, the same formula — is one of the stiffest desktop nylon filaments: 109.3 MPa tensile strength and 8636 MPa Young\'s modulus in XY, HDT of 173 °C at 1.8 MPa, per Polymaker\'s current TDS. The price of that stiffness is 2.1% elongation at break and a mandatory 100 °C / 10 h dry before printing.',
     intro: [
@@ -344,6 +451,17 @@ export const MATERIALS: Material[] = [
       { label: 'Density', value: '1.17 g/cm³', note: 'ISO 1183 at 23 °C' },
       { label: 'Nozzle temperature', value: '280–300 °C', note: 'Manufacturer recommendation' },
       { label: 'Drying', value: '100 °C for 10 h', note: 'TDS recommended printing conditions' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 109.3, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 54, unit: 'MPa', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 8636, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 3760, unit: 'MPa', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 2.1, unit: '%', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 1.9, unit: '%', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 173, unit: '°C', standard: 'ISO 75', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 215, unit: '°C', standard: 'ISO 75', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.17, unit: 'g/cm³', standard: 'ISO 1183', note: 'At 23 °C' },
     ],
     applications: [
       'Structural brackets and machine components',
@@ -366,9 +484,12 @@ export const MATERIALS: Material[] = [
     slug: 'polymaker-polymide-copa',
     name: 'Polymaker PolyMide CoPA',
     manufacturer: 'Polymaker',
+    vendorSlug: 'polymaker',
     basePolymer: 'Copolyamide (PA6/66 blend)',
     form: 'Filament',
     process: 'FDM',
+    processSlug: 'fdm',
+    relatedApplications: [],
     quickAnswer:
       'PolyMide CoPA is Polymaker\'s copolyamide filament, blended for easier printing: 78.0 MPa tensile strength, 2703 MPa modulus and 12.7% elongation at break in XY per its TDS — less stiff than PA6-CF, but far more ductile, less warp-prone, and printable at 250–270 °C.',
     intro: [
@@ -388,6 +509,17 @@ export const MATERIALS: Material[] = [
       { label: 'Density', value: '1.12 g/cm³', note: 'ISO 1183 at 23 °C' },
       { label: 'Nozzle temperature', value: '250–270 °C', note: 'Manufacturer recommendation' },
       { label: 'Drying', value: '100 °C for 8 h', note: 'TDS drying setting' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 78, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 45.8, unit: 'MPa', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 2703, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 2209, unit: 'MPa', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 12.7, unit: '%', standard: 'ISO 527', orientation: 'X-Y' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 1.3, unit: '%', standard: 'ISO 527', orientation: 'Z' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 70, unit: '°C', standard: 'ISO 75', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 111, unit: '°C', standard: 'ISO 75', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.12, unit: 'g/cm³', standard: 'ISO 1183', note: 'At 23 °C' },
     ],
     applications: [
       'Functional parts needing nylon toughness without composite stiffness',
@@ -409,9 +541,13 @@ export const MATERIALS: Material[] = [
     slug: 'bambu-pa6-cf',
     name: 'Bambu Lab PA6-CF',
     manufacturer: 'Bambu Lab',
+    vendorSlug: 'bambu-lab',
+    filler: 'Carbon fibre',
     basePolymer: 'PA6, carbon-fibre filled',
     form: 'Filament',
     process: 'FDM',
+    processSlug: 'fdm',
+    relatedApplications: [],
     quickAnswer:
       'Bambu Lab PA6-CF is a carbon-fibre PA6 filament tuned for the Bambu ecosystem: 102 MPa tensile strength and 4430 MPa Young\'s modulus in XY, HDT of 164 °C at 1.8 MPa, per Bambu\'s TDS — with a gentler drying spec than most PA6-CF grades: 80 °C for 8–12 h.',
     intro: [
@@ -432,6 +568,17 @@ export const MATERIALS: Material[] = [
       { label: 'Nozzle temperature', value: '260–290 °C', note: 'Manufacturer recommendation' },
       { label: 'Drying', value: '80 °C for 8–12 h', note: 'TDS, blast drying oven' },
     ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 102, unit: 'MPa', orientation: 'X-Y' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 48, unit: 'MPa', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 4430, unit: 'MPa', orientation: 'X-Y' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 2170, unit: 'MPa', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 5.8, unit: '%', orientation: 'X-Y' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 3.7, unit: '%', orientation: 'Z' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 164, unit: '°C', standard: 'ISO 75', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 186, unit: '°C', standard: 'ISO 75', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.09, unit: 'g/cm³', standard: 'ISO 1183' },
+    ],
     applications: [
       'Structural desktop-printed components',
       'Brackets, mounts and enclosures needing heat resistance',
@@ -451,9 +598,13 @@ export const MATERIALS: Material[] = [
     slug: 'bambu-paht-cf',
     name: 'Bambu Lab PAHT-CF',
     manufacturer: 'Bambu Lab',
+    vendorSlug: 'bambu-lab',
+    filler: 'Carbon fibre',
     basePolymer: 'High-temperature PA, carbon-fibre filled',
     form: 'Filament',
     process: 'FDM',
+    processSlug: 'fdm',
+    relatedApplications: [],
     quickAnswer:
       'Bambu Lab PAHT-CF is a carbon-fibre-filled high-temperature polyamide filament: 92 MPa tensile strength, 3860 MPa modulus and 8.4% elongation at break in XY per Bambu\'s TDS, with the highest HDT of the filaments listed here at 170 °C under 1.8 MPa load — and more ductility than PA6-CF grades.',
     intro: [
@@ -473,6 +624,17 @@ export const MATERIALS: Material[] = [
       { label: 'Density', value: '1.06 g/cm³', note: 'ISO 1183' },
       { label: 'Nozzle temperature', value: '260–290 °C', note: 'Manufacturer recommendation' },
       { label: 'Drying', value: '80 °C for 8–12 h', note: 'TDS, blast drying oven' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 92, unit: 'MPa', orientation: 'X-Y' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 47, unit: 'MPa', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 3860, unit: 'MPa', orientation: 'X-Y' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 2180, unit: 'MPa', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 8.4, unit: '%', orientation: 'X-Y' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 4.1, unit: '%', orientation: 'Z' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 170, unit: '°C', standard: 'ISO 75', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 194, unit: '°C', standard: 'ISO 75', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.06, unit: 'g/cm³', standard: 'ISO 1183' },
     ],
     applications: [
       'Hot-environment covers, ducts and housings',
@@ -494,9 +656,13 @@ export const MATERIALS: Material[] = [
     slug: 'formlabs-nylon-12-gf-powder',
     name: 'Formlabs Nylon 12 GF Powder',
     manufacturer: 'Formlabs',
+    vendorSlug: 'formlabs',
+    filler: 'Glass (form not specified by Formlabs)',
     basePolymer: 'PA12, glass-filled',
     form: 'Powder',
     process: 'SLS (Fuse series)',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'Formlabs Nylon 12 GF Powder is the glass-filled PA12 for the Fuse SLS series: glass filler raises tensile modulus to 2800 MPa (from 1850 MPa for unfilled Nylon 12 Powder) and HDT at 1.8 MPa to 113 °C, per Formlabs — at the cost of tensile strength (38 MPa) and elongation at break (4% in X/Y). It is the Fuse material for stiff parts that must hold their shape under sustained load and heat.',
     intro: [
@@ -516,6 +682,16 @@ export const MATERIALS: Material[] = [
       { label: 'Notched Izod impact strength', value: '36 J/m', note: 'ASTM D256-10' },
       { label: 'HDT @ 1.8 MPa', value: '113 °C', note: 'ASTM D648-16' },
       { label: 'HDT @ 0.45 MPa', value: '170 °C', note: 'ASTM D648-16' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Ultimate tensile strength', value: 38, unit: 'MPa', standard: 'ASTM D638-14', note: 'Type 1' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 2800, unit: 'MPa', standard: 'ASTM D638-14', note: 'Type 1' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 4, unit: '%', standard: 'ASTM D638-14', orientation: 'XY', note: 'Type 1' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 3, unit: '%', standard: 'ASTM D638-14', orientation: 'Z', note: 'Type 1' },
+      { key: 'flexuralModulus', label: 'Flexural modulus', value: 2400, unit: 'MPa', standard: 'ASTM D790-15' },
+      { key: 'impactStrength', label: 'Notched Izod impact strength', value: 36, unit: 'J/m', standard: 'ASTM D256-10' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 113, unit: '°C', standard: 'ASTM D648-16', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 170, unit: '°C', standard: 'ASTM D648-16', note: '@ 0.45 MPa' },
     ],
     applications: [
       'Stiff structural components that must not flex',
@@ -537,9 +713,13 @@ export const MATERIALS: Material[] = [
     slug: 'polymaker-polymide-pa12-cf',
     name: 'Polymaker PolyMide PA12-CF',
     manufacturer: 'Polymaker',
+    vendorSlug: 'polymaker',
+    filler: 'Carbon fibre',
     basePolymer: 'PA12, carbon-fibre filled',
     form: 'Filament',
     process: 'FDM',
+    processSlug: 'fdm',
+    relatedApplications: [],
     quickAnswer:
       'Polymaker PolyMide PA12-CF is a carbon-fibre-filled PA12 filament built around moisture stability: 77.4 MPa tensile strength and 3311 MPa Young\'s modulus in XY (dry), an HDT of 105 °C at 1.8 MPa and only ~1.5% equilibrium water absorption, per Polymaker\'s TDS (v5.4). Where PA6-CF grades are stiffer but thirstier, PA12-CF keeps its properties in humid service — note that the datasheet\'s dry figures are measured on annealed specimens.',
     intro: [
@@ -561,6 +741,19 @@ export const MATERIALS: Material[] = [
       { label: 'Nozzle temperature', value: '260–300 °C', note: 'Manufacturer recommendation' },
       { label: 'Drying', value: '100 °C for 8 h', note: 'TDS drying setting' },
     ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 77.4, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y', note: 'Dry (annealed specimens)' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 52.2, unit: 'MPa', standard: 'ISO 527', orientation: 'Z', note: 'Dry' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 71.7, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y', note: 'Wet' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 3311, unit: 'MPa', standard: 'ISO 527', orientation: 'X-Y', note: 'Dry' },
+      { key: 'tensileModulus', label: 'Young\'s modulus', value: 1807, unit: 'MPa', standard: 'ISO 527', orientation: 'Z', note: 'Dry' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 4.2, unit: '%', standard: 'ISO 527', orientation: 'X-Y', note: 'Dry' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 5, unit: '%', standard: 'ISO 527', orientation: 'Z', note: 'Dry (5.0% as printed)' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 105, unit: '°C', standard: 'ISO 75', note: '@ 1.8 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 131, unit: '°C', standard: 'ISO 75', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.06, unit: 'g/cm³', standard: 'ISO 1183', note: 'At 23 °C' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 171, unit: '°C', note: 'DSC, 10 °C/min' },
+    ],
     applications: [
       'Manufacturing tools — Polymaker\'s stated design use for this grade',
       'Jigs and fixtures that work in humid environments',
@@ -581,9 +774,12 @@ export const MATERIALS: Material[] = [
     slug: 'arkema-rilsan-invent-pa11',
     name: 'Arkema Rilsan Invent PA11',
     manufacturer: 'Arkema',
+    vendorSlug: 'arkema',
     basePolymer: 'PA11',
     form: 'Powder',
     process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
     quickAnswer:
       'Arkema Rilsan Invent PA11 (data sheet grade designation: Rilsan® PA11 Invent Nat) is a 100% bio-based PA11 powder for laser sintering, polymerised from castor oil. Per Arkema\'s technical data sheet it offers 45 MPa tensile strength at break, 1500 MPa tensile modulus and 45% strain at break — the ductility figure, far above any PA12 powder, is the reason this grade exists.',
     intro: [
@@ -608,6 +804,21 @@ export const MATERIALS: Material[] = [
       { label: 'Particle size, median (D50)', value: '46 µm', note: 'ISO 13320; D10: 19 µm, D90: 89 µm' },
       { label: 'Apparent density (bulk)', value: '0.49 g/cm³', note: 'ISO 1068; tapped: 0.62 g/cm³' },
       { label: 'Bio-based carbon content', value: '100%', note: 'ASTM D6866' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength at break', value: 45, unit: 'MPa', standard: 'ISO 527-1/-2', note: 'Arkema "stress at break", dry, 23 °C' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 1500, unit: 'MPa', standard: 'ISO 527-1/-2', note: 'Dry, 23 °C' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 45, unit: '%', standard: 'ISO 527-1/-2', note: 'Arkema "strain at break", dry, 23 °C' },
+      { key: 'flexuralModulus', label: 'Flexural modulus', value: 1200, unit: 'MPa', standard: 'ISO 178', note: '23 °C' },
+      { key: 'hardness', label: 'Hardness', value: 77, unit: 'Shore D', standard: 'ISO 868', note: '23 °C' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 44, unit: '°C', standard: 'ISO 75-1/-2', note: '@ 1.8 MPa' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 201, unit: '°C', standard: 'ISO 11357-3', note: 'ISO 11357-3 per Arkema PBF brochure; TDS states 20 °C/min' },
+      { key: 'particleSizeD50', label: 'Particle size, median (D50)', value: 46, unit: 'µm', standard: 'ISO 13320' },
+      { key: 'particleSizeD10', label: 'Particle size (D10)', value: 19, unit: 'µm', standard: 'ISO 13320' },
+      { key: 'particleSizeD90', label: 'Particle size (D90)', value: 89, unit: 'µm', standard: 'ISO 13320' },
+      { key: 'apparentDensity', label: 'Apparent density', value: 0.49, unit: 'g/cm³', standard: 'ISO 1068', note: 'Bulk' },
+      { key: 'apparentDensity', label: 'Apparent density', value: 0.62, unit: 'g/cm³', standard: 'ISO 1068', note: 'Tapped' },
+      { key: 'bioBasedCarbonContent', label: 'Bio-based carbon content', value: 100, unit: '%', standard: 'ASTM D6866' },
     ],
     applications: [
       'Automotive interior parts, including crash-relevant components (Arkema case studies)',

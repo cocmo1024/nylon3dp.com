@@ -1,6 +1,14 @@
 // Machine database. HARD RULE: every spec below was read from the
 // manufacturer's own specification page/datasheet listed in `sources`.
 // Specs a manufacturer does not state are omitted, never estimated.
+//
+// Rebuild B0: each entry also carries relations (vendorSlug, processSlug,
+// supportedMaterials) and `structuredSpecs` — the machine-readable form of
+// the legacy free-text `specs`. CONSERVATION: every structured value is
+// parsed verbatim out of the entry's own legacy spec strings;
+// scripts/validate-data.mjs proves the subset relation on every verify.
+
+import type { StructuredSpec } from './types';
 
 export interface MachineSpec {
   label: string;
@@ -12,10 +20,18 @@ export interface Machine {
   slug: string;
   name: string;
   manufacturer: string;
+  /** Vendor entity slug (vendors.ts); must resolve and match `manufacturer`. */
+  vendorSlug: string;
   process: string;
+  /** Process entity slug (processes.ts), derived from `process`. */
+  processSlug: string;
+  /** Material slugs (materials.ts) the manufacturer states for this machine; empty where no verified list exists. */
+  supportedMaterials: string[];
   quickAnswer: string;
   intro: string[];
   specs: MachineSpec[];
+  /** Machine-readable specs parsed verbatim from `specs` (see header). */
+  structuredSpecs: StructuredSpec[];
   notes: string[];
   faqs: { q: string; a: string }[];
   sources: { label: string; url: string }[];
@@ -26,7 +42,10 @@ export const MACHINES: Machine[] = [
     slug: 'hp-jet-fusion-5200',
     name: 'HP Jet Fusion 5200',
     manufacturer: 'HP',
+    vendorSlug: 'hp',
     process: 'MJF',
+    processSlug: 'mjf',
+    supportedMaterials: ['hp-pa-12'],
     quickAnswer:
       'The HP Jet Fusion 5200 is HP\'s production MJF printer: an effective build volume of 380 × 284 × 380 mm and a 0.08 mm layer thickness, printing HP\'s High Reusability nylon powders including PA 12.',
     intro: [
@@ -37,6 +56,12 @@ export const MACHINES: Machine[] = [
       { label: 'Technology', value: 'HP Multi Jet Fusion' },
       { label: 'Effective build volume', value: '380 × 284 × 380 mm', note: '15 × 11.2 × 15 in, per HP' },
       { label: 'Layer thickness', value: '0.08 mm', note: 'Per HP 5200 series specification' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 380, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 284, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 380, unit: 'mm' },
+      { key: 'layerThickness', label: 'Layer thickness', value: 0.08, unit: 'mm', note: 'Per HP 5200 series specification' },
     ],
     notes: [
       'MJF has no laser; layer time is independent of layer content because whole layers are fused in fixed passes.',
@@ -55,7 +80,10 @@ export const MACHINES: Machine[] = [
     slug: 'eos-formiga-p-110',
     name: 'EOS Formiga P 110 Velocis',
     manufacturer: 'EOS',
+    vendorSlug: 'eos',
     process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: ['eos-pa-2200', 'eos-pa-1101', 'eos-pa-3200-gf'],
     quickAnswer:
       'The EOS Formiga P 110 Velocis is EOS\'s compact SLS printer: a 200 × 250 × 330 mm build volume and a 30 W CO₂ laser, per the current EOS system data sheet — the entry point to the EOS polymer platform that runs PA 2200, PA 1101 and PA 3200 GF.',
     intro: [
@@ -66,6 +94,12 @@ export const MACHINES: Machine[] = [
       { label: 'Technology', value: 'SLS (polymer powder-bed fusion)' },
       { label: 'Build volume', value: '200 × 250 × 330 mm', note: '7.9 × 9.8 × 13.0 in, per EOS SDS' },
       { label: 'Laser', value: 'CO₂, 1 × 30 W', note: 'Per EOS system data sheet' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 200, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 250, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 330, unit: 'mm' },
+      { key: 'laserPower', label: 'Laser power', value: 30, unit: 'W', note: 'CO₂, 1 × laser, per EOS system data sheet' },
     ],
     notes: [
       'EOS does not state a layer-thickness figure in the current P 110 Velocis system data sheet, so none is listed here.',
@@ -84,7 +118,10 @@ export const MACHINES: Machine[] = [
     slug: 'formlabs-fuse-1-plus-30w',
     name: 'Formlabs Fuse 1+ 30W',
     manufacturer: 'Formlabs',
+    vendorSlug: 'formlabs',
     process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: ['formlabs-nylon-12-powder', 'formlabs-nylon-11-powder', 'formlabs-nylon-12-gf-powder'],
     quickAnswer:
       'The Formlabs Fuse 1+ 30W is a compact benchtop-class SLS printer: 165 × 165 × 300 mm build volume, 110 µm layer thickness and a 30 W ytterbium fibre laser, per Formlabs — running Nylon 12 and Nylon 11 powders.',
     intro: [
@@ -96,6 +133,14 @@ export const MACHINES: Machine[] = [
       { label: 'Build volume', value: '165 × 165 × 300 mm', note: '6.5 × 6.5 × 11.8 in, per Formlabs' },
       { label: 'Layer thickness', value: '110 µm', note: 'Single specified value, per Formlabs' },
       { label: 'Laser', value: 'Ytterbium fibre, max 30 W, 1065 nm', note: 'Class 1 laser product per EN 60825-1:2014' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 165, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 165, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 300, unit: 'mm' },
+      { key: 'layerThickness', label: 'Layer thickness', value: 110, unit: 'µm', note: 'Single specified value, per Formlabs' },
+      { key: 'laserPower', label: 'Laser power', value: 30, unit: 'W', note: 'Ytterbium fibre, max' },
+      { key: 'laserWavelength', label: 'Laser wavelength', value: 1065, unit: 'nm', note: 'Ytterbium fibre laser' },
     ],
     notes: [
       'Formlabs specifies a single layer thickness (110 µm) rather than a range.',
@@ -114,7 +159,10 @@ export const MACHINES: Machine[] = [
     slug: 'stratasys-h350',
     name: 'Stratasys H350',
     manufacturer: 'Stratasys',
+    vendorSlug: 'stratasys',
     process: 'SAF',
+    processSlug: 'saf',
+    supportedMaterials: [],
     quickAnswer:
       'The Stratasys H350 is a production powder-bed printer using SAF (Selective Absorption Fusion) technology: an effective build size of 315 × 208 × 293 mm (19.2 L) and 100 µm layers, per Stratasys — aimed at consistent, volume manufacturing of polymer parts.',
     intro: [
@@ -126,6 +174,13 @@ export const MACHINES: Machine[] = [
       { label: 'Effective build size', value: '315 × 208 × 293 mm', note: '12.40 × 8.18 × 11.53 in, per Stratasys' },
       { label: 'Effective build volume', value: '19.2 L', note: '5.07 gallon, per Stratasys' },
       { label: 'Layer thickness', value: '100 µm', note: '0.004 in, per Stratasys' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build size (X)', value: 315, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build size (Y)', value: 208, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build size (Z)', value: 293, unit: 'mm' },
+      { key: 'buildVolumeCapacity', label: 'Effective build volume', value: 19.2, unit: 'L', note: 'Per Stratasys' },
+      { key: 'layerThickness', label: 'Layer thickness', value: 100, unit: 'µm', note: 'Per Stratasys' },
     ],
     notes: [
       'SAF uses an infrared-absorbing fluid and flood exposure, so there is no laser specification to list.',
@@ -143,7 +198,10 @@ export const MACHINES: Machine[] = [
     slug: 'eos-p-396',
     name: 'EOS P 396',
     manufacturer: 'EOS',
+    vendorSlug: 'eos',
     process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: ['eos-pa-2200', 'eos-pa-1101', 'eos-pa-3200-gf'],
     quickAnswer:
       'The EOS P 396 is EOS\'s medium-format production SLS printer: a 340 × 340 × 600 mm build volume, a 70 W CO₂ laser and five material-dependent layer thicknesses from 0.06 to 0.18 mm, per the EOS system data sheet — the scale-up platform for serial nylon production on PA 2200, PA 1101 and PA 3200 GF.',
     intro: [
@@ -155,6 +213,12 @@ export const MACHINES: Machine[] = [
       { label: 'Build volume', value: '340 × 340 × 600 mm', note: '13.4 × 13.4 × 23.6 in, per EOS SDS' },
       { label: 'Layer thickness', value: '0.06 / 0.10 / 0.12 / 0.15 / 0.18 mm', note: 'Availability depending on material, per EOS SDS' },
       { label: 'Laser', value: 'CO₂, 1 × 70 W', note: 'Per EOS system data sheet' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 340, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 340, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 600, unit: 'mm' },
+      { key: 'laserPower', label: 'Laser power', value: 70, unit: 'W', note: 'CO₂, 1 × laser, per EOS system data sheet' },
     ],
     notes: [
       'EOS states 14 materials with 26 parameter sets for the current P 396 configuration; layer thickness is selected per material parameter set, not freely.',
