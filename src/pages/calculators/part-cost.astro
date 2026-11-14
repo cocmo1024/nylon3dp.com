@@ -1,0 +1,165 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+import { POWDER_GRADES } from '../../lib/calc';
+
+// Part cost estimator (rebuild batch B4). v1 scope is powder
+// economics only — the page says so, twice. The grade dropdown and
+// the density pre-fills are generated from the materials data layer
+// (lib/calc.ts reads structuredSpecs); there is deliberately NO price
+// default anywhere: the database cites datasheets, not prices.
+const payload = {
+  grades: POWDER_GRADES.map((g) => ({
+    slug: g.slug,
+    name: g.name,
+    density: g.density,
+    publishedRefresh: g.publishedRefresh,
+  })),
+};
+const first = POWDER_GRADES[0];
+
+const faq = [
+  { q: 'Why is there no powder price in the tool?', a: 'Because this site does not publish prices. Every number in the material database comes from a manufacturer datasheet, and datasheets do not fix a market price — the same grade costs different amounts per kilogram depending on supplier, region and volume. Inventing a “typical” price would break the rule the database runs on, so the tool asks for the price you actually pay and labels every result as your estimate.' },
+  { q: 'Why an allowance instead of the refresh ratio?', a: 'Because virgin consumption per part depends on how much of each build is actually parts. In steady state, virgin powder bought per build equals the refresh ratio times the whole charge, while only the fused fraction becomes parts — so the allowance implied by a ratio R at a packing fraction p (fused mass ÷ charge mass) is w = R ÷ p − 1. Real powder builds are mostly unfused powder, so production allowances are often several hundred percent: the refresh calculator’s worked example (50% ratio, 2 kg of parts in a 36 kg charge) implies w = 800%. If you do not know your packing fraction, your build records — virgin powder bought per kilogram of finished parts — give w directly.' },
+  { q: 'Does the estimate include machine time?', a: 'No. This v1 tool covers material cost only: powder in the part, plus the refresh allowance. Machine time, labour, post-processing, support removal (for filament), failed builds and overheads are real costs that vary too much by machine and workshop to model honestly here — the estimator states its scope rather than hiding a guess inside a total.' },
+  { q: 'Why is the density blank for some grades?', a: 'The pre-filled densities are the printed-part densities from the manufacturers’ datasheets, held in this site’s database. For a few grades those documents do not publish a printed-part density, so the field is left for you to fill from your own datasheet copy. Bulk or apparent powder density is never substituted: it measures how powder packs in a container, not the density of a fused part, and using it would understate part mass by roughly half.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="Nylon Part Cost Estimator — Powder Cost per Part | Nylon3DP"
+  description="Estimate the powder cost of an SLS or MJF nylon part: solid volume × the grade’s datasheet density, plus your refresh allowance and your own powder price."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/calculators/">Calculators</a> / Part cost estimator</p>
+  <h1>Nylon part cost estimator</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Pick a powder grade — its datasheet density is pre-filled from the <a href="/materials/">material database</a> — enter the part’s solid volume and the powder price <em>you</em> pay, and the estimator returns material cost per part: <strong>cost = volume × density × (1 + allowance) × price</strong>. Scope: powder economics only, no machine time — and no stored data, the inputs live in the page URL.</p>
+  </div>
+
+  <h2>The formula, with every variable named</h2>
+  <div class="formula">
+    <p>m = V × ρ　　(powder fused into one part)</p>
+    <p>m<sub>virgin</sub> = m × (1 + w)　　(add the refresh &amp; ageing allowance)</p>
+    <p>cost per part = m<sub>virgin</sub> × price ÷ 1000　　(m in grams, price per kilogram)</p>
+  </div>
+  <table>
+    <thead><tr><th>Symbol</th><th>Meaning</th><th>Where it comes from</th></tr></thead>
+    <tbody>
+      <tr><td class="num">V</td><td>Part solid volume, cm³</td><td>Your CAD model, or a bounding box × the share of it that is solid</td></tr>
+      <tr><td class="num">ρ</td><td>Printed-part density, g/cm³</td><td>The manufacturer datasheet, via this site’s database — pre-filled where the database holds it</td></tr>
+      <tr><td class="num">w</td><td>Refresh &amp; ageing allowance, %</td><td>Yours: the extra virgin powder each part drags with it because unfused powder ages out at the refresh ratio — see the FAQ for how it follows from the ratio and your packing</td></tr>
+      <tr><td class="num">price</td><td>Powder price per kilogram, in your currency</td><td>Your invoice. This site publishes no prices, so there is no default</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Estimator</h2>
+  <div data-calc-cost>
+    <form class="calc-form" data-calc-form method="get" action="/calculators/part-cost/">
+      <fieldset class="calc-group">
+        <legend>1 · Material</legend>
+        <div class="calc-grid">
+          <div class="filter-field">
+            <label for="pc-grade">Powder grade (from the material database)</label>
+            <select id="pc-grade" name="grade">
+              {POWDER_GRADES.map((g) => (
+                <option value={g.slug}>{g.name} — {g.manufacturer}, {g.process}</option>
+              ))}
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="pc-density">Printed-part density ρ (g/cm³)</label>
+            <input id="pc-density" name="density" type="number" step="any" min="0" value={first.density?.value ?? ''} />
+          </div>
+        </div>
+        <p class="calc-hint" data-density-note>{first.density ? `Density pre-filled from the grade’s datasheet value in our database (${first.density.value} ${first.density.unit}${first.density.basis ? `, ${first.density.basis}` : ''}). You can overwrite it.` : ''}</p>
+        <p class="calc-hint" data-grade-note></p>
+      </fieldset>
+      <fieldset class="calc-group">
+        <legend>2 · Part volume</legend>
+        <label class="calc-radio"><input type="radio" name="vmode" value="direct" checked /> I know the solid volume (from CAD)</label>
+        <label class="calc-radio"><input type="radio" name="vmode" value="dims" /> From a bounding box</label>
+        <div class="calc-grid" data-group-vol-direct>
+          <div class="filter-field">
+            <label for="pc-volume">Solid volume V (cm³)</label>
+            <input id="pc-volume" name="volume" type="number" step="any" min="0" value="24" />
+          </div>
+        </div>
+        <div class="calc-grid" data-group-vol-dims>
+          <div class="filter-field">
+            <label for="pc-l">Length (mm)</label>
+            <input id="pc-l" name="dimL" type="number" step="any" min="0" value="100" />
+          </div>
+          <div class="filter-field">
+            <label for="pc-w">Width (mm)</label>
+            <input id="pc-w" name="dimW" type="number" step="any" min="0" value="60" />
+          </div>
+          <div class="filter-field">
+            <label for="pc-h">Height (mm)</label>
+            <input id="pc-h" name="dimH" type="number" step="any" min="0" value="40" />
+          </div>
+          <div class="filter-field">
+            <label for="pc-solid">Solid share of the box (%)</label>
+            <input id="pc-solid" name="solid" type="number" step="any" min="0" max="100" value="100" />
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="calc-group">
+        <legend>3 · Your powder economics</legend>
+        <div class="calc-grid">
+          <div class="filter-field">
+            <label for="pc-allowance">Refresh &amp; ageing allowance w (%)</label>
+            <input id="pc-allowance" name="allowance" type="number" step="any" min="0" value="0" />
+          </div>
+          <div class="filter-field">
+            <label for="pc-price">Your powder price (per kg, your currency)</label>
+            <input id="pc-price" name="price" type="number" step="any" min="0" placeholder="Your price per kg" />
+          </div>
+          <div class="filter-field">
+            <label for="pc-count">Parts per build</label>
+            <input id="pc-count" name="count" type="number" step="1" min="1" value="1" />
+          </div>
+        </div>
+        <p class="calc-hint">Allowance 0% prices only the powder that ends up in the part. Production allowances are usually far higher — the FAQ below derives the allowance from your refresh ratio and packing. The price field is intentionally empty: this site publishes no powder prices.</p>
+      </fieldset>
+      <button type="submit" class="btn">Estimate cost</button>
+      <div data-errors aria-live="polite"></div>
+    </form>
+    <div data-results aria-live="polite">
+      <p class="compare-status">The estimate appears here. With JavaScript enabled it updates as you type; the worked example below shows a complete run.</p>
+    </div>
+    <script type="application/json" data-calc-data set:html={JSON.stringify(payload)} />
+  </div>
+
+  <h2>Worked example</h2>
+  <p>A mounting bracket in <a href="/materials/eos-pa-2200/">EOS PA 2200</a>: solid volume 24 cm³ from CAD, datasheet density 0.93 g/cm³ (pre-filled by the tool). For this walkthrough an allowance of 25% and a price of 90 per kilogram are typed in as example inputs — the allowance is an illustrative figure, not a production recommendation (see the FAQ), and the price is an example only: this site publishes no powder prices.</p>
+  <table class="spec-table">
+    <tbody>
+      <tr><th scope="row">Fused powder per part</th><td><span class="num spec-val">22.3 g</span><span class="cmp-sub">m = V × ρ = 24 × 0.93 = 22.32 g, shown rounded</span></td></tr>
+      <tr><th scope="row">Virgin powder per part</th><td><span class="num spec-val">27.9 g</span><span class="cmp-sub">22.32 × (1 + 25%)</span></td></tr>
+      <tr><th scope="row">Material cost per part</th><td><span class="num spec-val">2.51</span><span class="cmp-sub">27.9 g × 90 ÷ 1000 = 2.511, in the currency of the example price</span></td></tr>
+      <tr><th scope="row">Build of 20 parts</th><td><span class="num spec-val">558 g · 50.22</span><span class="cmp-sub">Virgin powder and material cost for the full build</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Scope and assumptions, stated</h2>
+  <ul>
+    <li><strong>Estimates only — your powder price, your machine.</strong> The result is a material-cost estimate built from the price and allowance you enter and the density in the manufacturer’s datasheet; it is not a quote and not a prediction of your total part cost.</li>
+    <li><strong>Material only.</strong> No machine time, labour, post-processing, failed builds or overheads — v1 of this tool prices powder, and says so rather than dressing a guess up as a total.</li>
+    <li><strong>Solid volume.</strong> The volume must be the part’s actual solid volume (or box × solid share). Hollow or lattice parts priced from their bounding box alone will be overstated.</li>
+    <li><strong>Nothing is stored or sent:</strong> the calculation runs in your browser; inputs are mirrored into the page URL so an estimate can be bookmarked or shared. For the powder-side planning that feeds the allowance, see the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a>.</li>
+  </ul>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+  <script>
+    import '../../lib/cost-client';
+  </script>
+</Base>

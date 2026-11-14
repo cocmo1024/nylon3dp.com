@@ -1,0 +1,140 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+import { DEFAULT_REFRESH } from '../../lib/calc';
+
+// Powder refresh-ratio calculator (rebuild batch B4). The definition
+// and formulas below are the ones this site already publishes — the
+// glossary entry for "Refresh ratio" and the usage on the material
+// pages (a ratio stated as the virgin share of the blend). The island
+// in lib/refresh-client.ts implements exactly these formulas; the
+// worked example is a complete run with the form's starting inputs,
+// so the printed result can be checked against the tool by hand.
+const faq = [
+  { q: 'What is a good refresh ratio?', a: 'There is no universal value — the material manufacturer specifies the ratio for each grade, and the calculator takes that figure as an input. The ratios published in this site’s database are 50% (Formlabs’ standard rate for Nylon 12 GF Powder, with up to 70% allowed when troubleshooting defects) and typically 50% (Arkema’s stated refreshing factor for Rilsan Invent PA11). Running below the specified ratio saves virgin powder but concentrates thermally aged powder, which manufacturer guidance links to surface defects and drifting mechanical properties.' },
+  { q: 'Why does surplus aged powder build up?', a: 'Because a build returns more unfused powder than the next build can take. At a 50% refresh ratio, a 36 kg charge returns 34 kg of unfused powder after 2 kg of parts, but the next 36 kg charge only has room for 18 kg of used powder — the other 16 kg is surplus, and in steady state it is discarded. That is why virgin powder bought per build (18 kg in the example) is far more than the powder that ends up in parts (2 kg).' },
+  { q: 'Does this apply to MJF and SAF as well as SLS?', a: 'Yes. All three are powder-bed processes with the same refresh economics: unfused powder is recovered and blended with virgin powder at the manufacturer-specified ratio. HP markets its MJF PA 12 as “High Reusability” on exactly this basis; the ratio HP specifies is the number to enter here.' },
+  { q: 'What if my next build is a different size?', a: 'The virgin/used split for one charge (the first block of results) holds for any build: it only needs the recovered powder you have and the ratio you target. The leftover and surplus rows assume the next build is identical to this one — same charge, same fused part mass — because surplus only exists relative to a next build. For a differently sized next build, run the calculator again with that build’s numbers.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+
+<Base
+  title="Powder Refresh Ratio Calculator (SLS & MJF) | Nylon3DP"
+  description="Refresh ratio calculator for SLS and MJF nylon powder: virgin powder needed per build, the effective ratio of a mix, and surplus aged powder per build."
+  jsonLd={faqLd}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/calculators/">Calculators</a> / Powder refresh ratio</p>
+  <h1>Powder refresh ratio calculator</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Enter the powder you recovered from your last build and the refresh ratio your material manufacturer specifies, and the calculator returns the virgin powder to add, the total charge, and the surplus aged powder each build leaves behind. In target mode: <strong>virgin = used × R ÷ (100 − R)</strong>. The form starts with the worked example’s inputs, so the first result can be checked against the hand-worked example below.</p>
+  </div>
+
+  <h2>The definition and the formulas</h2>
+  <p>This site’s <a href="/glossary/#refresh-ratio">glossary</a> defines the term, and the calculator implements that definition exactly:</p>
+  <div class="note">
+    <p>“In powder-bed fusion, the proportion of new (“virgin”) powder that must be mixed with powder recovered from previous builds to keep part quality consistent. Powder that has been through a build ages thermally, so manufacturers specify a refresh ratio for each material; the rest of the used powder can be reused, which is a major factor in powder process economics.”</p>
+  </div>
+  <p>The ratio is the virgin share of the whole charge — the same reading the material pages use when they state, for example, that Formlabs specifies “a standard refresh rate of 50% virgin powder” for <a href="/materials/formlabs-nylon-12-gf-powder/">Nylon 12 GF Powder</a>. With the variables named:</p>
+  <div class="formula">
+    <p>R = V ÷ T × 100%　　T = U + V</p>
+    <p>Plan to a target ratio:　V = U × R ÷ (100 − R)</p>
+    <p>Check a mix you made:　R = V ÷ (U + V) × 100%</p>
+  </div>
+  <table>
+    <thead><tr><th>Symbol</th><th>Meaning</th><th>Where it comes from</th></tr></thead>
+    <tbody>
+      <tr><td class="num">U</td><td>Used (recovered) powder available for the charge, kg</td><td>Your powder stock: cake mass minus fused part mass, or entered directly</td></tr>
+      <tr><td class="num">V</td><td>Virgin powder in the charge, kg</td><td>Computed in target mode; entered in check mode</td></tr>
+      <tr><td class="num">T</td><td>Total powder charge for the build, kg</td><td>U + V</td></tr>
+      <tr><td class="num">R</td><td>Refresh ratio — virgin share of the charge, %</td><td>Specified by the material manufacturer for each grade</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Calculator</h2>
+  <div data-calc-refresh>
+    <form class="calc-form" data-calc-form method="get" action="/calculators/powder-refresh-ratio/">
+      <fieldset class="calc-group">
+        <legend>1 · What do you want to work out?</legend>
+        <label class="calc-radio"><input type="radio" name="mode" value="target" checked /> Plan a build — I have a target refresh ratio</label>
+        <label class="calc-radio"><input type="radio" name="mode" value="actual" /> Check a mix — I know how much virgin powder I added</label>
+      </fieldset>
+      <fieldset class="calc-group">
+        <legend>2 · Powder recovered from the last build</legend>
+        <label class="calc-radio"><input type="radio" name="stock" value="cake" checked /> From cake and parts (weigh both)</label>
+        <label class="calc-radio"><input type="radio" name="stock" value="direct" /> I know my recovered used powder directly</label>
+        <div class="calc-grid" data-group-stock-cake>
+          <div class="filter-field">
+            <label for="rr-cake">Cake mass (kg)</label>
+            <input id="rr-cake" name="cake" type="number" step="any" min="0" value="20" />
+          </div>
+          <div class="filter-field">
+            <label for="rr-parts">Fused part mass (kg)</label>
+            <input id="rr-parts" name="parts" type="number" step="any" min="0" value="2" />
+          </div>
+        </div>
+        <div class="calc-grid" data-group-stock-direct>
+          <div class="filter-field">
+            <label for="rr-used">Recovered used powder (kg)</label>
+            <input id="rr-used" name="used" type="number" step="any" min="0" value="18" />
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="calc-group">
+        <legend>3 · The mix</legend>
+        <div class="calc-grid" data-group-mode-target>
+          <div class="filter-field">
+            <label for="rr-ratio">Target refresh ratio (%)</label>
+            <input id="rr-ratio" name="ratio" type="number" step="any" min="0" max="100" value={DEFAULT_REFRESH.ratio} />
+          </div>
+          <p class="calc-hint">{DEFAULT_REFRESH.provenance}</p>
+        </div>
+        <div class="calc-grid" data-group-mode-actual>
+          <div class="filter-field">
+            <label for="rr-virgin">Virgin powder added (kg)</label>
+            <input id="rr-virgin" name="virgin" type="number" step="any" min="0" value="9" />
+          </div>
+        </div>
+      </fieldset>
+      <button type="submit" class="btn">Calculate</button>
+      <div data-errors aria-live="polite"></div>
+    </form>
+    <div data-results aria-live="polite">
+      <p class="compare-status">Results appear here. With JavaScript enabled they update as you type; the worked example below is a complete run with the starting inputs.</p>
+    </div>
+  </div>
+
+  <h2>Worked example</h2>
+  <p>A build on a Fuse-series machine running <a href="/materials/formlabs-nylon-12-gf-powder/">Formlabs Nylon 12 GF Powder</a> at the manufacturer’s standard refresh rate of 50%. The finished build’s cake weighs 20 kg and the fused parts weigh 2 kg, so 18 kg of used powder was recovered. All figures in kilograms:</p>
+  <table class="spec-table">
+    <tbody>
+      <tr><th scope="row">Recovered used powder (U)</th><td><span class="num spec-val">18 kg</span><span class="cmp-sub">20 kg cake − 2 kg parts</span></td></tr>
+      <tr><th scope="row">Virgin powder to add (V)</th><td><span class="num spec-val">18 kg</span><span class="cmp-sub">V = U × R ÷ (100 − R) = 18 × 50 ÷ 50</span></td></tr>
+      <tr><th scope="row">Total charge (T)</th><td><span class="num spec-val">36 kg</span><span class="cmp-sub">18 used + 18 virgin — a 50 / 50 split</span></td></tr>
+      <tr><th scope="row">Recovered after this build</th><td><span class="num spec-val">34 kg</span><span class="cmp-sub">36 kg charge − 2 kg fused parts</span></td></tr>
+      <tr><th scope="row">Used powder the next build draws</th><td><span class="num spec-val">18 kg</span><span class="cmp-sub">Half of the next 36 kg charge</span></td></tr>
+      <tr><th scope="row">Surplus aged powder (discard)</th><td><span class="num spec-val">16 kg</span><span class="cmp-sub">34 recovered − 18 the next build can take</span></td></tr>
+      <tr><th scope="row">Virgin bought per build, steady state</th><td><span class="num spec-val">18 kg</span><span class="cmp-sub">2 kg into parts + 16 kg discarded — equals the virgin in the charge</span></td></tr>
+    </tbody>
+  </table>
+  <p>The lesson of the example is the last two rows: at a 50% refresh ratio only 2 kg of every 18 kg of virgin powder ends up in parts — the rest replaces powder that aged out. That refresh term, not the fused volume, dominates powder cost, which is why the <a href="/calculators/part-cost/">part cost estimator</a> carries an explicit refresh allowance instead of pricing fused volume alone.</p>
+
+  <h2>Assumptions, stated</h2>
+  <ul>
+    <li>The leftover and surplus rows assume the next build is identical to this one — same charge, same fused part mass. Surplus only exists relative to a next build, so a differently sized next build needs its own run.</li>
+    <li>The model treats all recovered powder as reusable up to the ratio; powder your own quality process rejects earlier (contamination, failed builds) is outside it.</li>
+    <li>Nothing is stored or sent: the calculation runs in your browser and the inputs are mirrored into the page URL so a result can be bookmarked or shared.</li>
+  </ul>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+  <script>
+    import '../../lib/refresh-client';
+  </script>
+</Base>

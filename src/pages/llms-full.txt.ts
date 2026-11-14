@@ -114,6 +114,17 @@ export const GET: APIRoute = () => {
     );
   }
 
+  out.push('', '================================================================', 'CALCULATORS', '================================================================', '');
+  out.push(
+    `## Powder refresh ratio calculator (${SITE.url}/calculators/powder-refresh-ratio/)`,
+    'Definition (this site’s glossary): the refresh ratio R is the proportion of virgin powder in the powder charged to a build. With U = recovered used powder, V = virgin powder and T = U + V: R = V / T. Planning to a target ratio: V = U × R / (100 − R), R in percent. Checking a mix already made: R = V / (U + V) × 100%. Surplus aged powder per build (identical builds, steady state) = (T − fused part mass) − T × (1 − R); virgin powder bought per build in steady state = fused part mass + that surplus.',
+    'Manufacturer refresh figures published on this site: Formlabs specifies a standard refresh rate of 50% virgin powder for Nylon 12 GF Powder (up to 70% allowed when troubleshooting); Arkema states a refreshing factor of typically 50% for Rilsan Invent PA11. Other grades’ ratios are specified by their manufacturers and are not published in this database.',
+    '',
+    `## Part cost estimator (${SITE.url}/calculators/part-cost/)`,
+    'Material cost per powder-bed part: m = V × ρ (fused powder per part; V = solid volume in cm³, ρ = printed-part density in g/cm³ from the manufacturer datasheet); m_virgin = m × (1 + w), where w is the visitor’s refresh & ageing allowance; cost = m_virgin × price per kg / 1000. The steady-state allowance implied by a refresh ratio R at packing fraction p (fused mass / charge mass) is w = R / p − 1. This site publishes no powder prices — the price is always the visitor’s own input. Scope: material cost only, no machine time or labour.',
+    '',
+  );
+
   out.push('', '================================================================', 'GLOSSARY', '================================================================', '');
   for (const t of GLOSSARY) {
     out.push(`## ${t.term}`, t.definition, '');

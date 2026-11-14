@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SITE } from '../../site';
+import { POWDER_GRADES, DEFAULT_REFRESH } from '../../lib/calc';
+
+// Calculators index (rebuild batch B4). The tools read the same data
+// layer as the databases; the methodology note below states what they
+// deliberately leave out — no invented prices, no defaults without an
+// on-site source.
+const withDensity = POWDER_GRADES.filter((g) => g.density).length;
+
+const tools = [
+  {
+    href: '/calculators/powder-refresh-ratio/',
+    name: 'Powder refresh ratio calculator',
+    blurb:
+      'Work out how much virgin powder a build needs at a target refresh ratio — or the effective ratio of a mix you already made — plus the surplus aged powder each build leaves behind.',
+  },
+  {
+    href: '/calculators/part-cost/',
+    name: 'Part cost estimator',
+    blurb:
+      'Material cost per powder-bed nylon part from its solid volume, the grade’s datasheet density and the powder price you actually pay — with the refresh allowance shown, not hidden.',
+  },
+];
+---
+
+<Base
+  title="Nylon 3D Printing Calculators | Nylon3DP"
+  description="Free nylon 3D printing calculators: powder refresh ratio (virgin powder per build, surplus aged powder) and per-part powder cost from datasheet density."
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / Calculators</p>
+    <h1>Nylon 3D printing calculators</h1>
+  </div>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Two calculators, both built on this site’s own definitions and database: the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a> turns a powder cake and a manufacturer refresh ratio into the virgin powder a build needs; the <a href="/calculators/part-cost/">part cost estimator</a> prices the powder in a part from its volume and the grade’s datasheet density. No sign-up, nothing is stored — inputs live only in the page URL, so a calculation can be bookmarked or shared.</p>
+  </div>
+  <div class="cards">
+    {tools.map((t) => (
+      <a class="card" href={t.href}>
+        <h3>{t.name}</h3>
+        <p>{t.blurb}</p>
+      </a>
+    ))}
+  </div>
+
+  <h2>Methodology — what these tools do and do not assume</h2>
+  <ul>
+    <li><strong>Definitions are this site’s published ones.</strong> The refresh ratio is the proportion of virgin powder in the powder charged to a build, exactly as the <a href="/glossary/#refresh-ratio">glossary</a> defines it and as the material pages use it. Each calculator prints its full formula, with every variable named, above the form.</li>
+    <li><strong>Densities come from the database.</strong> The cost estimator’s grade list is generated from the <a href="/materials/">material database</a>: {withDensity} of the {POWDER_GRADES.length} powder grades carry a manufacturer printed-part density in their structured datasheets, and the tool pre-fills from those values. Where the database holds no printed-part density, the tool asks you for the figure instead of borrowing one — and a bulk (apparent) powder density is never substituted, because it is a different quantity.</li>
+    <li><strong>Prices are yours.</strong> This site does not publish powder prices — manufacturer datasheets do not fix a market price, and quoting one would be inventing data. You type the price you actually pay; the estimate is labelled as yours throughout.</li>
+    <li><strong>Defaults carry their source.</strong> The one pre-filled ratio — {DEFAULT_REFRESH.ratio}% refresh — is the manufacturer figure this site publishes for two grades in the database (Formlabs Nylon 12 GF Powder and Arkema Rilsan Invent PA11); each tool says so next to the field and tells you to replace it with your own grade’s figure.</li>
+    <li><strong>Scope is stated, not implied.</strong> The cost estimator covers powder economics only: no machine time, labour, post-processing or failed builds. The refresh calculator’s surplus figures assume the next build matches this one, and say so.</li>
+  </ul>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

@@ -22,6 +22,11 @@
 //   renders with the two published drone guides linked; application pages
 //   render their design-number block; material pages link back to the
 //   application guides that recommend them
+// - calculators (B4): the calculators index links both tools; the
+//   refresh page renders the published definition, the formulas, the
+//   defaults provenance and a worked example; the part-cost page's
+//   grade payload and dropdown match the database's powder grades
+//   (counts mirrored below), and the formula + disclaimer render
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -106,7 +111,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 58; // 45 + B3: /vendors/ + 8 vendor pages + /applications/ + drones hub + 2 application guides (13 new)
+const EXPECTED_SITEMAP_URLS = 61; // 58 + B4: /calculators/ + refresh-ratio calculator + part-cost estimator (3 new)
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -352,6 +357,69 @@ for (const { path, values } of APP_SPOT_CHECKS) {
     const html = readFileSync(file, 'utf8');
     if (!html.includes('href="/applications/drones/motor-mounts/"')) errors.push('/materials/eos-pa-1101/: no link to the motor-mounts guide');
     if (!html.includes('href="/applications/drones/propeller-guards/"')) errors.push('/materials/eos-pa-1101/: no link to the propeller-guards guide');
+  }
+}
+
+// --- calculators (B4) ------------------------------------------------------
+// Counts mirror the data layer (materials.ts): powder grades, and the
+// subset whose structuredSpecs carry a printed-part density. Bump when
+// a batch adds a powder grade or a density value.
+const POWDER_GRADES_IN_DB = 9;
+const POWDER_GRADES_WITH_DENSITY = 5;
+{
+  const file = join(DIST, 'calculators', 'index.html');
+  if (!existsSync(file)) errors.push('/calculators/: missing in dist (B4 calculators check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('href="/calculators/powder-refresh-ratio/"')) errors.push('/calculators/: refresh calculator not linked');
+    if (!html.includes('href="/calculators/part-cost/"')) errors.push('/calculators/: part-cost estimator not linked');
+    if (!html.includes('Methodology')) errors.push('/calculators/: methodology note missing');
+  }
+}
+{
+  const path = '/calculators/powder-refresh-ratio/';
+  const file = join(DIST, 'calculators', 'powder-refresh-ratio', 'index.html');
+  if (!existsSync(file)) errors.push(`${path}: missing in dist (B4 refresh check)`);
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('data-calc-refresh')) errors.push(`${path}: no [data-calc-refresh] island root`);
+    if (!html.includes('proportion of new')) errors.push(`${path}: published refresh-ratio definition not quoted`);
+    if (!html.includes('V = U × R ÷ (100 − R)')) errors.push(`${path}: target-mode formula not rendered`);
+    if (!html.includes('R = V ÷ (U + V) × 100%')) errors.push(`${path}: actual-mode formula not rendered`);
+    if (!html.includes('Pre-filled at 50%')) errors.push(`${path}: default-ratio provenance missing`);
+    if (!html.includes('Worked example')) errors.push(`${path}: worked example missing`);
+    if (!html.includes('Surplus aged powder (discard)')) errors.push(`${path}: worked-example surplus row missing`);
+  }
+}
+{
+  const path = '/calculators/part-cost/';
+  const file = join(DIST, 'calculators', 'part-cost', 'index.html');
+  if (!existsSync(file)) errors.push(`${path}: missing in dist (B4 cost check)`);
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('data-calc-cost')) errors.push(`${path}: no [data-calc-cost] island root`);
+    const options = (html.match(/<option value="[a-z0-9-]+">/g) || []).length;
+    if (options !== POWDER_GRADES_IN_DB) errors.push(`${path}: grade dropdown has ${options} options, expected ${POWDER_GRADES_IN_DB} powder grades`);
+    const payloadMatch = html.match(/<script type="application\/json" data-calc-data>([\s\S]*?)<\/script>/);
+    if (!payloadMatch) errors.push(`${path}: no calculator JSON payload script`);
+    else {
+      try {
+        const payload = JSON.parse(payloadMatch[1]);
+        const grades = payload.grades ?? [];
+        if (grades.length !== POWDER_GRADES_IN_DB) errors.push(`${path}: payload has ${grades.length} grades, expected ${POWDER_GRADES_IN_DB}`);
+        const withDensity = grades.filter((g) => g.density).length;
+        if (withDensity !== POWDER_GRADES_WITH_DENSITY) errors.push(`${path}: payload has ${withDensity} grades with density, expected ${POWDER_GRADES_WITH_DENSITY}`);
+        const withRefresh = grades.filter((g) => g.publishedRefresh).length;
+        if (withRefresh !== 2) errors.push(`${path}: payload has ${withRefresh} grades with a published refresh figure, expected 2`);
+      } catch {
+        errors.push(`${path}: calculator JSON payload does not parse`);
+      }
+    }
+    if (!html.includes('× (1 + w)')) errors.push(`${path}: allowance formula not rendered`);
+    if (!html.includes('your powder price, your machine')) errors.push(`${path}: "estimates only" disclaimer missing`);
+    if (!html.includes('Worked example')) errors.push(`${path}: worked example missing`);
+    if (!html.includes('name="price"')) errors.push(`${path}: price input missing`);
+    if (/<input[^>]*name="price"[^>]*\svalue=/.test(html)) errors.push(`${path}: price input carries a default value — prices are never defaulted`);
   }
 }
 

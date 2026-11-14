@@ -107,6 +107,13 @@ const articleLd = {
     </section>
   )}
 
+  {m.form === 'Powder' && (
+    <section aria-label="Calculators for this grade">
+      <h2>Run the numbers for this grade</h2>
+      <p>Two calculators read this database: the <a href="/calculators/part-cost/">part cost estimator</a> prices a part in this grade from its volume and datasheet density, and the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a> plans the virgin-powder blend for a build.</p>
+    </section>
+  )}
+
   <Faq items={m.faqs} />
 
   <div class="sources">

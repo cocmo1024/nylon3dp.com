@@ -36,6 +36,9 @@ const ld = {
       <>
         <dt id={t.id}>{t.term}</dt>
         <dd>{t.definition}</dd>
+        {t.id === 'refresh-ratio' && (
+          <dd>Work it out for your own builds with the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a>, which implements this definition exactly.</dd>
+        )}
       </>
     ))}
   </dl>

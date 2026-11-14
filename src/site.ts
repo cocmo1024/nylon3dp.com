@@ -19,6 +19,7 @@ export const NAV = [
   { href: '/vendors/', label: 'Vendors' },
   { href: '/processes/', label: 'Processes' },
   { href: '/applications/', label: 'Applications' },
+  { href: '/calculators/', label: 'Calculators' },
   { href: '/guides/', label: 'Guides' },
   { href: '/glossary/', label: 'Glossary' },
 ] as const;
@@ -35,6 +36,9 @@ export const FOOTER_NAV = [
       { href: '/compare/sls-vs-mjf/', label: 'SLS vs MJF' },
       { href: '/compare/materials/', label: 'Compare materials' },
       { href: '/compare/machines/', label: 'Compare machines' },
+      { href: '/calculators/', label: 'Calculators' },
+      { href: '/calculators/powder-refresh-ratio/', label: 'Refresh ratio calculator' },
+      { href: '/calculators/part-cost/', label: 'Part cost estimator' },
       { href: '/glossary/', label: 'Glossary' },
     ],
   },
