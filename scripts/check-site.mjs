@@ -6,6 +6,9 @@
 // - i18n pilot: the 5 localized homepages exist, each with the right <html lang>,
 //   a self-referencing canonical and the full 7-entry hreflang cluster (also on
 //   the English homepage); total sitemap URL count matches EXPECTED_SITEMAP_URLS
+// - structured data: /materials/ and /machines/ carry a Dataset JSON-LD whose
+//   creator @id is the site Organization @id; the materials Dataset entry
+//   count equals the number of material cards rendered on the page
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -123,6 +126,41 @@ for (const [code, path] of Object.entries(HOME_CLUSTER)) {
   }
   if (smAlts.get('x-default') !== SITE + '/') errors.push(`sitemap ${path}: hreflang x-default = ${smAlts.get('x-default')}, expected ${SITE}/`);
   if (smAlts.size !== 7) errors.push(`sitemap ${path}: ${smAlts.size} alternate links, expected 7`);
+}
+
+// --- structured data checks (GEO plan item 5) ---------------------------
+// Both database index pages must carry a Dataset JSON-LD whose creator is
+// the site Organization (@id), and the materials Dataset entry count must
+// match the number of material cards actually rendered on the page.
+const ORG_ID = `${SITE}/#organization`;
+const parseLd = (html, where) => {
+  const blocks = [];
+  for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+    try { blocks.push(JSON.parse(m[1])); } catch { errors.push(`${where} unparseable JSON-LD block`); }
+  }
+  return blocks;
+};
+for (const path of ['/materials/', '/machines/']) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (Dataset check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  const blocks = parseLd(html, path);
+  const org = blocks.find((b) => b['@type'] === 'Organization');
+  if (!org) errors.push(`${path}: no Organization JSON-LD`);
+  else if (org['@id'] !== ORG_ID) errors.push(`${path}: Organization @id ${org['@id']}, expected ${ORG_ID}`);
+  const ds = blocks.find((b) => b['@type'] === 'Dataset');
+  if (!ds) { errors.push(`${path}: no Dataset JSON-LD`); continue; }
+  if (ds.creator?.['@id'] !== ORG_ID) {
+    errors.push(`${path}: Dataset creator @id ${ds.creator?.['@id']}, expected ${ORG_ID}`);
+  }
+  if (path === '/materials/') {
+    const cards = (html.match(/<a class="card" href="\/materials\/[^"]+\/">/g) || []).length;
+    const stated = ds.description?.match(/for (\d+) nylon 3D printing materials/)?.[1];
+    if (!stated) errors.push('/materials/: Dataset description states no entry count');
+    else if (Number(stated) !== cards) {
+      errors.push(`/materials/: Dataset states ${stated} materials, page renders ${cards} cards`);
+    }
+  }
 }
 
 if (errors.length) {

@@ -4,11 +4,46 @@ import { MATERIALS } from '../../data/materials';
 
 const headline = (m: (typeof MATERIALS)[number]) =>
   m.properties.find((p) => /tensile strength/i.test(p.label))?.value ?? '';
+
+// Dataset JSON-LD, generated from the data layer so the count, measured
+// variables and keywords can never drift from the entries actually listed.
+// Orientation/condition qualifiers on labels (X/Y, dry, printed part…) are
+// normalised away; synonym labels are merged to one measured variable.
+const MEASURED_RENAMES: Record<string, string> = {
+  'Ultimate tensile strength': 'Tensile strength',
+  'Tensile strength at break': 'Tensile strength',
+  "Young's modulus": 'Tensile modulus',
+  'Heat deflection temperature': 'Heat deflection temperature (HDT)',
+};
+const measuredName = (label: string) => {
+  if (/^HDT @/.test(label)) return 'Heat deflection temperature (HDT)';
+  const base = label.replace(/\s*\((?:X|Z|dry|printed part|bulk)[^)]*\)\s*$/, '').trim();
+  return MEASURED_RENAMES[base] ?? base;
+};
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'Nylon 3D Printing Materials Database',
+  description: `Property data for ${MATERIALS.length} nylon 3D printing materials — PA11, PA12, PA6 and carbon-fibre-reinforced grades for SLS, MJF and FDM. Every value is taken from the manufacturer's own technical data sheet, and the source document is cited on each entry page; values a manufacturer does not publish are omitted rather than estimated.`,
+  url: 'https://nylon3dp.com/materials/',
+  creator: { '@id': 'https://nylon3dp.com/#organization' },
+  // Entries carry no per-entry date field in the data layer; this is the
+  // database's last editorial update and moves with each database batch.
+  dateModified: '2026-11-14',
+  variableMeasured: [...new Set(MATERIALS.flatMap((m) => m.properties.map((p) => measuredName(p.label))))].sort(),
+  keywords: [
+    'Nylon 3D printing',
+    ...new Set(MATERIALS.map((m) => m.basePolymer)),
+    ...new Set(MATERIALS.map((m) => m.process)),
+    'Technical data sheet',
+  ],
+};
 ---
 
 <Base
   title="Nylon 3D Printing Materials Database — PA11, PA12, PA6 | Nylon3DP"
   description="Datasheet-verified nylon materials: PA12, PA11, glass-filled PA12 and PA6 powders plus PA-CF and CoPA filaments from EOS, Formlabs, HP, BASF and more."
+  jsonLd={datasetLd}
 >
   <p class="crumbs"><a href="/">Home</a> / Materials</p>
   <h1>Nylon material database</h1>

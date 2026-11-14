@@ -1,11 +1,38 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MACHINES } from '../../data/machines';
+
+// Dataset JSON-LD, generated from the data layer so the count, measured
+// variables and keywords can never drift from the entries actually listed.
+const MEASURED_RENAMES: Record<string, string> = {
+  'Effective build volume': 'Build volume',
+  'Effective build size': 'Build volume',
+};
+const datasetLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'Nylon 3D Printing Machines Database',
+  description: `Manufacturer-verified specifications for ${MACHINES.length} nylon-capable 3D printers — SLS, MJF and SAF powder-bed systems. Every specification is taken from the manufacturer's own specification sheet or product documentation, and the source document is cited on each entry page; specifications a manufacturer does not state are omitted rather than estimated.`,
+  url: 'https://nylon3dp.com/machines/',
+  creator: { '@id': 'https://nylon3dp.com/#organization' },
+  // Entries carry no per-entry date field in the data layer; this is the
+  // database's last editorial update and moves with each database batch.
+  dateModified: '2026-11-14',
+  variableMeasured: [
+    ...new Set(MACHINES.flatMap((m) => m.specs.map((s) => MEASURED_RENAMES[s.label] ?? s.label))),
+  ].sort(),
+  keywords: [
+    'Nylon 3D printers',
+    ...new Set(MACHINES.map((m) => m.process)),
+    'Manufacturer specification sheet',
+  ],
+};
 ---
 
 <Base
   title="Nylon 3D Printer Database — SLS, MJF & SAF Machines | Nylon3DP"
   description="Manufacturer-verified specs for nylon printers: HP Jet Fusion 5200 (MJF), EOS P 396 and Formiga P 110, Formlabs Fuse 1+ 30W (SLS), Stratasys H350 (SAF)."
+  jsonLd={datasetLd}
 >
   <p class="crumbs"><a href="/">Home</a> / Machines</p>
   <h1>Nylon 3D printer database</h1>
