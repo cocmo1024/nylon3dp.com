@@ -1,0 +1,22 @@
+---
+import { SPONSOR_SLOTS_ENABLED } from '../site';
+
+// Commercial skeleton (rebuild batch B4.5): a reserved sponsorship /
+// advertising position. While SPONSOR_SLOTS_ENABLED is false — the
+// standing state until the user rules on advertising — this component
+// renders literally nothing: no markup, no placeholder, no label.
+// check-site asserts that no "Sponsored" text reaches dist. Enabling
+// the flag renders a clearly labelled slot box; actual inventory is a
+// separate, later decision.
+interface Props {
+  /** Slot identifier, e.g. 'home-mid', 'vendor-page'. */
+  slot: string;
+}
+const { slot } = Astro.props;
+---
+
+{SPONSOR_SLOTS_ENABLED && (
+  <aside class="ad-slot" data-ad-slot={slot} aria-label="Sponsored">
+    <p class="ad-slot-label">Sponsored</p>
+  </aside>
+)}

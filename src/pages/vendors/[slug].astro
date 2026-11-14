@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
 import { VENDORS, type Vendor } from '../../data/vendors';
 import { MATERIALS } from '../../data/materials';
 import { MACHINES } from '../../data/machines';
@@ -62,6 +63,8 @@ const profileLd = {
   </div>
 
   <p>{v.intro}</p>
+
+  <AdSlot slot="vendor-page" />
 
   <h2>Materials in this database</h2>
   {materials.length > 0 ? (

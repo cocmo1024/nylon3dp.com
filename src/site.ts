@@ -13,21 +13,32 @@ export const SITE = {
   lastUpdated: 'November 2026',
 } as const;
 
+/**
+ * Commercial skeleton (B4.5): sponsorship/advertising slots exist in the
+ * layout (see components/AdSlot.astro) but render nothing while this is
+ * false. Advertising stays off until the user rules on timing and form.
+ */
+export const SPONSOR_SLOTS_ENABLED = false;
+
+// Portal navigation (B4.5): the industry sections lead — news, the
+// vendor/equipment ecosystem, applications — with data & tools as a
+// service entry. Guides, processes and the glossary live in the footer
+// and in the homepage depth section; their URLs are unchanged.
 export const NAV = [
+  { href: '/news/', label: 'News' },
+  { href: '/vendors/', label: 'Vendors' },
   { href: '/materials/', label: 'Materials' },
   { href: '/machines/', label: 'Machines' },
-  { href: '/vendors/', label: 'Vendors' },
-  { href: '/processes/', label: 'Processes' },
   { href: '/applications/', label: 'Applications' },
+  { href: '/guides/formnext-2026/', label: 'Formnext 2026' },
   { href: '/calculators/', label: 'Calculators' },
-  { href: '/guides/', label: 'Guides' },
-  { href: '/glossary/', label: 'Glossary' },
 ] as const;
 
 export const FOOTER_NAV = [
   {
     title: 'Reference',
     links: [
+      { href: '/news/', label: 'Industry news' },
       { href: '/materials/', label: 'Material database' },
       { href: '/machines/', label: 'Machine database' },
       { href: '/vendors/', label: 'Vendor directory' },
@@ -45,6 +56,7 @@ export const FOOTER_NAV = [
   {
     title: 'Guides',
     links: [
+      { href: '/guides/formnext-2026/', label: 'Formnext 2026: the nylon watchlist' },
       { href: '/guides/pa11-vs-pa12/', label: 'PA11 vs PA12' },
       { href: '/guides/how-to-dry-nylon-filament/', label: 'Drying nylon filament' },
       { href: '/guides/designing-for-sls-mjf/', label: 'Designing for SLS & MJF' },

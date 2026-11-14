@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import { NEWS, formatNewsDate } from '../../data/news';
+import { SITE } from '../../site';
+
+const listLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Nylon3DP news — nylon 3D printing industry coverage',
+  numberOfItems: NEWS.length,
+  itemListElement: NEWS.map((n, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: `${SITE.url}${n.href}`,
+    name: n.title,
+  })),
+};
+---
+
+<Base
+  title="Nylon 3D Printing News & Industry Briefing | Nylon3DP"
+  description="Dated, sourced coverage of the nylon 3D printing industry: vendor announcements, new systems and materials, and show reporting — starting with Formnext 2026."
+  jsonLd={listLd}
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / News</p>
+    <h1>Nylon industry news</h1>
+    <p class="lede">Coverage begins with Formnext 2026; the desk publishes on vendor announcements, new systems and materials — sourced, dated, no rumour roundups.</p>
+  </div>
+
+  <p class="kicker">The news desk</p>
+  <p>Every item here is a published page on this site, dated the day it went up and built from sources we can point to — a vendor's own announcement, a published datasheet, the show organiser's record. Vendor claims are reported as claims. When an announcement becomes a document — a specification sheet, a datasheet — the <a href="/materials/">material</a> and <a href="/machines/">machine</a> databases are where it lands, under the site's <a href="/editorial/">sourcing policy</a>.</p>
+
+  <div class="news-list">
+    {NEWS.map((n) => (
+      <article class="news-item">
+        <p class="news-date"><time datetime={n.date}>{formatNewsDate(n.date)}</time></p>
+        <div>
+          <p class="news-meta"><span class="tag">{n.tag}</span></p>
+          <h2 class="news-title"><a href={n.href}>{n.title}</a></h2>
+          <p>{n.dek}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div class="briefing-box">
+    <p class="kicker">The briefing</p>
+    <h2>Get the nylon briefing by email</h2>
+    <p>The industry briefing collects the desk's coverage — show reports, vendor moves, new database entries — into one occasional email. No daily noise, no third-party list. Signup is by email for now: send a note with “Subscribe” in the subject line.</p>
+    <p><a class="btn" href={`mailto:${SITE.email}?subject=Subscribe%20—%20Nylon3DP%20briefing`}>Subscribe by email</a></p>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

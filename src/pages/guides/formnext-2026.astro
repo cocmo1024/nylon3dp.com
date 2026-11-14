@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+const faq = [
+  {
+    q: 'When and where is Formnext 2026?',
+    a: 'Formnext 2026 runs Tuesday 17 to Friday 20 November 2026 at Messe Frankfurt, in Halls 11.0, 12.0 and 12.1 and the Portalhaus. Opening hours are 9:00–18:00 Tuesday to Thursday and 9:00–16:00 on Friday. The show is organised by Mesago Messe Frankfurt.',
+  },
+  {
+    q: 'What is EOS announcing at Formnext 2026?',
+    a: 'A new large-frame polymer SLS system, unveiled at 11:00 on Tuesday 17 November at the EOS booth (Hall 12.0, D71). EOS has confirmed a three-laser architecture ahead of the show; Materialise, which ran the unreleased machine in production, reports 44% higher productivity than the previous EOS platform. The full specification is being held for the unveiling — it is not published yet, and this page does not guess it.',
+  },
+  {
+    q: 'Will the machines and powders shown at Formnext appear in the Nylon3DP databases?',
+    a: 'Only when a manufacturer publishes a datasheet or specification we can cite. That is the rule for every entry in the material and machine databases. Announced products — the EOS platform, Arkema\u2019s next-generation Orgasol PA12, the TPM3D CF250 — stay on this watchlist, clearly labelled as announcements, until their documents exist.',
+  },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: 'Formnext 2026: the nylon watchlist',
+  datePublished: '2026-11-14',
+  dateModified: '2026-11-14',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  publisher: { '@id': `${SITE.url}/#organization` },
+};
+---
+
+<Base
+  title="Formnext 2026: The Nylon Watchlist (17–20 Nov) | Nylon3DP"
+  description="Formnext 2026 from the nylon side: EOS's new SLS platform, Arkema's Orgasol PA12, Stratasys and TPM3D debuts — vendor claims labelled, specs to follow."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/news/">News</a> / Formnext 2026</p>
+  <h1>Formnext 2026: the nylon watchlist</h1>
+  <p class="updated">Preview · Published 14 November 2026 · Formnext, Messe Frankfurt, 17–20 November 2026</p>
+  <div class="quick-answer">
+    <p class="qa-label">The short version</p>
+    <p>Formnext 2026 opens on Tuesday 17 November, and the nylon side of the hall is unusually dense: <strong>EOS</strong> unveils a new large-frame polymer SLS platform (Tuesday 11:00, Hall 12.0, D71), <strong>Arkema</strong> shows next-generation Orgasol PA12 powders, <strong>Stratasys</strong> unveils a manufacturing-scale system an hour later, and <strong>TPM3D</strong> gives its compact CF250 its international debut. This page is the desk's preview and watchlist. Announcements are reported as their makers state them — claims are labelled as claims — and nothing enters our <a href="/materials/">material</a> or <a href="/machines/">machine</a> databases until a datasheet or specification is published.</p>
+  </div>
+
+  <h2>The show in brief</h2>
+  <table>
+    <tbody>
+      <tr><th scope="row">Dates</th><td>Tuesday 17 – Friday 20 November 2026</td></tr>
+      <tr><th scope="row">Venue</th><td>Messe Frankfurt — Halls 11.0, 12.0, 12.1 and the Portalhaus</td></tr>
+      <tr><th scope="row">Hours</th><td>9:00–18:00 Tue–Thu · 9:00–16:00 Fri</td></tr>
+      <tr><th scope="row">Organiser</th><td>Mesago Messe Frankfurt</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tuesday's reveals, from the nylon side</h2>
+
+  <h3>EOS — a new large-frame polymer SLS platform (Hall 12.0, D71; Tuesday 11:00)</h3>
+  <p>The headline act for powder-bed nylon. EOS will unveil a new large-frame polymer <a href="/processes/sls/">SLS</a> system at 11:00 CET on the first morning — its first new polymer platform in about five years. What is confirmed ahead of the reveal is the architecture: three lasers, with intelligent utilisation and dynamic load balancing. What is not yet public is everything a database would need — build volume, layer range, power, price. Materialise has run the unreleased machine in production and reports 44% higher productivity than the previous EOS platform, with more than six minutes saved per part on its trial job; that is an early customer's reported figure, not an EOS specification. The full specification is promised at the unveiling, and the machine becomes a candidate for our <a href="/machines/">machine database</a> — alongside the EOS <a href="/machines/eos-p-396/">P 396</a> and <a href="/machines/eos-formiga-p-110/">Formiga P 110</a> — only when EOS publishes it. <a href="/vendors/eos/">EOS in the vendor directory</a>.</p>
+
+  <h3>Stratasys — a manufacturing-scale system, and the F870's European debut (Hall 12.1, D129; Tuesday 13:00)</h3>
+  <p>Two hours later, Stratasys unveils what its 29 October announcement calls a new manufacturing-scale solution for serial production of end-use polymer parts. The same booth gives the F870 FDM system its European debut and shows factory-floor applications from Toyota and GM. Stratasys's nylon powder story on this site currently runs through the SAF platform and the <a href="/machines/stratasys-h350/">H350</a>; whether Tuesday's system extends that line is one of the week's open questions. <a href="/vendors/stratasys/">Stratasys in the vendor directory</a>.</p>
+
+  <h3>Arkema — next-generation Orgasol PA12 (Hall 12.1, C119)</h3>
+  <p>The materials story of the show. Arkema's 9 November release says it will showcase a next generation of Orgasol PA12 powders for SLS and MJF, designed for powder recyclability; Arkema claims the powders can reduce material-related variable costs by up to 50%. That is the maker's claim, made ahead of the show: Arkema has not published a datasheet for the new grade, so there is nothing to put in a specification table yet — and on this site, no datasheet means no database entry. Alongside it, Arkema will highlight its Rilsan PA11 line — castor-bean based and 100% bio-based — with a claim of up to 40% lower material-related operating costs. Our database carries the current Rilsan Invent grade, <a href="/materials/arkema-rilsan-invent-pa11/">Arkema Rilsan Invent PA11</a>, on its published datasheet. <a href="/vendors/arkema/">Arkema in the vendor directory</a>.</p>
+
+  <h3>TPM3D — the compact CF250 goes international (Hall 11.0, D29)</h3>
+  <p>TPM3D's CF250+PPS250 compact SLS system, launched in China earlier this year, makes its international debut in Frankfurt. TPM3D states a 250 × 250 × 320 mm build volume, a 0.53 m² footprint and standard 220 V power — a specification aimed squarely at the lab and small-production niche that Formlabs' Fuse series opened. TPM3D is not yet in our vendor directory; its stated figures enter the machine database only from published documentation, after the show.</p>
+
+  <h2>Also on the floor</h2>
+  <ul>
+    <li><strong>DyeMansion</strong> launches the Powershot Go, a post-processing system for smaller shops finishing SLS and MJF parts; trade previews report a price below €14,000 — a reported figure, not a DyeMansion list price we have verified.</li>
+    <li><strong>3devo</strong> (Hall 12.1, B139) runs its Filament Maker X10 live for all four days, turning spent MJF PA12 powder into spooled filament — powder economics in the most literal sense on the show floor.</li>
+  </ul>
+
+  <h2>The thread running through it: powder economics</h2>
+  <p>Read the announcements together and one theme dominates the nylon side of Formnext 2026: what a build costs in powder. Arkema's recyclability claims, 3devo's waste-powder filament and the productivity fight between the new platforms are all, underneath, arguments about <a href="/glossary/">refresh ratio</a> and cost per part. Our standing rule survives the show unchanged: a recyclability claim stays a claim — attributed to its maker — until a datasheet states the ratio. The tools to run your own numbers are already here: the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a> and the <a href="/calculators/part-cost/">part cost estimator</a>.</p>
+
+  <h2>After the show</h2>
+  <p>This preview becomes a report. The EOS platform's specification sheet, any Orgasol PA12 datasheet Arkema publishes, and the CF250's documentation are the first documents the desk will chase — in that order — and each database entry they produce will cite them, per our <a href="/editorial/">sourcing policy</a>. Follow the coverage on the <a href="/news/">news page</a>.</p>
+
+  <Faq items={faq} />
+
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      <li><a href="https://builder.messefrankfurt.com/frankfurt/en/event-specific-information/formnext.html" rel="noopener">Messe Frankfurt — Formnext 2026 event information (dates)</a></li>
+      <li><a href="https://industrialmachinerydigest.com/fabrication/additive-manufacturing/eos-to-unveil-new-polymer-sls-system-at-formnext-2026" rel="noopener">Industrial Machinery Digest — EOS to unveil new polymer SLS system at Formnext 2026 (booth, time, launch framing)</a></li>
+      <li><a href="https://investors.stratasys.com/news-events/press-releases/detail/996/stratasys-introduces-new-printer-for-serial-production" rel="noopener">Stratasys press release, 29 October 2026 — new manufacturing solution, F870 European debut</a></li>
+      <li><a href="https://www.arkema.com/global/en/media/newslist/news/global/products/2026/20261109-formnext-2026/" rel="noopener">Arkema press release, 9 November 2026 — Orgasol PA12 and Rilsan PA11 at Formnext 2026</a></li>
+      <li><a href="https://english.tpm3d.com/tpm3d-cf250-formnext-2026/" rel="noopener">TPM3D — CF250+PPS250 international debut announcement</a></li>
+      <li><a href="https://3dprinting.com/news/formnext-2026-preview-what-to-see-in-frankfurt/" rel="noopener">3DPrinting.com — Formnext 2026 preview (show hours, DyeMansion Powershot Go)</a></li>
+      <li><a href="https://www.3devo.com/formnext-2026" rel="noopener">3devo — Formnext 2026: live MJF powder recycling, Filament Maker X10</a></li>
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

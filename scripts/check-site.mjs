@@ -27,6 +27,13 @@
 //   defaults provenance and a worked example; the part-cost page's
 //   grade payload and dropdown match the database's powder grades
 //   (counts mirrored below), and the formula + disclaimer render
+// - portal form (B4.5): the homepage renders the front-page anatomy
+//   (lead story, news, ecosystem, depth, applications, data & tools)
+//   with the live database counts and no article-stream heading; the
+//   /news/ index renders its desk intro and the seeded item with an
+//   ItemList; the Formnext lead feature renders with its sourced
+//   claims labelled; sponsorship slots are disabled, so no
+//   "Sponsored" text may appear anywhere in dist
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -111,7 +118,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 61; // 58 + B4: /calculators/ + refresh-ratio calculator + part-cost estimator (3 new)
+const EXPECTED_SITEMAP_URLS = 63; // 61 + B4.5: /news/ + /guides/formnext-2026/ (the lead feature, published this batch as a sourced preview) (2 new)
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -420,6 +427,70 @@ const POWDER_GRADES_WITH_DENSITY = 5;
     if (!html.includes('Worked example')) errors.push(`${path}: worked example missing`);
     if (!html.includes('name="price"')) errors.push(`${path}: price input missing`);
     if (/<input[^>]*name="price"[^>]*\svalue=/.test(html)) errors.push(`${path}: price input carries a default value — prices are never defaulted`);
+  }
+}
+
+// --- portal form (B4.5) ----------------------------------------------------
+// Sponsorship slots are disabled (SPONSOR_SLOTS_ENABLED=false): nothing
+// labelled "Sponsored" may reach the built site, anywhere.
+for (const f of htmlFiles) {
+  const html = readFileSync(f, 'utf8');
+  if (html.includes('Sponsored')) errors.push(`${toUrlPath(f)}: contains "Sponsored" — ad slots must render nothing while disabled`);
+}
+// Homepage front-page anatomy: all six sections, the lead story, the
+// live database counts, and no article-stream framing as the spine.
+{
+  const file = join(DIST, 'index.html');
+  if (!existsSync(file)) errors.push('/: missing in dist (B4.5 portal check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    for (const section of ['lead', 'news', 'ecosystem', 'depth', 'applications', 'data-tools']) {
+      if (!html.includes(`data-section="${section}"`)) errors.push(`/: front-page section "${section}" missing`);
+    }
+    if (!html.includes('The nylon 3D printing industry hub')) errors.push('/: portal masthead headline missing');
+    if (!html.includes('href="/guides/formnext-2026/"')) errors.push('/: lead story (Formnext 2026) not linked');
+    if (!html.includes('Formnext 2026: the nylon watchlist')) errors.push('/: lead story headline missing');
+    if (!html.includes('href="/news/"')) errors.push('/: news section not linked');
+    if (!html.includes('href="/vendors/"')) errors.push('/: ecosystem (vendor directory) not linked');
+    if (!html.includes('14 material grades · 5 machines · 8 vendors')) {
+      errors.push('/: data & tools module does not state the database counts (14 grades · 5 machines · 8 vendors)');
+    }
+    if (html.includes("Editor's picks")) errors.push('/: contains an "Editor\u2019s picks" stream heading — the front page is a portal, not an article stream');
+    if (html.includes('Featured grades')) errors.push('/: still carries the old "Featured grades" article-card section');
+  }
+}
+// News index: desk intro + the seeded item + a parseable ItemList.
+{
+  const file = join(DIST, 'news', 'index.html');
+  if (!existsSync(file)) errors.push('/news/: missing in dist (B4.5 news check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('Coverage begins with Formnext 2026')) errors.push('/news/: desk intro missing');
+    if (!html.includes('no rumour roundups')) errors.push('/news/: desk intro (sourced, dated) missing');
+    if (!html.includes('Formnext 2026: the nylon watchlist')) errors.push('/news/: seeded Formnext item not rendered');
+    if (!html.includes('href="/guides/formnext-2026/"')) errors.push('/news/: seeded item not linked');
+    if (!html.includes('datetime="2026-11-14"')) errors.push('/news/: seeded item date not rendered');
+    const blocks = parseLd(html, '/news/');
+    const list = blocks.find((b) => b['@type'] === 'ItemList');
+    if (!list) errors.push('/news/: no ItemList JSON-LD');
+    else {
+      if (list.numberOfItems !== 1) errors.push(`/news/: ItemList numberOfItems ${list.numberOfItems}, expected 1 (seed)`);
+      if (!String(list.itemListElement?.[0]?.url ?? '').endsWith('/guides/formnext-2026/')) {
+        errors.push('/news/: ItemList first item is not the Formnext feature');
+      }
+    }
+  }
+}
+// Lead feature page: the sourced preview renders, claims labelled.
+{
+  const path = '/guides/formnext-2026/';
+  const file = join(DIST, 'guides', 'formnext-2026', 'index.html');
+  if (!existsSync(file)) errors.push(`${path}: missing in dist (B4.5 lead check)`);
+  else {
+    const html = readFileSync(file, 'utf8');
+    for (const v of ['the nylon watchlist', 'Hall 12.0', 'D71', 'Orgasol', 'claims are labelled as claims', 'up to 50%']) {
+      if (!html.includes(v)) errors.push(`${path}: expected content "${v}" not rendered`);
+    }
   }
 }
 

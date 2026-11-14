@@ -122,6 +122,12 @@ for (const v of VENDORS) {
   for (const f of ['name', 'hqCountry', 'intro']) checkStr(v, f, w);
   if (!isHttps(v.officialSite)) err(`${w}: officialSite is not HTTPS: ${v.officialSite}`);
   if (!['material', 'machine', 'both'].includes(v.type)) err(`${w}: type "${v.type}" not in material|machine|both`);
+  if (v.claimStatus !== undefined && !['unclaimed', 'claimed'].includes(v.claimStatus)) {
+    err(`${w}: claimStatus "${v.claimStatus}" not in unclaimed|claimed`);
+  }
+  if (v.listingTier !== undefined && !['standard', 'enhanced', 'sponsored'].includes(v.listingTier)) {
+    err(`${w}: listingTier "${v.listingTier}" not in standard|enhanced|sponsored`);
+  }
   if (v.founded !== undefined && (!Number.isInteger(v.founded) || v.founded < 1600 || v.founded > 2026)) {
     err(`${w}: founded "${v.founded}" is not a plausible year`);
   }

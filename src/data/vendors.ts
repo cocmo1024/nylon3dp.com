@@ -22,6 +22,19 @@ export interface Vendor {
   /** One neutral, factual paragraph. No marketing claims. */
   intro: string;
   sources: DataSource[];
+  /**
+   * Commercial skeleton (B4.5): whether the vendor has claimed its
+   * directory listing. Optional; the default for every listing is
+   * 'unclaimed'. Recorded only when a claim actually happens — never
+   * pre-filled, and it changes nothing the page renders.
+   */
+  claimStatus?: 'unclaimed' | 'claimed';
+  /**
+   * Commercial skeleton (B4.5): directory listing tier. Optional; the
+   * default for every listing is 'standard'. Any non-standard tier is
+   * a commercial decision for the user to rule on first.
+   */
+  listingTier?: 'standard' | 'enhanced' | 'sponsored';
 }
 
 export const VENDORS: Vendor[] = [
