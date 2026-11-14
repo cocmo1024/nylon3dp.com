@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import { VENDORS } from '../../data/vendors';
+import { MATERIALS } from '../../data/materials';
+import { MACHINES } from '../../data/machines';
+import { SITE } from '../../site';
+
+// Vendor directory (rebuild B3). Counts are derived at build time from the
+// vendorSlug reverse references on materials and machines — never typed
+// by hand, so the table cannot drift from the databases it summarises.
+const TYPE_LABEL: Record<string, string> = {
+  material: 'Materials',
+  machine: 'Machines',
+  both: 'Materials & machines',
+};
+const rows = VENDORS.map((v) => ({
+  vendor: v,
+  materials: MATERIALS.filter((m) => m.vendorSlug === v.slug).length,
+  machines: MACHINES.filter((m) => m.vendorSlug === v.slug).length,
+}));
+
+const itemListLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Nylon 3D Printing Vendors',
+  description:
+    'Manufacturers behind the materials and machines in the Nylon3DP databases, with the grades and printers listed for each.',
+  numberOfItems: rows.length,
+  itemListElement: rows.map((r, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: r.vendor.name,
+    url: `${SITE.url}/vendors/${r.vendor.slug}/`,
+  })),
+};
+---
+
+<Base
+  title="Nylon 3D Printing Vendors — Manufacturer Directory | Nylon3DP"
+  description="Directory of the eight manufacturers behind the Nylon3DP databases, with the nylon grades and machines listed for each."
+  jsonLd={itemListLd}
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / Vendors</p>
+    <h1>Nylon 3D printing vendors</h1>
+  </div>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Eight manufacturers account for every grade and machine in this database — EOS, HP, Formlabs, Stratasys, BASF Forward AM, Polymaker, Bambu Lab and Arkema. Each vendor page lists exactly which of its materials and machines are in the database, generated from the database itself, so the counts below can never drift from the entries they summarise.</p>
+  </div>
+
+  <p>The directory follows the same rule as the databases: a vendor appears here because its products are listed, with headquarters, founding year (where the public record is unambiguous) and product lists taken from the manufacturers' own sites. Vendors whose nylon products are not yet in the database are not listed — the directory grows with the databases, in the open.</p>
+
+  <h2>All vendors</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Vendor</th>
+          <th>Headquarters</th>
+          <th>Type</th>
+          <th class="num-col">Founded</th>
+          <th class="num-col">Materials in database</th>
+          <th class="num-col">Machines in database</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            <td><a href={`/vendors/${r.vendor.slug}/`}>{r.vendor.name}</a></td>
+            <td>{r.vendor.hqCountry}</td>
+            <td>{TYPE_LABEL[r.vendor.type]}</td>
+            <td class="num">{r.vendor.founded ?? '—'}</td>
+            <td class="num">{r.materials}</td>
+            <td class="num">{r.machines}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Counts are the entries in the <a href="/materials/">material database</a> and <a href="/machines/">machine database</a> as of the last database update. A dash for the founding year means the entity's founding is ambiguous in the public record (for example a brand inside an older group) and is omitted rather than guessed.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

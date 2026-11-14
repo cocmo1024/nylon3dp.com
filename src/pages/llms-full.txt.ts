@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { MATERIALS } from '../data/materials';
 import { MACHINES } from '../data/machines';
 import { GLOSSARY } from '../data/glossary';
+import { VENDORS } from '../data/vendors';
+import { APPLICATIONS } from '../data/applications';
 import { SITE } from '../site';
 
 // Full-text companion to llms.txt, generated at build time from the same data.
@@ -69,6 +71,46 @@ export const GET: APIRoute = () => {
       '',
       'Sources:',
       ...m.sources.map((s) => `- ${s.label}: ${s.url}`),
+    );
+  }
+
+  out.push('', '================================================================', 'VENDORS', '================================================================', '');
+  for (const v of VENDORS) {
+    const mats = MATERIALS.filter((m) => m.vendorSlug === v.slug);
+    const machs = MACHINES.filter((m) => m.vendorSlug === v.slug);
+    out.push(
+      `## ${v.name} (${v.hqCountry}${v.founded ? `, founded ${v.founded}` : ''})`,
+      v.intro,
+      `Materials in this database: ${mats.length ? mats.map((m) => m.name).join(', ') : 'none yet'}. Machines in this database: ${machs.length ? machs.map((m) => m.name).join(', ') : 'none yet'}.`,
+      `Vendor page: ${SITE.url}/vendors/${v.slug}/`,
+      '',
+    );
+  }
+
+  out.push('', '================================================================', 'APPLICATION GUIDES', '================================================================', '');
+  for (const a of APPLICATIONS) {
+    out.push(
+      `## ${a.title} (${SITE.url}/applications/${a.industry}/${a.slug}/)`,
+      a.quickAnswer,
+      '',
+      'Selection reasoning:',
+      ...a.selectionReasoning.map((s, i) => `${i + 1}. ${s}`),
+      '',
+      'Design numbers:',
+      ...a.designNumbers.map((d) => `- ${d.label}: ${d.value}${d.note ? ` (${d.note})` : ''}`),
+      '',
+      'Failure modes:',
+      ...a.failureModes.map((f) => `- ${f}`),
+      '',
+      'Economics vs conventional:',
+      ...a.economicsVsConventional,
+      '',
+      'FAQ:',
+      ...a.faqs.flatMap((f) => [`Q: ${f.q}`, `A: ${f.a}`]),
+      '',
+      'Sources:',
+      ...a.sources.map((s) => `- ${s.label}: ${s.url}`),
+      '',
     );
   }
 

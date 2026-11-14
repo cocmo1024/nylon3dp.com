@@ -4,10 +4,9 @@
 // reverse references (machines specified for a material / materials a
 // machine is specified for).
 //
-// VENDOR LINK DECISION (B1): /vendors/<slug>/ pages ship in batch B3, so
-// the vendor card deliberately does NOT link internally yet — it renders
-// the vendor's facts and its official website (external). B3 turns the
-// vendor name into the internal link when the routes exist.
+// VENDOR LINK (B3): /vendors/<slug>/ pages are live, so the vendor name
+// links to the vendor's directory page; the official website stays as a
+// separate external link.
 import type { Vendor } from '../data/vendors';
 import type { Process } from '../data/processes';
 
@@ -42,7 +41,7 @@ const siteHost = vendor.officialSite.replace(/^https:\/\//, '').replace(/\/$/, '
   <div class="rel-grid">
     <div class="rel-card">
       <p class="rel-label">Manufacturer</p>
-      <p class="rel-name">{vendor.name}</p>
+      <p class="rel-name"><a href={`/vendors/${vendor.slug}/`}>{vendor.name}</a></p>
       <p class="rel-meta">{vendorMeta}</p>
       <p>{vendor.intro}</p>
       <p><a href={vendor.officialSite} rel="noopener">Official website — {siteHost}</a></p>

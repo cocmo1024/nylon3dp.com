@@ -1,0 +1,132 @@
+---
+import Base from '../../layouts/Base.astro';
+import { VENDORS, type Vendor } from '../../data/vendors';
+import { MATERIALS } from '../../data/materials';
+import { MACHINES } from '../../data/machines';
+import { PROCESSES } from '../../data/processes';
+import { pickSpec, fmtSpec, buildVolumeString } from '../../lib/specs';
+import { SITE } from '../../site';
+
+export function getStaticPaths() {
+  return VENDORS.map((v) => ({ params: { slug: v.slug }, props: { vendor: v } }));
+}
+
+interface Props {
+  vendor: Vendor;
+}
+const { vendor: v } = Astro.props;
+
+// Product lists are reverse references: derived from the vendorSlug on
+// each material/machine at build time, never hand-written.
+const materials = MATERIALS.filter((m) => m.vendorSlug === v.slug);
+const machines = MACHINES.filter((m) => m.vendorSlug === v.slug);
+const processes = PROCESSES.filter((p) =>
+  [...materials, ...machines].some((e) => e.processSlug === p.slug),
+);
+
+const TYPE_LABEL: Record<Vendor['type'], string> = {
+  material: 'Material manufacturer',
+  machine: 'Machine manufacturer',
+  both: 'Materials & machines',
+};
+const siteHost = v.officialSite.replace(/^https:\/\//, '').replace(/\/$/, '');
+
+const title = `${v.name} — Nylon Materials & Machines | Nylon3DP`;
+const description = `${v.name} (${v.hqCountry}): the ${v.name} nylon grades and printers listed in the Nylon3DP database, with datasheet-sourced specifications.`;
+
+const profileLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Organization',
+    name: v.name,
+    url: v.officialSite,
+    ...(v.founded ? { foundingDate: String(v.founded) } : {}),
+    address: { '@type': 'PostalAddress', addressCountry: v.hqCountry },
+  },
+};
+---
+
+<Base title={title} description={description} jsonLd={profileLd}>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/vendors/">Vendors</a> / {v.name}</p>
+  <h1>{v.name}</h1>
+  <p>
+    <span class="tag">{v.hqCountry}</span>
+    <span class="tag">{TYPE_LABEL[v.type]}</span>
+    {v.founded && <span class="tag">Founded {v.founded}</span>}
+    {processes.map((p) => <span class="tag">{p.name}</span>)}
+  </p>
+  <div class="quick-answer">
+    <p class="qa-label">In this database</p>
+    <p>{v.name} accounts for {materials.length} material grade{materials.length === 1 ? '' : 's'} and {machines.length} machine{machines.length === 1 ? '' : 's'} in the Nylon3DP databases, listed below. Official website: <a href={v.officialSite} rel="noopener">{siteHost}</a>.</p>
+  </div>
+
+  <p>{v.intro}</p>
+
+  <h2>Materials in this database</h2>
+  {materials.length > 0 ? (
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Grade</th>
+            <th>Polymer</th>
+            <th>Form</th>
+            <th>Process</th>
+            <th class="num-col">Tensile strength</th>
+          </tr>
+        </thead>
+        <tbody>
+          {materials.map((m) => {
+            const ts = pickSpec(m.structuredSpecs, 'tensileStrength', { orientations: ['XY', 'X-Y', 'X'] });
+            return (
+              <tr>
+                <td><a href={`/materials/${m.slug}/`}>{m.name}</a></td>
+                <td>{m.basePolymer}</td>
+                <td>{m.form}</td>
+                <td>{m.process}</td>
+                <td class="num">{ts ? fmtSpec(ts) : '—'}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p>No material grades from {v.name} are in the <a href="/materials/">material database</a> yet. The database is expanding in stages; grades are added only with a manufacturer datasheet in hand.</p>
+  )}
+
+  <h2>Machines in this database</h2>
+  {machines.length > 0 ? (
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Machine</th>
+            <th>Process</th>
+            <th class="num-col">Build volume X × Y × Z (mm)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {machines.map((m) => (
+            <tr>
+              <td><a href={`/machines/${m.slug}/`}>{m.name}</a></td>
+              <td>{m.process}</td>
+              <td class="num">{buildVolumeString(m) ?? '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p>No machines from {v.name} are in the <a href="/machines/">machine database</a> yet. The database is expanding in stages; machines are added only with manufacturer specifications in hand.</p>
+  )}
+
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      {v.sources.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

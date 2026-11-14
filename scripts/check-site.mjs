@@ -16,6 +16,12 @@
 //   tool pages carry their picker shell + payload; the B1-dropped
 //   datasheet-note incidentals (± tolerances, unit conversions, laser
 //   class) are restored verbatim on the entity pages
+// - vendors & applications (B3): the vendor index carries an ItemList of
+//   the 8 vendors; each vendor page's material/machine link counts match
+//   the database (reverse references); the applications coverage matrix
+//   renders with the two published drone guides linked; application pages
+//   render their design-number block; material pages link back to the
+//   application guides that recommend them
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -100,7 +106,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 45; // 43 + B2 comparison tools (/compare/materials/, /compare/machines/)
+const EXPECTED_SITEMAP_URLS = 58; // 45 + B3: /vendors/ + 8 vendor pages + /applications/ + drones hub + 2 application guides (13 new)
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -254,6 +260,98 @@ for (const { path, values } of NOTE_SPOT_CHECKS) {
   if (!html.includes('Datasheet notes')) errors.push(`${path}: no "Datasheet notes" section`);
   for (const v of values) {
     if (!html.includes(v)) errors.push(`${path}: datasheet-note text "${v}" not restored`);
+  }
+}
+
+// --- vendors & applications checks (B3) -----------------------------------
+// Vendor index: ItemList JSON-LD listing all 8 vendor pages.
+{
+  const file = join(DIST, 'vendors', 'index.html');
+  if (!existsSync(file)) errors.push('/vendors/: missing in dist (B3 vendor check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    const blocks = parseLd(html, '/vendors/');
+    const list = blocks.find((b) => b['@type'] === 'ItemList');
+    if (!list) errors.push('/vendors/: no ItemList JSON-LD');
+    else {
+      if (list.numberOfItems !== 8) errors.push(`/vendors/: ItemList numberOfItems ${list.numberOfItems}, expected 8`);
+      if ((list.itemListElement ?? []).length !== 8) errors.push('/vendors/: ItemList does not list 8 vendors');
+      for (const item of list.itemListElement ?? []) {
+        if (!String(item.url ?? '').startsWith(`${SITE}/vendors/`)) errors.push(`/vendors/: ItemList url ${item.url} is not a vendor page`);
+      }
+    }
+  }
+}
+// Vendor pages: the material/machine entry links rendered must equal the
+// database's reverse-reference counts for that vendor (mirrors the data
+// layer; bump when a batch adds entries for a vendor).
+const VENDOR_PRODUCT_COUNTS = {
+  'eos': { materials: 3, machines: 2 },
+  'hp': { materials: 1, machines: 1 },
+  'formlabs': { materials: 3, machines: 1 },
+  'stratasys': { materials: 0, machines: 1 },
+  'basf-forward-am': { materials: 1, machines: 0 },
+  'polymaker': { materials: 3, machines: 0 },
+  'bambu-lab': { materials: 2, machines: 0 },
+  'arkema': { materials: 1, machines: 0 },
+};
+for (const [slug, counts] of Object.entries(VENDOR_PRODUCT_COUNTS)) {
+  const path = `/vendors/${slug}/`;
+  const file = join(DIST, 'vendors', slug, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (B3 vendor check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  const matLinks = (html.match(/<a href="\/materials\/[a-z0-9-]+\/">/g) || []).length;
+  const machLinks = (html.match(/<a href="\/machines\/[a-z0-9-]+\/">/g) || []).length;
+  if (matLinks !== counts.materials) errors.push(`${path}: ${matLinks} material entry links, expected ${counts.materials}`);
+  if (machLinks !== counts.machines) errors.push(`${path}: ${machLinks} machine entry links, expected ${counts.machines}`);
+}
+// Applications matrix: renders the taxonomy, links the drones hub and
+// exactly the published guides.
+{
+  const file = join(DIST, 'applications', 'index.html');
+  if (!existsSync(file)) errors.push('/applications/: missing in dist (B3 matrix check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('matrix-table')) errors.push('/applications/: no coverage matrix table');
+    for (const label of ['Drones &amp; UAV', 'Brackets &amp; mounts', 'Housings &amp; enclosures', 'Prosthetics &amp; orthotics']) {
+      if (!html.includes(label)) errors.push(`/applications/: matrix axis label "${label}" not rendered`);
+    }
+    if (!html.includes('href="/applications/drones/"')) errors.push('/applications/: drones hub not linked');
+    const guideLinks = (html.match(/status-live/g) || []).length;
+    if (guideLinks !== 2) errors.push(`/applications/: ${guideLinks} published-guide cells, expected 2`);
+    if (!html.includes('Planned')) errors.push('/applications/: no Planned cells rendered');
+  }
+}
+// Application pages: the design-number block renders with its sourced
+// values; the hub renders and links both guides.
+const APP_SPOT_CHECKS = [
+  { path: '/applications/drones/motor-mounts/', values: ['Design numbers', '0.6 mm', 'Recommended grades', 'EOS PA 3200 GF'] },
+  { path: '/applications/drones/propeller-guards/', values: ['Design numbers', 'Propeller tip clearance', 'Formlabs Nylon 11'] },
+];
+for (const { path, values } of APP_SPOT_CHECKS) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (B3 application check)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  if (!html.includes('design-numbers')) errors.push(`${path}: no design-numbers table`);
+  for (const v of values) if (!html.includes(v)) errors.push(`${path}: expected content "${v}" not rendered`);
+}
+{
+  const file = join(DIST, 'applications', 'drones', 'index.html');
+  if (!existsSync(file)) errors.push('/applications/drones/: missing in dist (B3 hub check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('href="/applications/drones/motor-mounts/"')) errors.push('/applications/drones/: motor-mounts guide not linked');
+    if (!html.includes('href="/applications/drones/propeller-guards/"')) errors.push('/applications/drones/: propeller-guards guide not linked');
+  }
+}
+// Material pages link back to the guides that recommend them.
+{
+  const file = join(DIST, 'materials', 'eos-pa-1101', 'index.html');
+  if (!existsSync(file)) errors.push('/materials/eos-pa-1101/: missing in dist (B3 back-link check)');
+  else {
+    const html = readFileSync(file, 'utf8');
+    if (!html.includes('href="/applications/drones/motor-mounts/"')) errors.push('/materials/eos-pa-1101/: no link to the motor-mounts guide');
+    if (!html.includes('href="/applications/drones/propeller-guards/"')) errors.push('/materials/eos-pa-1101/: no link to the propeller-guards guide');
   }
 }
 

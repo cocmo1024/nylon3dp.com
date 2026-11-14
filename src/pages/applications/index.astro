@@ -1,0 +1,78 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  APPLICATIONS,
+  APPLICATION_INDUSTRIES,
+  APPLICATION_PART_FAMILIES,
+  APPLICATION_MATRIX,
+} from '../../data/applications';
+import { SITE } from '../../site';
+
+// Applications coverage map (rebuild B3). This page renders the planning
+// matrix itself — industry x part family — from applications.ts. It is
+// deliberately honest about coverage: a cell is either a published guide
+// (linked), in the coverage plan (candidate), or not in the plan at all.
+// Nothing here is a page that does not exist.
+const cellFor = (industry: string, partFamily: string) =>
+  APPLICATION_MATRIX.find((c) => c.industry === industry && c.partFamily === partFamily);
+const appFor = (industry: string, partFamily: string) =>
+  APPLICATIONS.find((a) => a.industry === industry && a.partFamily === partFamily);
+const publishedCount = APPLICATION_MATRIX.filter((c) => c.status === 'published').length;
+const plannedCount = APPLICATION_MATRIX.filter((c) => c.status !== 'published').length;
+// Industries with a live hub page (the hub routes are built per industry).
+const HUB_INDUSTRIES = new Set(APPLICATIONS.map((a) => a.industry));
+---
+
+<Base
+  title="Nylon 3D Printing Applications — Coverage Map | Nylon3DP"
+  description="The coverage map of the Nylon3DP application library: which industry and part-family combinations have published guides, which are planned, and which are not."
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / Applications</p>
+    <h1>Applications of nylon 3D printing</h1>
+  </div>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>This page is the coverage map of the application library — the matrix the library is built from. Each cell is an industry paired with a part family. {publishedCount} cells have published guides today (the <a href="/applications/drones/">Drones &amp; UAV hub</a>), {plannedCount} are in the coverage plan, and the rest are not planned. A guide is published only when it passes a double gate: real demand for the question, and a complete part-specific kernel — selection reasoning, its own design numbers, failure modes and economics. No cell becomes a page to fill the grid.</p>
+  </div>
+
+  <p>There are thousands of parts that can be printed in nylon, across every industry in the left-hand column. Publishing a thin page for each of them would be easy and worthless — the pages would be one template with the nouns swapped. So the library is built the other way: the matrix below is planned in the open, and a cell turns into a guide only when its content can be genuinely specific to that part — its loads, its design numbers, the way it fails. Coverage so far is one industry hub deep; the map shows exactly how far it goes and what is queued behind it.</p>
+
+  <h2>The coverage matrix</h2>
+  <div class="table-scroll">
+    <table class="data-table matrix-table">
+      <thead>
+        <tr>
+          <th>Industry \ Part family</th>
+          {APPLICATION_PART_FAMILIES.map((f) => <th>{f.name}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {APPLICATION_INDUSTRIES.map((ind) => (
+          <tr>
+            <th scope="row">
+              {HUB_INDUSTRIES.has(ind.slug)
+                ? <a href={`/applications/${ind.slug}/`}>{ind.name}</a>
+                : ind.name}
+            </th>
+            {APPLICATION_PART_FAMILIES.map((fam) => {
+              const cell = cellFor(ind.slug, fam.slug);
+              const app = cell?.status === 'published' ? appFor(ind.slug, fam.slug) : undefined;
+              return (
+                <td>
+                  {app
+                    ? <a class="status-live" href={`/applications/${ind.slug}/${app.slug}/`}>Guide published</a>
+                    : cell
+                      ? <span class="status-planned">Planned</span>
+                      : <span class="status-none">—</span>}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">“Guide published” links to the application guide. “Planned” means the combination is in the coverage plan and waits its turn under the double gate described above — there is no page behind it yet, and this map does not pretend otherwise. A dash means the combination is not currently planned. The first hub, <a href="/applications/drones/">Drones &amp; UAV</a>, covers {APPLICATIONS.filter((a) => a.industry === 'drones').length} part families today: {APPLICATIONS.filter((a) => a.industry === 'drones').map((a) => a.title.replace(/^Drone /, '').toLowerCase()).join(' and ')}.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

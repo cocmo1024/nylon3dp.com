@@ -213,6 +213,14 @@ table.data-table.hub-table tbody tr.alt td { background: var(--zebra); }
 .cmp-sub { display: block; color: var(--muted); font-size: var(--fs-xs); }
 td.cmp-missing { color: var(--muted); text-align: center; }
 
+/* B3: applications coverage matrix + design-number tables */
+.matrix-table th[scope="row"] { background: var(--bg); font-weight: 600; }
+.matrix-table td { text-align: center; }
+.status-planned { color: var(--muted); }
+.status-none { color: var(--muted); }
+.design-numbers { white-space: normal; }
+.design-numbers th[scope="row"] { background: var(--bg); font-weight: 600; }
+
 @media (max-width: 760px) {
   :root { --fs-base: 1rem; --fs-h1: 1.8rem; --fs-display: 2rem; --fs-table: 0.88rem; }
   .footer-grid { grid-template-columns: 1fr 1fr; }

@@ -183,12 +183,38 @@ for (const a of APPLICATIONS) {
   const w = `application ${a.slug}`;
   if (!industrySlugs.has(a.industry)) err(`${w}: unknown industry "${a.industry}"`);
   if (!partFamilySlugs.has(a.partFamily)) err(`${w}: unknown part family "${a.partFamily}"`);
+  for (const f of ['title', 'quickAnswer']) checkStr(a, f, w);
+  if (!Array.isArray(a.intro) || !a.intro.length) err(`${w}: "intro" must be a non-empty array`);
   for (const f of ['selectionReasoning', 'designNumbers', 'failureModes', 'economicsVsConventional', 'faqs']) {
     if (!Array.isArray(a[f]) || !a[f].length) err(`${w}: "${f}" must be a non-empty array (the unique kernel is mandatory)`);
   }
+  if (!Array.isArray(a.recommendedMaterials) || !a.recommendedMaterials.length) err(`${w}: "recommendedMaterials" must be a non-empty array`);
+  if (!Array.isArray(a.processes) || !a.processes.length) err(`${w}: "processes" must be a non-empty array`);
   for (const s of a.recommendedMaterials ?? []) if (!materialSlugs.has(s)) err(`${w}: recommendedMaterials references unknown material "${s}"`);
   for (const s of a.processes ?? []) if (!processSlugs.has(s)) err(`${w}: processes references unknown process "${s}"`);
   checkSources(a, w);
+}
+// Matrix <-> application consistency (B3): a 'published' cell corresponds
+// to exactly one application entry, and every application entry's cell is
+// marked 'published'. Candidate/in-progress cells must have no entry.
+{
+  const cellKey = (industry, partFamily) => `${industry}×${partFamily}`;
+  const appsByCell = new Map();
+  for (const a of APPLICATIONS) {
+    const k = cellKey(a.industry, a.partFamily);
+    if (appsByCell.has(k)) err(`applications: two entries for matrix cell ${k}`);
+    appsByCell.set(k, a);
+  }
+  const publishedCells = new Set();
+  for (const cell of APPLICATION_MATRIX) {
+    if (cell.status !== 'published') continue;
+    const k = cellKey(cell.industry, cell.partFamily);
+    publishedCells.add(k);
+    if (!appsByCell.has(k)) err(`application matrix: cell ${k} is 'published' but has no application entry`);
+  }
+  for (const [k, a] of appsByCell) {
+    if (!publishedCells.has(k)) err(`application ${a.slug}: cell ${k} is not marked 'published' in the matrix`);
+  }
 }
 
 // --- (b) relation integrity ---------------------------------------------------
@@ -214,6 +240,28 @@ for (const m of MATERIALS) {
 for (const mc of MACHINES) {
   checkEntityRelations(mc, 'machine');
   for (const s of mc.supportedMaterials) if (!materialSlugs.has(s)) err(`machine ${mc.slug}: supportedMaterials references unknown material "${s}"`);
+}
+// Material <-> application back-references must agree (B3): a material is
+// listed on an application page (recommendedMaterials) exactly when the
+// application is listed on the material page (relatedApplications).
+{
+  const materialBySlug = new Map(MATERIALS.map((m) => [m.slug, m]));
+  for (const a of APPLICATIONS) {
+    for (const s of a.recommendedMaterials) {
+      const m = materialBySlug.get(s);
+      if (m && !m.relatedApplications.includes(a.slug)) {
+        err(`relations: application ${a.slug} recommends material ${s}, but the material's relatedApplications does not link back`);
+      }
+    }
+  }
+  for (const m of MATERIALS) {
+    for (const s of m.relatedApplications) {
+      const a = APPLICATIONS.find((x) => x.slug === s);
+      if (a && !a.recommendedMaterials.includes(m.slug)) {
+        err(`relations: material ${m.slug} lists application ${s}, but the application does not recommend the material`);
+      }
+    }
+  }
 }
 for (const [manufacturer, set] of manufacturerToVendors) {
   if (set.size !== 1) err(`relations: manufacturer "${manufacturer}" maps to ${set.size} vendors (${[...set].join(', ')}), expected exactly 1`);

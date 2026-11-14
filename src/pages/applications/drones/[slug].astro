@@ -1,0 +1,147 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Faq from '../../../components/Faq.astro';
+import {
+  APPLICATIONS,
+  APPLICATION_INDUSTRIES,
+  APPLICATION_PART_FAMILIES,
+  type Application,
+} from '../../../data/applications';
+import { MATERIALS } from '../../../data/materials';
+import { PROCESSES } from '../../../data/processes';
+import { pickSpec, fmtSpec } from '../../../lib/specs';
+import { SITE } from '../../../site';
+
+// Application guide pages for the Drones & UAV hub (rebuild B3). The page
+// renders the application entity's unique kernel from the data layer:
+// selection reasoning chain, part-specific design numbers, dominant
+// failure modes, economics versus the conventional process, FAQs. The
+// recommended-grades table is resolved from recommendedMaterials, so a
+// grade appears here only if the data layer says so (validate-data.mjs
+// enforces the material-side back-reference as well).
+export function getStaticPaths() {
+  return APPLICATIONS.filter((a) => a.industry === 'drones').map((a) => ({
+    params: { slug: a.slug },
+    props: { app: a },
+  }));
+}
+
+interface Props {
+  app: Application;
+}
+const { app } = Astro.props;
+const industry = APPLICATION_INDUSTRIES.find((i) => i.slug === app.industry)!;
+const family = APPLICATION_PART_FAMILIES.find((f) => f.slug === app.partFamily)!;
+const grades = app.recommendedMaterials
+  .map((s) => MATERIALS.find((m) => m.slug === s)!)
+  .filter(Boolean);
+const processes = app.processes.map((s) => PROCESSES.find((p) => p.slug === s)!).filter(Boolean);
+const compareHref = `/compare/materials/?sel=${grades.slice(0, 4).map((g) => g.slug).join(',')}`;
+
+const title = `${app.title} in Printed Nylon — Guide | Nylon3DP`;
+const description = `${app.title}: material selection with datasheet numbers, design numbers, failure modes, and economics vs machined and moulded parts.`;
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: app.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `${app.title} in 3D printed nylon`,
+  description,
+  about: app.title,
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base title={title} description={description} jsonLd={[articleLd, faqLd]}>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/applications/">Applications</a> / <a href="/applications/drones/">Drones &amp; UAV</a> / {app.title.replace(/^Drone /, '')}</p>
+  <h1>{app.title} in 3D printed nylon</h1>
+  <p>
+    <span class="tag">{industry.name}</span>
+    <span class="tag">{family.name}</span>
+    {processes.map((p) => <span class="tag">{p.name}</span>)}
+  </p>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>{app.quickAnswer}</p>
+  </div>
+
+  {app.intro.map((para) => <p>{para}</p>)}
+
+  <h2>Choosing the material: the reasoning chain</h2>
+  <ol>
+    {app.selectionReasoning.map((step) => <li>{step}</li>)}
+  </ol>
+  <p>Every figure in that chain is a datasheet value from the grade's own page in this database — follow the grade links in the table below, or open the shortlist in the <a href={compareHref}>material comparison tool</a>.</p>
+
+  <h2>Design numbers for this part</h2>
+  <div class="table-scroll">
+    <table class="data-table design-numbers">
+      <thead>
+        <tr><th>Design point</th><th>Value</th><th>Basis</th></tr>
+      </thead>
+      <tbody>
+        {app.designNumbers.map((d) => (
+          <tr>
+            <th scope="row">{d.label}</th>
+            <td>{d.value}</td>
+            <td>{d.note ?? ''}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Where the basis column names a manufacturer document, the value is that document's. Where it says rule of thumb or engineering practice, the value is this site's engineering guidance, labelled as such — not manufacturer data.</p>
+
+  <h2>Recommended grades in this database</h2>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Grade</th>
+          <th>Polymer</th>
+          <th>Process</th>
+          <th class="num-col">Tensile strength</th>
+          <th class="num-col">Elongation at break (in-plane)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {grades.map((g) => {
+          const ts = pickSpec(g.structuredSpecs, 'tensileStrength', { orientations: ['XY', 'X-Y', 'X'] });
+          const el = pickSpec(g.structuredSpecs, 'elongationAtBreak', { orientations: ['XY', 'X-Y', 'X'] });
+          return (
+            <tr>
+              <td><a href={`/materials/${g.slug}/`}>{g.name}</a></td>
+              <td>{g.basePolymer}</td>
+              <td>{g.process}</td>
+              <td class="num">{ts ? fmtSpec(ts) : '—'}</td>
+              <td class="num">{el ? fmtSpec(el) : '—'}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>How this part fails</h2>
+  <ul>
+    {app.failureModes.map((f) => <li>{f}</li>)}
+  </ul>
+
+  <h2>Economics: printed nylon vs the conventional part</h2>
+  {app.economicsVsConventional.map((para) => <p>{para}</p>)}
+  <p>Related: the <a href="/compare/sls-vs-mjf/">SLS vs MJF cost-structure comparison</a> and the <a href="/guides/designing-for-sls-mjf/">SLS &amp; MJF design guide</a> cover the process side of these numbers.</p>
+
+  <Faq items={app.faqs} />
+
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      {app.sources.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

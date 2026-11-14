@@ -5,6 +5,7 @@ import SpecTable from '../../components/SpecTable.astro';
 import Relations, { type RelatedLink } from '../../components/Relations.astro';
 import { MATERIALS, type Material } from '../../data/materials';
 import { MACHINES } from '../../data/machines';
+import { APPLICATIONS, APPLICATION_INDUSTRIES } from '../../data/applications';
 import { VENDORS } from '../../data/vendors';
 import { PROCESSES } from '../../data/processes';
 import { materialFallbackRows, materialNoteRows } from '../../lib/specs';
@@ -29,6 +30,16 @@ const specifiedOn: RelatedLink[] = MACHINES.filter((mc) => mc.supportedMaterials
 }));
 const fallbackRows = materialFallbackRows(m);
 const noteRows = materialNoteRows(m);
+// Application guides that recommend this grade (data-layer relation,
+// rendered only when non-empty; validate-data keeps both sides in sync).
+const appGuides = m.relatedApplications
+  .map((s) => APPLICATIONS.find((a) => a.slug === s)!)
+  .filter(Boolean)
+  .map((a) => ({
+    href: `/applications/${a.industry}/${a.slug}/`,
+    title: a.title,
+    industry: APPLICATION_INDUSTRIES.find((i) => i.slug === a.industry)?.name ?? a.industry,
+  }));
 
 const title = `${m.name} Datasheet — Properties | Nylon3DP`;
 const description = `${m.name}: ${m.basePolymer} ${m.form.toLowerCase()} for ${m.process} — manufacturer-sourced datasheet properties and FAQ.`;
@@ -84,6 +95,17 @@ const articleLd = {
     relatedTitle={specifiedOn.length > 0 ? 'Machines specified for this material' : undefined}
     related={specifiedOn}
   />
+
+  {appGuides.length > 0 && (
+    <section aria-label="Application guides for this material">
+      <h2>Application guides for this grade</h2>
+      <ul>
+        {appGuides.map((g) => (
+          <li><a href={g.href}>{g.title}</a> <span class="rel-meta">{g.industry}</span></li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <Faq items={m.faqs} />
 

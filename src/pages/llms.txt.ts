@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { MATERIALS } from '../data/materials';
 import { MACHINES } from '../data/machines';
+import { VENDORS } from '../data/vendors';
+import { APPLICATIONS } from '../data/applications';
 import { SITE } from '../site';
 
 // Generated at build time from the same data files as the HTML pages.
@@ -17,6 +19,8 @@ export const GET: APIRoute = () => {
     `- [Home](${SITE.url}/): Overview and entry points`,
     `- [Material database](${SITE.url}/materials/): All nylon grades with datasheet property tables`,
     `- [Machine database](${SITE.url}/machines/): Powder-bed printers with manufacturer specifications`,
+    `- [Vendor directory](${SITE.url}/vendors/): The manufacturers behind the databases, with their listed grades and machines`,
+    `- [Applications](${SITE.url}/applications/): Coverage map of the application library (industry x part family), and the published application guides`,
     `- [Processes](${SITE.url}/processes/): SLS, MJF, SAF and FDM explained`,
     `- [SLS vs MJF](${SITE.url}/compare/sls-vs-mjf/): The two production powder processes compared on manufacturer data`,
     `- [Material comparison tool](${SITE.url}/compare/materials/): Side-by-side datasheet comparison of any 2–4 materials in the database (selection carried in the URL, e.g. ?sel=eos-pa-2200,hp-pa-12)`,
@@ -40,6 +44,15 @@ export const GET: APIRoute = () => {
     '## Machines',
     '',
     ...MACHINES.map((m) => `- [${m.name}](${SITE.url}/machines/${m.slug}/): ${m.process} printer by ${m.manufacturer}. ${m.quickAnswer}`),
+    '',
+    '## Vendors',
+    '',
+    ...VENDORS.map((v) => `- [${v.name}](${SITE.url}/vendors/${v.slug}/): ${v.hqCountry}. ${v.intro}`),
+    '',
+    '## Application guides',
+    '',
+    `- [Drones & UAV hub](${SITE.url}/applications/drones/): Why nylon is printed for drone parts, the five part families, and the PA12-stiffness vs PA11-toughness selection logic`,
+    ...APPLICATIONS.map((a) => `- [${a.title}](${SITE.url}/applications/${a.industry}/${a.slug}/): ${a.quickAnswer}`),
     '',
     '## Processes',
     '',

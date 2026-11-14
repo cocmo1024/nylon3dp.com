@@ -1,0 +1,66 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { APPLICATIONS } from '../../../data/applications';
+import { SITE } from '../../../site';
+
+// Drones & UAV industry hub (rebuild B3) — the first application hub.
+// Editorial essay: why nylon earns its place on an airframe, the five
+// part families that make up a drone, and the selection logic that runs
+// across all of them. Published guides are linked from the data layer;
+// families without a guide yet are labelled as such, never faked.
+const guides = APPLICATIONS.filter((a) => a.industry === 'drones');
+const guideFor = (slug: string) => guides.find((g) => g.slug === slug);
+
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'Drones & UAV: nylon 3D printing applications',
+  description:
+    'Why nylon powder-bed printing earns its place on drones: motor mounts, propeller guards, frames and payload mounts — material selection logic with datasheet numbers.',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="Drones & UAV — Nylon 3D Printing Applications | Nylon3DP"
+  description="The drone application hub: why nylon is printed for motor mounts, propeller guards and frames, and how PA12 stiffness trades against PA11 toughness."
+  jsonLd={articleLd}
+>
+  <div class="hub-band">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/applications/">Applications</a> / Drones &amp; UAV</p>
+    <h1>Drones &amp; UAV: nylon 3D printing applications</h1>
+  </div>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>Nylon powder-bed printing (SLS and MJF) is the standard way to print structural drone parts because it combines metal-replacing stiffness at a third of the weight with the toughness to survive crashes. The selection logic across almost every drone part is one trade: PA12 grades — especially glass-filled — for stiffness and alignment, PA11 grades for impact survival, with datasheet elongation at break (3–9% for the glass-filled PA12 grades, up to 45% for PA11) as the number that decides. Two part families have full guides today: <a href="/applications/drones/motor-mounts/">motor mounts</a> and <a href="/applications/drones/propeller-guards/">propeller guards &amp; ducts</a>.</p>
+  </div>
+
+  <h2>Why nylon, on an aircraft that counts grams</h2>
+  <p>Three properties put printed nylon on airframes. The first is specific strength: the unfilled powder grades in this database have part densities of 0.93–1.03 g/cm³ on their manufacturers' datasheets (EOS PA 2200 at 0.93, HP PA 12 at 1.02) with tensile strengths of 45–54 MPa — a strength-to-weight position no printable polymer family beats at this toughness level, and one no machined metal matches for small complex parts. The second is that powder-bed parts need no support structures, so a mount, a duct and a cable guide can be one printed piece instead of an assembly. The third is damping and toughness: nylon flexes, absorbs vibration and survives the crashes that are a normal part of drone operations — provided the grade is chosen for it, which is what the guides under this hub are for.</p>
+  <p>The honest limits belong in the same paragraph. Printed nylon is not carbon plate: a flat arm in bending still belongs to composites or aluminium. Nylon absorbs moisture and creeps under sustained clamping, and its properties are direction-dependent in every datasheet on this site. The parts below are the ones where the balance lands in nylon's favour.</p>
+
+  <h2>The five part families</h2>
+
+  <h3>1. Motor mounts &amp; brackets</h3>
+  <p>The structural joint of the aircraft: thrust, torque, vibration and crash loads through a bolted connection. The mount is a stiffness part that must also survive impacts, which makes it the purest form of the PA12-versus-PA11 trade — glass-filled grades at 2800–3200 MPa modulus for alignment, PA11 at 30–40% elongation for survival. <strong>Guide published:</strong> <a href={`/applications/drones/${guideFor('motor-mounts')!.slug}/`}>drone motor mounts</a> — reasoning chain, bolt-circle design numbers, failure modes and economics.</p>
+
+  <h3>2. Propeller guards &amp; ducts</h3>
+  <p>The sacrificial part: a ring whose job is to be hit, at the largest radius on the aircraft. Here the trade inverts — ductility picks the material, stiffness comes from ring geometry, and glass filler is the wrong answer. <strong>Guide published:</strong> <a href={`/applications/drones/${guideFor('propeller-guards')!.slug}/`}>drone propeller guards &amp; ducts</a> — tip clearance, ring sections, orientation and the failure modes of the wrong grade.</p>
+
+  <h3>3. Frames &amp; arms</h3>
+  <p>The largest printed structures on small aircraft: monocoque frames for cinewhoops and indoor aircraft, arm assemblies and centre plates on custom builds. Frames are where powder-bed integration pays most — motor seats, ducts, battery trays and electronics mounts in one part — and where the stiffness-versus-toughness trade is fought at the scale of the whole aircraft rather than one bracket. <em>Dedicated guide in preparation under the <a href="/applications/">coverage plan</a>; the selection logic below and the two published guides cover the material decisions meanwhile.</em></p>
+
+  <h3>4. Camera &amp; payload mounts</h3>
+  <p>Gimbal plates, camera cages, sensor and antenna mounts: small parts where nylon's vibration damping is a feature rather than a compromise, loads are modest, and the design problem is isolation and fit rather than strength. Unfilled PA12 is the usual default; the failure mode to design against is creep in any mount that holds a payload under sustained strap or bolt load. <em>Dedicated guide in preparation under the <a href="/applications/">coverage plan</a>.</em></p>
+
+  <h3>5. Landing gear &amp; skids</h3>
+  <p>The other impact part: legs and skids that take landing shock and ground abrasion, and are expected to be replaced. The reasoning follows the propeller guard's — ductile PA11, flex-first geometry, wear treated as a replacement cue. <em>Dedicated guide in preparation under the <a href="/applications/">coverage plan</a>.</em></p>
+
+  <h2>The selection logic, once</h2>
+  <p>Nearly every drone part is decided by the same three questions, in this order. <strong>Does it need to hold alignment, or survive impact?</strong> Alignment points to stiffness — glass-filled PA12 (EOS PA 3200 GF, Formlabs Nylon 12 GF) or unfilled PA12. Impact points to elongation — the PA11 powders (EOS PA 1101, Formlabs Nylon 11, Arkema Rilsan Invent PA11). <strong>Which direction does it bend?</strong> Every powder datasheet splits properties by orientation; a part loaded across layers gets the Z column, not the headline number — 4% elongation for EOS PA 2200 in Z against 18% in-plane. <strong>What does it touch?</strong> Heat (motor-adjacent parts check HDT at load), sustained clamping (creep — spread the load), moisture (nylon conditions over time; design clearances accordingly).</p>
+  <p>Work the trade yourself in the <a href="/compare/materials/">material comparison tool</a>, read the grades in the <a href="/materials/">material database</a>, and design to the <a href="/guides/designing-for-sls-mjf/">SLS &amp; MJF design guide</a> and the <a href="/guides/pa11-vs-pa12/">PA11 vs PA12 guide</a>. Where this hub's guides make a numerical claim, it is a datasheet value from those pages, cited at the point of use.</p>
+
+  <h2>Coverage status</h2>
+  <p>This hub is the first of the application library's industry hubs. Two of its part families have full guides today; the remaining three are covered by the essay above and are queued under the same double gate as every application on this site — real demand, and a complete part-specific kernel, before a page exists. The full plan, including the industries that follow this one, is the <a href="/applications/">applications coverage map</a>.</p>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

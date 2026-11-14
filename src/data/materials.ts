@@ -57,7 +57,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts'],
     quickAnswer:
       'EOS PA 2200 is the reference PA12 powder for selective laser sintering: a balanced, unfilled nylon 12 with 48 MPa tensile strength (XY), 1650 MPa tensile modulus and 18% elongation at break in the XY plane, per the current EOS material data sheet.',
     intro: [
@@ -110,7 +110,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts', 'propeller-guards'],
     quickAnswer:
       'EOS PA 1101 is a bio-based PA11 SLS powder derived from castor oil. Per the EOS data sheet it offers 50 MPa tensile strength (XY), 1650 MPa modulus and 30% elongation at break — its ductility and impact resistance, not stiffness, are the reason to choose it over PA12.',
     intro: [
@@ -163,7 +163,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts'],
     quickAnswer:
       'EOS PA 3200 GF is a glass-bead-filled PA12 SLS powder (40 wt% glass beads per EOS). Filling raises tensile modulus to 3200 MPa — roughly double unfilled PA 2200 — with 51 MPa tensile strength and 9% elongation at break, for stiff housings and wear-resistant machine components.',
     intro: [
@@ -268,7 +268,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS (Fuse series)',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts', 'propeller-guards'],
     quickAnswer:
       'Formlabs Nylon 11 Powder is a bio-based PA11 for the Fuse series, built for parts that bend or take impact: 49 MPa tensile strength, 1600 MPa modulus and 40% elongation at break (X/Y) per the Formlabs technical data sheet — the most ductile powder in the Formlabs range.',
     intro: [
@@ -320,7 +320,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'MJF',
     processSlug: 'mjf',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts', 'propeller-guards'],
     quickAnswer:
       'HP 3D High Reusability PA 12 is the standard nylon for Multi Jet Fusion: 54 MPa tensile strength, 2150 MPa tensile modulus and 18% elongation at break in XY (10% in Z), with a density of 1.02 g/cm³, per HP\'s technical data sheet. "High Reusability" refers to HP\'s powder-refresh economics: surplus powder is recovered and reused at a set refresh ratio.',
     intro: [
@@ -662,7 +662,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS (Fuse series)',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['motor-mounts'],
     quickAnswer:
       'Formlabs Nylon 12 GF Powder is the glass-filled PA12 for the Fuse SLS series: glass filler raises tensile modulus to 2800 MPa (from 1850 MPa for unfilled Nylon 12 Powder) and HDT at 1.8 MPa to 113 °C, per Formlabs — at the cost of tensile strength (38 MPa) and elongation at break (4% in X/Y). It is the Fuse material for stiff parts that must hold their shape under sustained load and heat.',
     intro: [
@@ -779,7 +779,7 @@ export const MATERIALS: Material[] = [
     form: 'Powder',
     process: 'SLS',
     processSlug: 'sls',
-    relatedApplications: [],
+    relatedApplications: ['propeller-guards'],
     quickAnswer:
       'Arkema Rilsan Invent PA11 (data sheet grade designation: Rilsan® PA11 Invent Nat) is a 100% bio-based PA11 powder for laser sintering, polymerised from castor oil. Per Arkema\'s technical data sheet it offers 45 MPa tensile strength at break, 1500 MPa tensile modulus and 45% strain at break — the ductility figure, far above any PA12 powder, is the reason this grade exists.',
     intro: [

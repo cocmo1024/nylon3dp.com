@@ -16,7 +16,9 @@ export const SITE = {
 export const NAV = [
   { href: '/materials/', label: 'Materials' },
   { href: '/machines/', label: 'Machines' },
+  { href: '/vendors/', label: 'Vendors' },
   { href: '/processes/', label: 'Processes' },
+  { href: '/applications/', label: 'Applications' },
   { href: '/guides/', label: 'Guides' },
   { href: '/glossary/', label: 'Glossary' },
 ] as const;
@@ -27,6 +29,8 @@ export const FOOTER_NAV = [
     links: [
       { href: '/materials/', label: 'Material database' },
       { href: '/machines/', label: 'Machine database' },
+      { href: '/vendors/', label: 'Vendor directory' },
+      { href: '/applications/', label: 'Applications' },
       { href: '/processes/', label: 'Processes' },
       { href: '/compare/sls-vs-mjf/', label: 'SLS vs MJF' },
       { href: '/compare/materials/', label: 'Compare materials' },
