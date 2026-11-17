@@ -109,6 +109,30 @@ export const GLOSSARY: GlossaryTerm[] = [
       'The family of processes — SLS, MJF and SAF among them — that build parts inside a bed of fine polymer powder, fusing one thin layer at a time. The surrounding powder supports overhangs, parts can be nested in three dimensions to fill the build volume, and unfused powder is recovered, refreshed and reused.',
   },
   {
+    id: 'powder-cake',
+    term: 'Powder cake',
+    definition:
+      'The cooled block taken out of a powder-bed build chamber after a build: the fused parts embedded in the unfused powder that surrounded them. Parts are excavated from the cake, and the loose powder is recovered, sieved and refreshed for the next build.',
+  },
+  {
+    id: 'virgin-powder',
+    term: 'Virgin powder',
+    definition:
+      'Powder that has never been through a build. In powder-bed printing, virgin powder is blended with recovered used powder at the manufacturer-specified refresh ratio to replace what fused into parts and to dilute thermally aged powder.',
+  },
+  {
+    id: 'packing-density',
+    term: 'Packing density',
+    definition:
+      'The share of a powder-bed build that actually becomes parts — the fused part mass (or volume) divided by the total powder charge. Packing density links the refresh ratio to running cost: at a given refresh ratio, a denser-packed build consumes its charge more productively and leaves less surplus aged powder per part.',
+  },
+  {
+    id: 'powder-ageing',
+    term: 'Powder ageing',
+    definition:
+      'The gradual change in unfused powder that sits near the melting point for the hours of a build: molecular weight and melt behaviour drift, which is why recovered powder cannot be reused indefinitely at 100%. Refreshing with virgin powder at the specified ratio is the standard control for ageing.',
+  },
+  {
     id: 'hdt',
     term: 'Heat deflection temperature (HDT)',
     definition:

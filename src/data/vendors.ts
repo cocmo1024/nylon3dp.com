@@ -125,6 +125,16 @@ export const VENDORS: Vendor[] = [
       'Arkema is a French specialty materials company headquartered in Colombes, formed in 2004 as a spin-off of Total’s chemicals division. Its Rilsan polyamide 11 — polymerised from castor oil — is the original PA11 chemistry, and the Rilsan Invent line adapts that chemistry for powder-bed fusion.',
     sources: [{ label: 'Arkema — official site', url: 'https://www.arkema.com' }],
   },
+  {
+    slug: 'sinterit',
+    name: 'Sinterit',
+    hqCountry: 'Poland',
+    type: 'both',
+    officialSite: 'https://sinterit.com',
+    intro:
+      'Sinterit is a Polish SLS company based in Kraków, known for the Lisa series of benchtop selective laser sintering printers and its own line of SLS powders. Its PA12 Smooth powder — with a manufacturer refreshing ratio of 22% — is the first Sinterit grade listed in this database.',
+    sources: [{ label: 'Sinterit — official site', url: 'https://sinterit.com' }],
+  },
 ];
 
 for (const v of VENDORS) {

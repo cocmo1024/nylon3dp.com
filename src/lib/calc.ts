@@ -46,6 +46,16 @@ export const PUBLISHED_REFRESH: Record<string, { ratio: number; basis: string }>
     basis:
       'Arkema states a low refreshing factor for Rilsan Invent PA11 — typically 50%, roughly half virgin powder in the blend — see the grade page.',
   },
+  'hp-pa-12-glass-beads': {
+    ratio: 30,
+    basis:
+      'HP specifies a refresh ratio of 30% for stable performance for PA 12 Glass Beads (data sheet 4AA7-0716ENE) — see the grade page.',
+  },
+  'sinterit-pa12-smooth': {
+    ratio: 22,
+    basis:
+      'Sinterit specifies a material refreshing ratio of 22% for PA12 Smooth — the percent of fresh powder mixed with used powder for the next print — see the grade page.',
+  },
 };
 
 export const POWDER_GRADES: CalcGrade[] = MATERIALS.filter((m) => m.form === 'Powder').map(

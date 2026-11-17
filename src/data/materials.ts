@@ -59,7 +59,7 @@ export const MATERIALS: Material[] = [
     processSlug: 'sls',
     relatedApplications: ['motor-mounts'],
     quickAnswer:
-      'EOS PA 2200 is the reference PA12 powder for selective laser sintering: a balanced, unfilled nylon 12 with 48 MPa tensile strength (XY), 1650 MPa tensile modulus and 18% elongation at break in the XY plane, per the current EOS material data sheet.',
+      'PA12 (polyamide 12) is the most widely used nylon in 3D printing — the standard powder polymer for SLS and MJF, with balanced strength, stiffness and elongation and low moisture uptake for a nylon. EOS PA 2200 is the reference PA12 powder for selective laser sintering: a balanced, unfilled nylon 12 with 48 MPa tensile strength (XY), 1650 MPa tensile modulus and 18% elongation at break in the XY plane, per the current EOS material data sheet.',
     intro: [
       'PA 2200 is EOS\'s standard polyamide 12 powder and, in EOS\'s own words, has a "very balanced property profile". It is the grade most SLS users start with and the one against which other PA12 powders are compared: stiffness, strength and elongation are evenly matched, and it suits both prototypes and end-use parts.',
       'Orientation matters. EOS publishes direction-dependent values: tensile strength is 48 MPa in X and Y but 42 MPa in Z, and strain at break drops from 18% in-plane to 4% in Z, because layer interfaces are the weak direction. Designers of loaded parts should read the XY figures as best-case and the Z figures as the design limit for cross-layer loads.',
@@ -836,6 +836,114 @@ export const MATERIALS: Material[] = [
     sources: [
       { label: 'Arkema Technical Data Sheet — Rilsan® PA11 Invent Nat (hpp.arkema.com, retrieved 2026-11-12)', url: 'https://hpp.arkema.com/assets/arkema/TDS_RILSAN%C2%AE%20PA11%20INVENT%20NAT_en_WW.pdf' },
       { label: 'Arkema brochure — Thermoplastic Powders for Powder Bed Fusion: Rilsan® Invent (arkema.com, © 2022 Arkema Inc., retrieved 2026-11-12)', url: 'https://www.arkema.com/files/live/sites/shared_arkema/files/downloads/products-documentations/technicalpolymers/2022%20-%20Rilsan%20Powder%20Bed%20Fusion.pdf' },
+    ],
+  },
+  {
+    slug: 'hp-pa-12-glass-beads',
+    name: 'HP HR PA 12 Glass Beads',
+    manufacturer: 'HP',
+    vendorSlug: 'hp',
+    filler: 'Glass beads',
+    basePolymer: 'PA12',
+    form: 'Powder',
+    process: 'MJF',
+    processSlug: 'mjf',
+    relatedApplications: [],
+    quickAnswer:
+      'HP 3D High Reusability PA 12 Glass Beads is HP\'s glass-bead-filled MJF powder: 40% glass beads in PA12, with 30 MPa tensile strength, 2800 MPa tensile modulus (XY) and 6.5% elongation at break, per HP\'s technical data sheet (4AA7-0716ENE). HP specifies a refresh ratio of 30% for stable performance — the stiffness grade of the MJF nylon line.',
+    intro: [
+      'This is the MJF counterpart of the glass-filled SLS grades: where unfilled HP PA 12 balances strength and ductility (54 MPa, 18% elongation in the current sheet), the glass-bead grade trades ductility for stiffness and dimensional stability — modulus rises to 2800 MPa (XY) while elongation falls to 6.5%. HP positions it for enclosures and housings, fixtures and tooling.',
+      'The filler is spherical glass beads, not fibres — the same distinction EOS draws for PA 3200 GF — which is why the XY and Z figures stay close (modulus 2800 vs 2900 MPa, elongation 6.5% in both directions). The heat numbers are the other headline: HDT of 121 °C at 1.82 MPa and 173 °C at 0.45 MPa (Z, ASTM D648), well above unfilled MJF PA12 behaviour.',
+    ],
+    processing: [
+      'MJF powder for HP Jet Fusion systems; the data sheet lists compatibility with the Jet Fusion 4210/4200/3200 printing solutions.',
+      'Refresh ratio for stable performance: 30% virgin powder, per the data sheet\'s recyclability table — equivalently, HP markets 70% surplus powder reusability for this grade.',
+      'Average particle size 58 µm (ASTM D3451); powder melting point 186 °C (DSC, ASTM D3418).',
+    ],
+    properties: [
+      { label: 'Tensile strength (XY)', value: '30 MPa', note: 'ASTM D638; Z: 30 MPa' },
+      { label: 'Tensile modulus (XY)', value: '2800 MPa', note: 'ASTM D638; Z: 2900 MPa' },
+      { label: 'Elongation at break (XY)', value: '6.5%', note: 'ASTM D638; Z: 6.5%' },
+      { label: 'HDT @ 1.8 MPa', value: '121 °C', note: 'ASTM D648, Z, measured at 1.82 MPa; @ 0.45 MPa: 173 °C' },
+      { label: 'Density (printed part)', value: '1.30 g/cm³', note: 'ASTM D792' },
+      { label: 'Melting temperature', value: '186 °C', note: 'ASTM D3418 (DSC)' },
+      { label: 'Glass bead content', value: '40%', note: 'Glass beads, per HP data sheet' },
+      { label: 'Izod impact strength (notched)', value: '2.7 kJ/m²', note: 'ASTM D256, XYZ' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 30, unit: 'MPa', standard: 'ASTM D638', orientation: 'XY' },
+      { key: 'tensileStrength', label: 'Tensile strength', value: 30, unit: 'MPa', standard: 'ASTM D638', orientation: 'Z' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 2800, unit: 'MPa', standard: 'ASTM D638', orientation: 'XY' },
+      { key: 'tensileModulus', label: 'Tensile modulus', value: 2900, unit: 'MPa', standard: 'ASTM D638', orientation: 'Z' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 6.5, unit: '%', standard: 'ASTM D638', orientation: 'XY' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 6.5, unit: '%', standard: 'ASTM D638', orientation: 'Z' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 121, unit: '°C', standard: 'ASTM D648', orientation: 'Z', note: '@ 1.82 MPa' },
+      { key: 'hdt', label: 'Heat deflection temperature', value: 173, unit: '°C', standard: 'ASTM D648', orientation: 'Z', note: '@ 0.45 MPa' },
+      { key: 'density', label: 'Density', value: 1.3, unit: 'g/cm³', standard: 'ASTM D792', note: 'Printed part' },
+      { key: 'meltingTemperature', label: 'Melting temperature', value: 186, unit: '°C', standard: 'ASTM D3418' },
+      { key: 'fillerContent', label: 'Glass bead content', value: 40, unit: '%', note: 'Glass beads, per HP data sheet' },
+      { key: 'impactStrength', label: 'Izod impact strength (notched)', value: 2.7, unit: 'kJ/m²', standard: 'ASTM D256', orientation: 'XYZ' },
+    ],
+    applications: [
+      'Enclosures and housings requiring stiffness and dimensional stability',
+      'Fixtures and tooling',
+      'Stiff functional parts where unfilled PA 12 flexes too much',
+    ],
+    faqs: [
+      { q: 'What refresh ratio does HP specify for PA 12 Glass Beads?', a: '30% virgin powder for stable performance, per the recyclability table of HP\'s data sheet (4AA7-0716ENE). HP phrases the same figure from the other side as 70% surplus powder reusability.' },
+      { q: 'Glass beads or glass fibres?', a: 'Beads. HP specifies a 40% glass bead filling — spherical particles, which is why the XY and Z modulus and elongation figures are nearly identical. Fibre-filled grades behave more directionally.' },
+      { q: 'PA 12 Glass Beads or unfilled HP PA 12?', a: 'Glass Beads when stiffness, dimensional stability and heat resistance dominate (2800 MPa modulus, HDT 121 °C at 1.82 MPa). Unfilled PA 12 when the part must flex or take impact — its elongation is 18% (XY) against 6.5% here, and its tensile strength is higher (54 MPa vs 30 MPa).' },
+    ],
+    sources: [
+      { label: 'HP Technical Data Sheet — HP 3D High Reusability PA 12 Glass Beads (doc. 4AA7-0716ENE, November 2017)', url: 'https://ylem.gr/assets/brochures/PA12GB-brochure.pdf' },
+      { label: 'HP 3D printing — official site', url: 'https://www.hp.com/us-en/printers/3d-printers/products.html' },
+    ],
+  },
+  {
+    slug: 'sinterit-pa12-smooth',
+    name: 'Sinterit PA12 Smooth',
+    manufacturer: 'Sinterit',
+    vendorSlug: 'sinterit',
+    basePolymer: 'PA12',
+    form: 'Powder',
+    process: 'SLS',
+    processSlug: 'sls',
+    relatedApplications: [],
+    quickAnswer:
+      'Sinterit PA12 Smooth is the standard PA12 powder for Sinterit\'s Lisa-series desktop SLS printers: 32 MPa tensile strength and 10% elongation at break per Sinterit\'s powder specification (PN-EN ISO 527-2), with a material refreshing ratio of 22% — the lowest manufacturer refresh figure in this database.',
+    intro: [
+      'PA12 Smooth is the entry powder of the Sinterit ecosystem — the grade the Lisa and Lisa Pro benchtop SLS printers are specified around. Its headline tensile figures (32 MPa, 10% elongation) sit below the industrial SLS grades in this database, which reflects the desktop machine class it is tested on; Sinterit\'s own specification notes that final part properties vary with part design and orientation.',
+      'The figure that stands out is the refreshing ratio: 22%. Sinterit defines it in the specification exactly as this site does — the percent of fresh powder that has to be mixed with used (unsintered) powder for the next print — and a low ratio is the core of the desktop SLS cost argument, because most of every build is recovered powder.',
+    ],
+    processing: [
+      'SLS powder for Sinterit Lisa & Lisa Pro printers, per the powder specification.',
+      'Material refreshing ratio 22%: 22% fresh powder mixed with used (unsintered) powder for reuse, per Sinterit\'s specification footnote.',
+      'Granulation 18–90 µm, per the specification.',
+    ],
+    properties: [
+      { label: 'Tensile strength', value: '32 MPa', note: 'PN-EN ISO 527-2:2012, per Sinterit powder specification' },
+      { label: 'Elongation at break', value: '10%', note: 'PN-EN ISO 527-2:2012, per Sinterit powder specification' },
+      { label: 'Charpy impact strength (unnotched)', value: '16 kJ/m²', note: 'PN-EN ISO 179-1/1eU:2010, per Sinterit powder specification' },
+      { label: 'Granulation', value: '18–90 µm', note: 'Per Sinterit powder specification' },
+    ],
+    structuredSpecs: [
+      { key: 'tensileStrength', label: 'Tensile strength', value: 32, unit: 'MPa', standard: 'PN-EN ISO 527-2' },
+      { key: 'elongationAtBreak', label: 'Elongation at break', value: 10, unit: '%', standard: 'PN-EN ISO 527-2' },
+      { key: 'impactStrength', label: 'Charpy impact strength (unnotched)', value: 16, unit: 'kJ/m²', standard: 'PN-EN ISO 179-1' },
+    ],
+    applications: [
+      'Functional prototypes and small solid parts on desktop SLS',
+      'Complex mechanisms printed as one assembly',
+      'Design models where the Smooth surface finish matters',
+    ],
+    faqs: [
+      { q: 'What does Sinterit\'s 22% refreshing ratio mean?', a: 'Per Sinterit\'s own footnote in the powder specification: the percent of fresh powder that has to be mixed with used (unsintered) powder to be reused in the next print. At 22%, a charge is 22% fresh and 78% recovered powder — a lower virgin share than the 30–50% figures the industrial grades in this database publish.' },
+      { q: 'Why are PA12 Smooth\'s strength figures lower than EOS PA 2200\'s?', a: 'Different machine class and test setup: PA12 Smooth is specified on Sinterit\'s Lisa-series desktop printers, PA 2200 on EOS industrial systems. Both are PA12; compare the figures as system-level results (printer + powder + parameters), not as pure polymer rankings.' },
+      { q: 'Which printers run PA12 Smooth?', a: 'The specification lists the Lisa & Lisa Pro. Sinterit sells the powder in Starter (first print) and Fresh (refresh) variants of the same grade.' },
+    ],
+    sources: [
+      { label: 'Sinterit Powder Specification — PA12 Smooth (document 20201118_EN_V01)', url: 'https://www.ponto-z.pt/wp-content/uploads/2021/12/Sinterit-Powders_Specification-PA12-Smooth.pdf' },
+      { label: 'Sinterit — official site', url: 'https://sinterit.com' },
     ],
   },
 ];
