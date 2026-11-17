@@ -71,6 +71,7 @@ export const GET: APIRoute = () => {
     `- [PA11 vs PA12](${SITE.url}/guides/pa11-vs-pa12/)`,
     `- [How to dry nylon filament](${SITE.url}/guides/how-to-dry-nylon-filament/)`,
     `- [Designing parts for SLS & MJF](${SITE.url}/guides/designing-for-sls-mjf/)`,
+    `- [Powder refresh ratio guide](${SITE.url}/guides/powder-refresh-ratio/)`,
     '',
     `Contact: ${SITE.email}`,
     '',

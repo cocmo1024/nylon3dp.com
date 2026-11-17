@@ -124,7 +124,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 65; // 63 + B5: /de/materials/ + /de/machines/ (German database index pilot)
+const EXPECTED_SITEMAP_URLS = 69; // 65 + weekly 2026-11-17: refresh guide, HP PA 12 GB + Sinterit PA12 Smooth materials, Sinterit vendor
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -216,7 +216,7 @@ for (const { path, values } of SPEC_SPOT_CHECKS) {
 // Hub pages: the filter/sort island payload is serialised at build time
 // (application/json, NOT ld+json), the static table exposes one row and
 // one compare checkbox per entry, and rows are keyed by slug.
-for (const [path, entries] of [['/materials/', 14], ['/machines/', 5]]) {
+for (const [path, entries] of [['/materials/', 16], ['/machines/', 5]]) {
   const file = join(DIST, path, 'index.html');
   if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 hub check)`); continue; }
   const html = readFileSync(file, 'utf8');
@@ -239,7 +239,7 @@ for (const [path, entries] of [['/materials/', 14], ['/machines/', 5]]) {
 
 // Comparison tool pages: picker shell (GET form with one checkbox per
 // entry) + payload + result container must all be server-rendered.
-for (const [path, entries] of [['/compare/materials/', 14], ['/compare/machines/', 5]]) {
+for (const [path, entries] of [['/compare/materials/', 16], ['/compare/machines/', 5]]) {
   const file = join(DIST, path, 'index.html');
   if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 compare check)`); continue; }
   const html = readFileSync(file, 'utf8');
@@ -292,8 +292,8 @@ for (const { path, values } of NOTE_SPOT_CHECKS) {
     const list = blocks.find((b) => b['@type'] === 'ItemList');
     if (!list) errors.push('/vendors/: no ItemList JSON-LD');
     else {
-      if (list.numberOfItems !== 8) errors.push(`/vendors/: ItemList numberOfItems ${list.numberOfItems}, expected 8`);
-      if ((list.itemListElement ?? []).length !== 8) errors.push('/vendors/: ItemList does not list 8 vendors');
+      if (list.numberOfItems !== 9) errors.push(`/vendors/: ItemList numberOfItems ${list.numberOfItems}, expected 8`);
+      if ((list.itemListElement ?? []).length !== 9) errors.push('/vendors/: ItemList does not list 9 vendors');
       for (const item of list.itemListElement ?? []) {
         if (!String(item.url ?? '').startsWith(`${SITE}/vendors/`)) errors.push(`/vendors/: ItemList url ${item.url} is not a vendor page`);
       }
@@ -305,7 +305,8 @@ for (const { path, values } of NOTE_SPOT_CHECKS) {
 // layer; bump when a batch adds entries for a vendor).
 const VENDOR_PRODUCT_COUNTS = {
   'eos': { materials: 3, machines: 2 },
-  'hp': { materials: 1, machines: 1 },
+  'hp': { materials: 2, machines: 1 },
+  'sinterit': { materials: 1, machines: 0 },
   'formlabs': { materials: 3, machines: 1 },
   'stratasys': { materials: 0, machines: 1 },
   'basf-forward-am': { materials: 1, machines: 0 },
@@ -377,8 +378,8 @@ for (const { path, values } of APP_SPOT_CHECKS) {
 // Counts mirror the data layer (materials.ts): powder grades, and the
 // subset whose structuredSpecs carry a printed-part density. Bump when
 // a batch adds a powder grade or a density value.
-const POWDER_GRADES_IN_DB = 9;
-const POWDER_GRADES_WITH_DENSITY = 5;
+const POWDER_GRADES_IN_DB = 11;
+const POWDER_GRADES_WITH_DENSITY = 6;
 {
   const file = join(DIST, 'calculators', 'index.html');
   if (!existsSync(file)) errors.push('/calculators/: missing in dist (B4 calculators check)');
@@ -423,7 +424,7 @@ const POWDER_GRADES_WITH_DENSITY = 5;
         const withDensity = grades.filter((g) => g.density).length;
         if (withDensity !== POWDER_GRADES_WITH_DENSITY) errors.push(`${path}: payload has ${withDensity} grades with density, expected ${POWDER_GRADES_WITH_DENSITY}`);
         const withRefresh = grades.filter((g) => g.publishedRefresh).length;
-        if (withRefresh !== 2) errors.push(`${path}: payload has ${withRefresh} grades with a published refresh figure, expected 2`);
+        if (withRefresh !== 4) errors.push(`${path}: payload has ${withRefresh} grades with a published refresh figure, expected 4`);
       } catch {
         errors.push(`${path}: calculator JSON payload does not parse`);
       }
@@ -433,6 +434,38 @@ const POWDER_GRADES_WITH_DENSITY = 5;
     if (!html.includes('Worked example')) errors.push(`${path}: worked example missing`);
     if (!html.includes('name="price"')) errors.push(`${path}: price input missing`);
     if (/<input[^>]*name="price"[^>]*\svalue=/.test(html)) errors.push(`${path}: price input carries a default value — prices are never defaulted`);
+  }
+}
+
+// --- weekly batch 2026-11-17: refresh guide + 2 materials + Sinterit -----
+{
+  const path = '/guides/powder-refresh-ratio/';
+  const file = join(DIST, 'guides', 'powder-refresh-ratio', 'index.html');
+  if (!existsSync(file)) errors.push(`${path}: missing in dist (weekly 2026-11-17)`);
+  else {
+    const html = readFileSync(file, 'utf8');
+    for (const v of ['22%', '30%', '50%', 'virgin share', 'href="/calculators/powder-refresh-ratio/"', 'href="/materials/hp-pa-12-glass-beads/"', 'href="/materials/sinterit-pa12-smooth/"']) {
+      if (!html.includes(v)) errors.push(`${path}: expected content "${v}" not rendered`);
+    }
+  }
+}
+for (const [path, values] of [
+  ['/materials/hp-pa-12-glass-beads/', ['2800 MPa', '121 °C', '1.3 g/cm³', '30%']],
+  ['/materials/sinterit-pa12-smooth/', ['32 MPa', '22%']],
+  ['/vendors/sinterit/', ['Sinterit', 'href="/materials/sinterit-pa12-smooth/"']],
+]) {
+  const file = join(DIST, path, 'index.html');
+  if (!existsSync(file)) { errors.push(`${path}: missing in dist (weekly 2026-11-17)`); continue; }
+  const html = readFileSync(file, 'utf8');
+  for (const v of values) if (!html.includes(v)) errors.push(`${path}: expected content "${v}" not rendered`);
+}
+{
+  const file = join(DIST, 'glossary', 'index.html');
+  if (existsSync(file)) {
+    const html = readFileSync(file, 'utf8');
+    for (const v of ['Powder cake', 'Virgin powder', 'Packing density', 'Powder ageing']) {
+      if (!html.includes(v)) errors.push(`/glossary/: new term "${v}" not rendered (weekly 2026-11-17)`);
+    }
   }
 }
 
@@ -458,8 +491,8 @@ for (const f of htmlFiles) {
     if (!html.includes('Formnext 2026: the nylon watchlist')) errors.push('/: lead story headline missing');
     if (!html.includes('href="/news/"')) errors.push('/: news section not linked');
     if (!html.includes('href="/vendors/"')) errors.push('/: ecosystem (vendor directory) not linked');
-    if (!html.includes('14 material grades · 5 machines · 8 vendors')) {
-      errors.push('/: data & tools module does not state the database counts (14 grades · 5 machines · 8 vendors)');
+    if (!html.includes('16 material grades · 5 machines · 9 vendors')) {
+      errors.push('/: data & tools module does not state the database counts (16 grades · 5 machines · 9 vendors)');
     }
     if (html.includes("Editor's picks")) errors.push('/: contains an "Editor\u2019s picks" stream heading — the front page is a portal, not an article stream');
     if (html.includes('Featured grades')) errors.push('/: still carries the old "Featured grades" article-card section');
@@ -528,7 +561,7 @@ for (const [code, path] of Object.entries(HOME_CLUSTER)) {
 // counterpart (en + de + x-default → EN), on both pages and in the
 // sitemap; the DE pages carry the hub payload, German chrome and a
 // Dataset JSON-LD under the localized URL.
-for (const [base, entries] of [['/materials/', 14], ['/machines/', 5]]) {
+for (const [base, entries] of [['/materials/', 16], ['/machines/', 5]]) {
   const pair = { en: SITE + base, de: `${SITE}/de${base}`, 'x-default': SITE + base };
   for (const path of [base, `/de${base}`]) {
     const file = join(DIST, path, 'index.html');
