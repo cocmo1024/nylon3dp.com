@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+// Powder refresh ratio guide (weekly batch 2026-11-17). The companion
+// explainer to the refresh-ratio calculator: every ratio in the table
+// is a manufacturer figure already published on the grade's own page
+// of this site, with the same sources. No ratio is estimated, and no
+// grade without a published figure is given one.
+const faq = [
+  { q: 'How many times can SLS powder be reused?', a: 'There is no fixed cycle count in manufacturer guidance — reuse is controlled by the refresh ratio, not by counting builds. At a 30% refresh ratio (HP PA 12 Glass Beads), each charge replaces 30% of the powder with virgin material, so the stock continuously turns over; the oldest powder is what leaves as surplus. What ends reuse in practice is running below the specified ratio until part quality drifts.' },
+  { q: 'Can I run a 0% refresh ratio — all used powder?', a: 'You can physically print that way, but no manufacturer figure in this database sanctions it: the lowest published ratio is 22% (Sinterit PA12 Smooth). Unfused powder ages thermally during every build, and the virgin share is what holds melt behaviour and part properties steady. A 0% run concentrates the oldest powder build after build.' },
+  { q: 'Does the refresh ratio apply to MJF as well as SLS?', a: 'Yes — MJF is a powder-bed process with the same recovery loop. HP specifies the ratio per material in its data sheets (30% for PA 12 Glass Beads, in the sheet\'s recyclability table) and markets the same figure as surplus powder reusability (70% for that grade). SAF works the same way; use the figure for your grade.' },
+  { q: 'What happens if I refresh below the specified ratio?', a: 'Manufacturer guidance links under-refreshing to surface defects and drifting mechanical properties — Formlabs, which specifies 50% for Nylon 12 GF Powder, allows raising the ratio to 70% when troubleshooting defects, which is the same mechanism seen from the other side. The saving is real but small next to a failed build: the surplus arithmetic in this guide shows virgin powder per build is mostly set by the ratio and the packing density.' },
+  { q: 'Is a lower refresh ratio always cheaper?', a: 'Per build, virgin powder bought equals fused part mass plus surplus discarded, and the surplus grows as the ratio falls — at low packing density a low ratio can discard more aged powder than it saves. The steady-state comparison is worked in the calculator: run your own charge and part mass at two ratios and compare the "virgin powder bought per build" row, not just the blend percentages.' },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'Powder refresh ratio: how much virgin nylon powder does a build need?',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<Base
+  title="Powder Refresh Ratio Guide (SLS & MJF) | Nylon3DP"
+  description="Refresh ratio explained: the virgin share of a powder charge, the manufacturer ratios (22-50%), surplus aged powder, and how packing density drives cost."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/guides/">Guides</a> / Powder refresh ratio</p>
+  <h1>Powder refresh ratio: how much virgin powder does a build need?</h1>
+  <div class="quick-answer">
+    <p class="qa-label">Quick answer</p>
+    <p>The refresh ratio is the <strong>virgin (new) powder share of the whole powder charge</strong> — the rest is powder recovered from previous builds. Manufacturers specify it per grade: the figures published in this database run from <strong>22%</strong> (Sinterit PA12 Smooth) to <strong>50%</strong> (Formlabs Nylon 12 GF Powder, Arkema Rilsan Invent PA11), with HP specifying <strong>30%</strong> for PA 12 Glass Beads. Virgin powder to add = recovered powder × R ÷ (100 − R). Run your own numbers in the <a href="/calculators/powder-refresh-ratio/">refresh ratio calculator</a>.</p>
+  </div>
+
+  <h2>The manufacturer ratios, in one table</h2>
+  <p>Every figure below is stated by the grade's manufacturer in its own document and is published, with the same source, on the grade's page in this site's <a href="/materials/">material database</a>. Grades whose manufacturers do not publish a figure in the documents this site cites — including the EOS PA12 and PA11 grades — are not given one here.</p>
+  <table>
+    <thead>
+      <tr><th>Grade</th><th>Process</th><th>Refresh ratio (virgin share)</th><th>Manufacturer wording</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><a href="/materials/sinterit-pa12-smooth/">Sinterit PA12 Smooth</a></td><td>SLS</td><td><strong>22%</strong></td><td>“Material refreshing ratio” — percent of fresh powder mixed with used powder for the next print (powder specification)</td></tr>
+      <tr><td><a href="/materials/hp-pa-12-glass-beads/">HP HR PA 12 Glass Beads</a></td><td>MJF</td><td><strong>30%</strong></td><td>“Refresh ratio for stable performance” (data sheet recyclability table); the same figure stated as 70% surplus reusability</td></tr>
+      <tr><td><a href="/materials/formlabs-nylon-12-gf-powder/">Formlabs Nylon 12 GF Powder</a></td><td>SLS</td><td><strong>50%</strong> standard, up to 70%</td><td>Standard refresh rate of 50%; up to 70% allowed when troubleshooting defects</td></tr>
+      <tr><td><a href="/materials/arkema-rilsan-invent-pa11/">Arkema Rilsan Invent PA11</a></td><td>SLS</td><td><strong>typically 50%</strong></td><td>“Low refreshing factor — typically 50%” (data sheet description)</td></tr>
+    </tbody>
+  </table>
+  <p>Two cautions before comparing the column. First, the ratio is a property of a <em>material-and-machine system</em>, not of PA12 in general — the two 50% SLS figures and the 22% desktop-SLS figure are all PA12-family powders on different systems. Second, a lower ratio is not automatically better: it is only cheaper if part quality holds, which is exactly what the specified ratio is meant to guarantee.</p>
+
+  <h2>Why powder needs refreshing at all</h2>
+  <p>Only a small share of a powder charge fuses into parts. The rest spends the whole build held just below the melting point — and that heat exposure is <a href="/glossary/#powder-ageing">powder ageing</a>: the polymer's melt behaviour drifts, build after build, in the powder that was never fused. Reusing 100% of it would concentrate the oldest, most-aged powder indefinitely. Blending in virgin powder at the specified ratio holds the blend's average age — and with it surface quality and mechanical properties — steady. The full definition is in the <a href="/glossary/#refresh-ratio">glossary</a>.</p>
+
+  <h2>The surplus nobody budgets for</h2>
+  <p>A build returns more unfused powder than the next build can take. The calculator's worked example makes it concrete: a 36 kg charge at a 50% refresh ratio fuses 2 kg of parts and returns 34 kg of used powder — but the next 36 kg charge has room for only 18 kg of it. The other <strong>16 kg is surplus aged powder</strong>, discarded in steady state, and the virgin powder actually bought per build is 18 kg, not the 2 kg that ends up in parts. This is why the refresh ratio, together with <a href="/glossary/#packing-density">packing density</a>, decides powder economics: the allowance in the <a href="/calculators/part-cost/">part cost estimator</a> follows the same relation, w = R ÷ p − 1, where p is the packing fraction of the build. Pack builds densely and the surplus per part falls; run sparse builds at a high ratio and most of your powder spend is turnover, not parts.</p>
+
+  <h2>Running it in practice</h2>
+  <ul>
+    <li><strong>Weigh the cake, not just the parts.</strong> Recovered powder U = cake mass − fused part mass. The <a href="/calculators/powder-refresh-ratio/">calculator</a> takes either that pair or a directly weighed U.</li>
+    <li><strong>Blend to the ratio, then sieve.</strong> Virgin powder V = U × R ÷ (100 − R) at your grade's ratio from the table above; sieving the recovered powder before blending is standard powder handling on every powder-bed platform.</li>
+    <li><strong>Track generations when quality drifts.</strong> If surfaces degrade, the manufacturer-sanctioned lever is raising the virgin share — Formlabs' guidance for Nylon 12 GF allows up to 70% when troubleshooting — before suspecting the machine.</li>
+    <li><strong>Keep grades and colours separate.</strong> A refresh calculation only holds within one powder stock; mixing stocks mixes their age profiles and voids the ratio's meaning.</li>
+  </ul>
+
+  <Faq items={faq} />
+  <div class="sources">
+    <p>Sources</p>
+    <ul>
+      <li><a href="https://formlabs.com/support/Using-Nylon-12-GF/" rel="noopener">Formlabs support — Using Nylon 12 GF (standard refresh rate 50%, up to 70% when troubleshooting), as cited on the grade page</a></li>
+      <li><a href="https://hpp.arkema.com/assets/arkema/TDS_RILSAN%C2%AE%20PA11%20INVENT%20NAT_en_WW.pdf" rel="noopener">Arkema Technical Data Sheet — Rilsan® PA11 Invent Nat (refreshing factor typically 50%)</a></li>
+      <li><a href="https://ylem.gr/assets/brochures/PA12GB-brochure.pdf" rel="noopener">HP Technical Data Sheet — HP 3D High Reusability PA 12 Glass Beads (doc. 4AA7-0716ENE; refresh ratio 30%)</a></li>
+      <li><a href="https://www.ponto-z.pt/wp-content/uploads/2021/12/Sinterit-Powders_Specification-PA12-Smooth.pdf" rel="noopener">Sinterit Powder Specification — PA12 Smooth (document 20201118_EN_V01; refreshing ratio 22%)</a></li>
+    </ul>
+  </div>
+  <p class="updated">Last updated: {SITE.lastUpdated}</p>
+</Base>

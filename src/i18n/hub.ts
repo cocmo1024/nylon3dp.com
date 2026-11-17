@@ -135,7 +135,7 @@ const enMaterials: MaterialsHubCopy = {
   h1: 'Nylon material database',
   qaLabel: 'Quick answer',
   qaBody:
-    "Every nylon grade in this database has its own page with a property table taken from the manufacturer's own datasheet — PA12 and PA11 powders for SLS and MJF, glass-filled grades for stiffness, and PA6-CF / CoPA filaments for FDM. No reseller numbers, no estimates: if the manufacturer does not publish a value, the table leaves it out.",
+    "PA12 (polyamide 12) is the most widely used nylon in 3D printing — the standard powder polymer for SLS and MJF, balanced in strength, stiffness and elongation, with low moisture uptake for a nylon; PA11 is its more ductile, bio-based counterpart. Every nylon grade in this database has its own page with a property table taken from the manufacturer's own datasheet — PA12 and PA11 powders for SLS and MJF, glass-filled grades for stiffness, and PA6-CF / CoPA filaments for FDM. No reseller numbers, no estimates: if the manufacturer does not publish a value, the table leaves it out.",
   coverageHtml:
     'Coverage so far: {materials} grades from {makers}. The database is expanding in stages toward the full nylon landscape — powders, filaments and pellets across all major suppliers — and each addition follows the same rule: a manufacturer datasheet, or it does not go in.',
   allHeading: 'All materials',
@@ -208,7 +208,7 @@ const deMaterials: MaterialsHubCopy = {
   h1: 'Nylon-Materialdatenbank',
   qaLabel: 'Kurze Antwort',
   qaBody:
-    'Jeder Nylon-Typ in dieser Datenbank hat eine eigene Seite mit einer Eigenschaftstabelle aus dem Datenblatt des Herstellers — PA12- und PA11-Pulver für SLS und MJF, glasgefüllte Typen für Steifigkeit sowie PA6-CF- und CoPA-Filamente für FDM. Keine Händlerzahlen, keine Schätzungen: Veröffentlicht ein Hersteller einen Wert nicht, lässt die Tabelle ihn aus.',
+    'PA12 (Polyamid 12) ist das meistverwendete Nylon im 3D-Druck — das Standard-Pulverpolymer für SLS und MJF, ausgewogen in Festigkeit, Steifigkeit und Dehnung, mit für ein Nylon geringer Feuchtigkeitsaufnahme; PA11 ist sein duktileres, biobasiertes Gegenstück. Jeder Nylon-Typ in dieser Datenbank hat eine eigene Seite mit einer Eigenschaftstabelle aus dem Datenblatt des Herstellers — PA12- und PA11-Pulver für SLS und MJF, glasgefüllte Typen für Steifigkeit sowie PA6-CF- und CoPA-Filamente für FDM. Keine Händlerzahlen, keine Schätzungen: Veröffentlicht ein Hersteller einen Wert nicht, lässt die Tabelle ihn aus.',
   coverageHtml:
     'Aktueller Stand: {materials} Typen von {makers}. Die Datenbank wächst in Stufen auf die vollständige Nylon-Landschaft zu — Pulver, Filamente und Pellets aller großen Anbieter — und jede Aufnahme folgt derselben Regel: ein Herstellerdatenblatt, sonst kommt sie nicht hinein.',
   allHeading: 'Alle Materialien',

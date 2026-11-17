@@ -58,6 +58,7 @@ export const FOOTER_NAV = [
     links: [
       { href: '/guides/formnext-2026/', label: 'Formnext 2026: the nylon watchlist' },
       { href: '/guides/pa11-vs-pa12/', label: 'PA11 vs PA12' },
+      { href: '/guides/powder-refresh-ratio/', label: 'Powder refresh ratio' },
       { href: '/guides/how-to-dry-nylon-filament/', label: 'Drying nylon filament' },
       { href: '/guides/designing-for-sls-mjf/', label: 'Designing for SLS & MJF' },
     ],
