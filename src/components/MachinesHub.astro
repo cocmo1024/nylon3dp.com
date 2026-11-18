@@ -50,6 +50,9 @@ const datasetLd = {
   description: copy.datasetDescription.replaceAll('{machines}', String(MACHINES.length)),
   url: hubUrl(locale, '/machines/'),
   creator: { '@id': 'https://nylon3dp.com/#organization' },
+  // Reuse terms for this compiled dataset live on the site's Terms page
+  // (values remain the manufacturers'; see the footer sourcing note).
+  license: 'https://nylon3dp.com/terms/',
   // Entries carry no per-entry date field in the data layer; this is the
   // database's last editorial update and moves with each database batch.
   dateModified: '2026-11-17',
