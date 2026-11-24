@@ -68,6 +68,7 @@ export const GET: APIRoute = () => {
     '## Guides',
     '',
     `- [Formnext 2026: the nylon watchlist](${SITE.url}/guides/formnext-2026/)`,
+    `- [Formnext 2026 recap: what the nylon side actually launched](${SITE.url}/guides/formnext-2026-recap/)`,
     `- [PA11 vs PA12](${SITE.url}/guides/pa11-vs-pa12/)`,
     `- [How to dry nylon filament](${SITE.url}/guides/how-to-dry-nylon-filament/)`,
     `- [Designing parts for SLS & MJF](${SITE.url}/guides/designing-for-sls-mjf/)`,

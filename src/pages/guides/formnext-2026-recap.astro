@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import Faq from '../../components/Faq.astro';
+import { SITE } from '../../site';
+
+// Formnext 2026 post-show recap (weekly batch 2026-11-24). Editorial
+// desk piece: every specification below is from a manufacturer
+// document published during or after the show (EOS system data sheet
+// for HELIOR); performance figures are labelled as the manufacturer
+// claims or trial results they are. Watchlist items whose makers have
+// not published a datasheet stay labelled as announcements — the same
+// rule the preview page stated.
+const faq = [
+  {
+    q: 'What was the biggest nylon launch at Formnext 2026?',
+    a: 'EOS HELIOR, unveiled on Tuesday 17 November: a large-format SLS platform with a 700 × 380 × 580 mm build volume and three 70 W CO₂ lasers, per the EOS system data sheet published at the show. It launches with validated parameters for PA 2200 and PA 2220 HighReuse and is commercially available from December 2026.',
+  },
+  {
+    q: 'Does the EOS HELIOR use 70 W or 80 W lasers?',
+    a: '70 W. Some launch-week trade coverage reported three 80 W lasers, but the EOS system data sheet — the document this site cites — states CO₂, 3 × 70 W. The machine database entry follows the data sheet.',
+  },
+  {
+    q: 'When can you buy an EOS HELIOR?',
+    a: 'EOS states commercial availability from December 2026. No price has been published.',
+  },
+  {
+    q: 'What happened to the other nylon watchlist items?',
+    a: 'They remain announcements until their makers publish documents: Arkema showed next-generation Orgasol PA12 powders without a public datasheet, so no Orgasol grade has been added to the material database; the same datasheet rule applies to the Stratasys system and the TPM3D CF250 shown at the show.',
+  },
+];
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+const articleLd = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: 'Formnext 2026: what the nylon side actually launched',
+  datePublished: '2026-11-24',
+  dateModified: '2026-11-24',
+  author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+  publisher: { '@id': `${SITE.url}/#organization` },
+};
+---
+
+<Base
+  title="Formnext 2026 Recap: The Nylon Launches, Verified | Nylon3DP"
+  description="Formnext 2026 recap: EOS HELIOR's published specification (700 × 380 × 580 mm, three 70 W lasers), claims labelled as claims, watchlist updated."
+  jsonLd={[articleLd, faqLd]}
+>
+  <p class="crumbs"><a href="/">Home</a> / <a href="/news/">News</a> / Formnext 2026 recap</p>
+  <h1>Formnext 2026: what the nylon side actually launched</h1>
+  <p class="updated">Recap · Published 24 November 2026 · Formnext, Messe Frankfurt, 17–20 November 2026</p>
+  <div class="quick-answer">
+    <p class="qa-label">The short version</p>
+    <p>Formnext 2026 (17–20 November, Frankfurt) delivered one fully documented nylon launch: <strong>EOS HELIOR</strong>, a large-format SLS platform with a <strong>700 × 380 × 580 mm</strong> build volume and <strong>three 70 W CO₂ lasers</strong> per the EOS system data sheet — now listed in our <a href="/machines/eos-helior/">machine database</a>. The rest of the desk's <a href="/guides/formnext-2026/">watchlist</a> stays labelled as announcements: interesting, but without a published datasheet there is nothing this site will put in a database. Claims are labelled as claims throughout.</p>
+  </div>
+
+  <h2>EOS HELIOR: the specification is out</h2>
+  <p>EOS unveiled HELIOR on Tuesday 17 November at its booth (Hall 12.0, D71), as trailed — and, usefully, published the system data sheet with it. The verified core of the machine:</p>
+  <table>
+    <tbody>
+      <tr><th scope="row">Build volume</th><td><strong>700 × 380 × 580 mm</strong> (154 litres)</td></tr>
+      <tr><th scope="row">Lasers</th><td><strong>CO₂, 3 × 70 W</strong>, with dynamic load balancing across the three exposure units</td></tr>
+      <tr><th scope="row">Scan speed</th><td>Up to 12.0 m/s</td></tr>
+      <tr><th scope="row">Launch materials</th><td>Validated parameters for <a href="/materials/eos-pa-2200/">PA 2200</a> and PA 2220 HighReuse (both PA12)</td></tr>
+      <tr><th scope="row">Availability</th><td>Commercially available from December 2026, per EOS; no price published</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">All values from the EOS System Data Sheet for HELIOR, published at the show. The full entry — including the notes below — is in the <a href="/machines/eos-helior/">machine database</a>.</p>
+
+  <h2>Two numbers to read carefully</h2>
+  <p><strong>70 W, not 80 W.</strong> Launch-week trade coverage was split on the laser rating, with some outlets reporting three 80 W lasers. The EOS system data sheet states 3 × 70 W, and that is the figure this site publishes. If you are speccing a purchase, ask EOS to confirm the rating for your configuration in writing — but do not plan around the 80 W figure.</p>
+  <p><strong>"Up to 80% more part volume in 24 hours"</strong> is an EOS claim tied to a stated condition — a 10% packing density — not an independent measurement. The pre-launch trial evidence is narrower and more useful: Materialise, which ran the unreleased platform in production, reported <strong>44% higher productivity</strong> than the previous machine on its validation part (reported by EOS), and Prototal Group reported +60% part volume within 24 hours on housing components (also via EOS). Trial results on real parts, from named operators — worth more than the headline percentage, and still labelled as reported results, not data-sheet values.</p>
+
+  <h2>The watchlist, one week on</h2>
+  <ul>
+    <li><strong>Arkema — next-generation Orgasol PA12:</strong> shown at the show (Hall 12.1, C119) with a manufacturer claim of up to 50% lower cost; no public technical datasheet yet, so no Orgasol grade enters the <a href="/materials/">material database</a>. Status: announcement.</li>
+    <li><strong>Stratasys — manufacturing-scale system:</strong> unveiled at the show per the company's pre-show release; nylon-relevant specifications have not been published in a document this site can cite. Status: announcement.</li>
+    <li><strong>TPM3D CF250:</strong> given its international debut (Hall 11.0, D29); manufacturer-stated specifications only so far. Status: announcement.</li>
+    <li><strong>DyeMansion Powershot Go:</strong> the sub-€14,000 price point circulated in show previews is a reported price, not a published list price. Status: reported, unconfirmed.</li>
+  </ul>
+  <p>That is the desk's rule working as intended: one launch produced a document, so one launch produced a database entry. The rest join the database when their documents do — and the December batch will check each of them again.</p>
+
+  <h2>Sources</h2>
+  <ul>
+    <li>EOS, <a href="https://www.eos.info/polymer-solutions/polymer-printers/data-sheets/sds-eos-helior" rel="noopener">System Data Sheet — EOS HELIOR</a> (build volume, laser type and rating, scan speed).</li>
+    <li>EOS, <a href="https://www.eos.info/polymer-solutions/polymer-printers/eos-helior" rel="noopener">EOS HELIOR product page</a> (availability, launch materials, throughput claim and its packing-density condition).</li>
+    <li>EOS, <a href="https://www.eos.info/industries/customer-success-stories/aviation/materialise-cable-wheel" rel="noopener">Materialise HELIOR validation story</a> (44% productivity figure, reported by EOS).</li>
+    <li>Pre-show announcements as cited on the desk's <a href="/guides/formnext-2026/">Formnext 2026 watchlist</a> (Arkema, Stratasys, TPM3D, DyeMansion).</li>
+  </ul>
+
+  <Faq items={faq} />
+  <p class="updated">Last updated: November 2026</p>
+</Base>
