@@ -124,7 +124,7 @@ for (const line of readFileSync(join(DIST, '_redirects'), 'utf8').split('\n').fi
 
 // --- i18n pilot checks -------------------------------------------------
 // Homepage cluster: en at the root plus de/es/pt/ja/zh homepages.
-const EXPECTED_SITEMAP_URLS = 69; // 65 + weekly 2026-11-17: refresh guide, HP PA 12 GB + Sinterit PA12 Smooth materials, Sinterit vendor
+const EXPECTED_SITEMAP_URLS = 73; // 69 + weekly 2026-11-24: EOS HELIOR + Sinterit Lisa X + Suzy machines, Formnext 2026 recap
 if (sitemapPaths.size !== EXPECTED_SITEMAP_URLS) {
   errors.push(`sitemap: expected ${EXPECTED_SITEMAP_URLS} URLs, got ${sitemapPaths.size}`);
 }
@@ -201,6 +201,8 @@ const SPEC_SPOT_CHECKS = [
   { path: '/materials/eos-pa-2200/', values: ['48 MPa', '42 MPa', '1650 MPa'] },
   { path: '/materials/arkema-rilsan-invent-pa11/', values: ['46 µm', '0.49 g/cm³', '45 MPa'] },
   { path: '/machines/hp-jet-fusion-5200/', values: ['380 mm', '284 mm', '0.08 mm'] },
+  { path: '/machines/eos-helior/', values: ['700 mm', '380 mm', '580 mm'] },
+  { path: '/machines/sinterit-lisa-x/', values: ['130 mm', '180 mm', '330 mm'] },
 ];
 for (const { path, values } of SPEC_SPOT_CHECKS) {
   const file = join(DIST, path, 'index.html');
@@ -216,7 +218,7 @@ for (const { path, values } of SPEC_SPOT_CHECKS) {
 // Hub pages: the filter/sort island payload is serialised at build time
 // (application/json, NOT ld+json), the static table exposes one row and
 // one compare checkbox per entry, and rows are keyed by slug.
-for (const [path, entries] of [['/materials/', 16], ['/machines/', 5]]) {
+for (const [path, entries] of [['/materials/', 16], ['/machines/', 8]]) {
   const file = join(DIST, path, 'index.html');
   if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 hub check)`); continue; }
   const html = readFileSync(file, 'utf8');
@@ -239,7 +241,7 @@ for (const [path, entries] of [['/materials/', 16], ['/machines/', 5]]) {
 
 // Comparison tool pages: picker shell (GET form with one checkbox per
 // entry) + payload + result container must all be server-rendered.
-for (const [path, entries] of [['/compare/materials/', 16], ['/compare/machines/', 5]]) {
+for (const [path, entries] of [['/compare/materials/', 16], ['/compare/machines/', 8]]) {
   const file = join(DIST, path, 'index.html');
   if (!existsSync(file)) { errors.push(`${path}: missing in dist (B2 compare check)`); continue; }
   const html = readFileSync(file, 'utf8');
@@ -304,9 +306,9 @@ for (const { path, values } of NOTE_SPOT_CHECKS) {
 // database's reverse-reference counts for that vendor (mirrors the data
 // layer; bump when a batch adds entries for a vendor).
 const VENDOR_PRODUCT_COUNTS = {
-  'eos': { materials: 3, machines: 2 },
+  'eos': { materials: 3, machines: 3 },
   'hp': { materials: 2, machines: 1 },
-  'sinterit': { materials: 1, machines: 0 },
+  'sinterit': { materials: 1, machines: 2 },
   'formlabs': { materials: 3, machines: 1 },
   'stratasys': { materials: 0, machines: 1 },
   'basf-forward-am': { materials: 1, machines: 0 },
@@ -487,12 +489,12 @@ for (const f of htmlFiles) {
       if (!html.includes(`data-section="${section}"`)) errors.push(`/: front-page section "${section}" missing`);
     }
     if (!html.includes('The nylon 3D printing industry hub')) errors.push('/: portal masthead headline missing');
-    if (!html.includes('href="/guides/formnext-2026/"')) errors.push('/: lead story (Formnext 2026) not linked');
-    if (!html.includes('Formnext 2026: the nylon watchlist')) errors.push('/: lead story headline missing');
+    if (!html.includes('href="/guides/formnext-2026-recap/"')) errors.push('/: lead story (Formnext 2026 recap) not linked');
+    if (!html.includes('Formnext 2026: what the nylon side actually launched')) errors.push('/: lead story headline missing');
     if (!html.includes('href="/news/"')) errors.push('/: news section not linked');
     if (!html.includes('href="/vendors/"')) errors.push('/: ecosystem (vendor directory) not linked');
-    if (!html.includes('16 material grades · 5 machines · 9 vendors')) {
-      errors.push('/: data & tools module does not state the database counts (16 grades · 5 machines · 9 vendors)');
+    if (!html.includes('16 material grades · 8 machines · 9 vendors')) {
+      errors.push('/: data & tools module does not state the database counts (16 grades · 8 machines · 9 vendors)');
     }
     if (html.includes("Editor's picks")) errors.push('/: contains an "Editor\u2019s picks" stream heading — the front page is a portal, not an article stream');
     if (html.includes('Featured grades')) errors.push('/: still carries the old "Featured grades" article-card section');
@@ -513,9 +515,9 @@ for (const f of htmlFiles) {
     const list = blocks.find((b) => b['@type'] === 'ItemList');
     if (!list) errors.push('/news/: no ItemList JSON-LD');
     else {
-      if (list.numberOfItems !== 1) errors.push(`/news/: ItemList numberOfItems ${list.numberOfItems}, expected 1 (seed)`);
-      if (!String(list.itemListElement?.[0]?.url ?? '').endsWith('/guides/formnext-2026/')) {
-        errors.push('/news/: ItemList first item is not the Formnext feature');
+      if (list.numberOfItems !== 3) errors.push(`/news/: ItemList numberOfItems ${list.numberOfItems}, expected 3`);
+      if (!String(list.itemListElement?.[0]?.url ?? '').endsWith('/guides/formnext-2026-recap/')) {
+        errors.push('/news/: ItemList first item is not the Formnext recap');
       }
     }
   }
@@ -561,7 +563,7 @@ for (const [code, path] of Object.entries(HOME_CLUSTER)) {
 // counterpart (en + de + x-default → EN), on both pages and in the
 // sitemap; the DE pages carry the hub payload, German chrome and a
 // Dataset JSON-LD under the localized URL.
-for (const [base, entries] of [['/materials/', 16], ['/machines/', 5]]) {
+for (const [base, entries] of [['/materials/', 16], ['/machines/', 8]]) {
   const pair = { en: SITE + base, de: `${SITE}/de${base}`, 'x-default': SITE + base };
   for (const path of [base, `/de${base}`]) {
     const file = join(DIST, path, 'index.html');

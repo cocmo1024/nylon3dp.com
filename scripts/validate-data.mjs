@@ -29,7 +29,7 @@ import { createRequire } from 'node:module';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_FILES = ['materials.ts', 'machines.ts', 'vendors.ts', 'processes.ts', 'applications.ts', 'types.ts'];
-const EXPECTED = { materials: 16, machines: 5, vendors: 9, processes: 4 };
+const EXPECTED = { materials: 16, machines: 8, vendors: 9, processes: 4 };
 const PROCESS_SLUG_BY_LEGACY = { SLS: 'sls', 'SLS (Fuse series)': 'sls', MJF: 'mjf', SAF: 'saf', FDM: 'fdm' };
 
 const errors = [];

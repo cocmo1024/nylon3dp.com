@@ -31,6 +31,20 @@ export const formatNewsDate = (iso: string): string => {
 /** Newest first. */
 export const NEWS: NewsItem[] = [
   {
+    date: '2026-11-24',
+    title: 'Formnext 2026: what the nylon side actually launched',
+    href: '/guides/formnext-2026-recap/',
+    dek: 'The show is over and the documents are out. EOS HELIOR is real — 700 × 380 × 580 mm and three 70 W lasers per the EOS system data sheet, not the 80 W of launch-week coverage — and it is now in the machine database. The desk\'s post-show recap separates published specifications from claims still waiting for a datasheet.',
+    tag: 'Shows',
+  },
+  {
+    date: '2026-11-17',
+    title: 'EOS unveils HELIOR, its three-laser SLS flagship',
+    href: '/machines/eos-helior/',
+    dek: 'Unveiled at Formnext on 17 November, HELIOR pairs a 700 × 380 × 580 mm build volume with three 70 W CO₂ lasers and dynamic load balancing, launches with validated PA 2200 parameters and reaches customers from December 2026. Full specification, from the EOS system data sheet, is in the machine database.',
+    tag: 'Machines',
+  },
+  {
     date: '2026-11-14',
     title: 'Formnext 2026: the nylon watchlist',
     href: '/guides/formnext-2026/',

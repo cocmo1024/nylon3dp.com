@@ -232,6 +232,125 @@ export const MACHINES: Machine[] = [
       { label: 'EOS System Data Sheet — EOS P 396', url: 'https://www.eos.info/polymer-solutions/polymer-printers/data-sheets/sds-eos-p-396' },
     ],
   },
+  {
+    slug: 'eos-helior',
+    name: 'EOS HELIOR',
+    manufacturer: 'EOS',
+    vendorSlug: 'eos',
+    process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: ['eos-pa-2200'],
+    quickAnswer:
+      'The EOS HELIOR is EOS\'s large-format production SLS platform, unveiled at Formnext 2026: a 700 × 380 × 580 mm build volume and three 70 W CO₂ lasers with dynamic load balancing, per the EOS system data sheet — the largest build volume in this database, launched with validated parameters for PA 2200.',
+    intro: [
+      'HELIOR was unveiled on 17 November 2026 at Formnext in Frankfurt (Hall 12.0, D71) and is commercially available from December 2026, per EOS. It succeeds the EOS P 770 class at the top of the EOS polymer range: the same 700 × 380 × 580 mm build envelope, but three lasers instead of two, an adjustable roller recoater, and load balancing that distributes exposure work across the three lasers.',
+      'EOS rates the platform at up to 80% more part volume in 24 hours at 10% packing density (154 litres of build volume) — a manufacturer claim tied to that packing density, not an independent measurement. At launch, validated material and process parameters exist for PA 2200 and PA 2220 HighReuse; PA 2200 is in the material database, PA 2220 HighReuse is not yet listed separately.',
+    ],
+    specs: [
+      { label: 'Technology', value: 'SLS (polymer powder-bed fusion)' },
+      { label: 'Build volume', value: '700 × 380 × 580 mm', note: '27.6 × 15.0 × 22.8 in, per EOS SDS' },
+      { label: 'Laser', value: 'CO₂, 3 × 70 W', note: 'Per EOS system data sheet' },
+      { label: 'Scan speed', value: 'up to 12.0 m/s', note: 'Per EOS system data sheet' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 700, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 380, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 580, unit: 'mm' },
+      { key: 'laserPower', label: 'Laser power', value: 70, unit: 'W', note: 'CO₂, per laser; 3 lasers, per EOS system data sheet' },
+    ],
+    notes: [
+      'Some launch-week trade coverage reported the lasers as 80 W units; the EOS system data sheet states CO₂, 3 × 70 W, and this database follows the data sheet.',
+      'Materialise, which evaluated HELIOR in production before launch, reported 44% higher productivity than the previous machine — a trial result reported by EOS, not a data-sheet value.',
+    ],
+    faqs: [
+      { q: 'What nylon does the EOS HELIOR print?', a: 'At launch, EOS lists validated material and process parameters for PA 2200 and PA 2220 HighReuse, both PA12 grades. PA 2200 is documented in the material database; more materials are to be validated on customer request, per EOS.' },
+      { q: 'How does HELIOR differ from the EOS P 396?', a: 'Scale and laser count. Per their EOS data sheets: HELIOR offers 700 × 380 × 580 mm with three 70 W CO₂ lasers; the P 396 offers 340 × 340 × 600 mm with one 70 W CO₂ laser. HELIOR is aimed at 24-hour production cycles and volume manufacturing.' },
+    ],
+    sources: [
+      { label: 'EOS System Data Sheet — EOS HELIOR', url: 'https://www.eos.info/polymer-solutions/polymer-printers/data-sheets/sds-eos-helior' },
+      { label: 'EOS — EOS HELIOR product page', url: 'https://www.eos.info/polymer-solutions/polymer-printers/eos-helior' },
+    ],
+  },
+  {
+    slug: 'sinterit-lisa-x',
+    name: 'Sinterit Lisa X',
+    manufacturer: 'Sinterit',
+    vendorSlug: 'sinterit',
+    process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: ['sinterit-pa12-smooth'],
+    quickAnswer:
+      'The Sinterit Lisa X is Sinterit\'s compact open-parameter SLS printer: a 130 × 180 × 330 mm build volume for PA and PP powders, a 30 W infrared diode laser and layer heights from 0.075 to 0.175 mm, per Sinterit\'s product specification.',
+    intro: [
+      'The Lisa X is the top of Sinterit\'s compact Lisa line: the same bench-scale footprint as the smaller Lisas, but a 30 W galvo-scanned infrared laser in place of the 5 W class units, which Sinterit credits for build speeds up to 14 mm/h. It is an open system — Sinterit Studio exposes the printing parameters — and runs Sinterit\'s powder range including PA12 Smooth, which is in the material database.',
+      'For flexible materials the stated Z height rises to 340 mm; the PA/PP figure of 330 mm is the one listed in the specification table here, because this database covers nylon work.',
+    ],
+    specs: [
+      { label: 'Technology', value: 'SLS (polymer powder-bed fusion)' },
+      { label: 'Build volume', value: '130 × 180 × 330 mm', note: 'PA / PP powders, per Sinterit specification; flexible materials 130 × 180 × 340 mm' },
+      { label: 'Layer thickness', value: '0.075–0.175 mm', note: 'Per Sinterit specification' },
+      { label: 'Laser', value: 'IR fibre-coupled diode, 30 W', note: '976 ± 3 nm, galvo scanner, per Sinterit specification' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 130, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 180, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 330, unit: 'mm', note: 'PA / PP powders, per Sinterit specification' },
+      { key: 'laserPower', label: 'Laser power', value: 30, unit: 'W', note: 'IR fibre-coupled diode, per Sinterit specification' },
+    ],
+    notes: [
+      'Sinterit states a build speed of up to 14 mm/h and a minimum wall thickness from 0.5 mm in the same specification.',
+      'The Lisa X has a built-in inert gas (nitrogen) control system, which some Sinterit materials and workflows require.',
+    ],
+    faqs: [
+      { q: 'Which nylons run on the Lisa X?', a: 'Sinterit\'s PA range, including PA12 Smooth (in the material database, with its 22% manufacturer refresh ratio) and PA11 grades. The system is open, so parameters can be adjusted per material in Sinterit Studio.' },
+      { q: 'Lisa X or Suzy?', a: 'Per Sinterit\'s own comparison: both offer 130 × 180 × 330 mm for PA/PP and the same 30 W laser. The Lisa X is the open, multi-material system (PA11, PP, flexible and filled grades, nitrogen support); Suzy is the closed, PA12-focused system with preset profiles and a higher build speed.' },
+    ],
+    sources: [
+      { label: 'Sinterit Lisa X — product specification (official PDF)', url: 'https://sinterit.com/wp-content/uploads/2022/02/Sinterit-LISA-X-SPECIFICATION-1.pdf' },
+      { label: 'Sinterit — Lisa X vs. SUZY comparison & FAQ', url: 'https://sinterit.com/blog/sls-technology/sinterit-lisa-x-vs-suzy-comparison-faq/' },
+    ],
+  },
+  {
+    slug: 'sinterit-suzy',
+    name: 'Sinterit Suzy',
+    manufacturer: 'Sinterit',
+    vendorSlug: 'sinterit',
+    process: 'SLS',
+    processSlug: 'sls',
+    supportedMaterials: [],
+    quickAnswer:
+      'Sinterit Suzy is Sinterit\'s closed, PA12-dedicated compact SLS printer: a 130 × 180 × 330 mm build volume, a 30 W infrared diode laser, a fixed 0.075 mm layer height and build speeds up to 20 mm/h, per Sinterit\'s product specification.',
+    intro: [
+      'Suzy is Sinterit\'s fourth-generation compact SLS machine (specification dated March 2025), deliberately narrowed to one job: a closed system dedicated to PA12, with preset profiles in Sinterit Studio instead of the Lisa X\'s open parameters. In exchange for the narrower material scope, Sinterit states build speeds up to 20 mm/h — faster than the Lisa X on the same build envelope and laser.',
+      'Because Suzy is dedicated to Sinterit\'s PA12 Industrial powder — a grade this database does not yet list separately from PA12 Smooth — the supported-materials list below is left empty rather than linked to a different grade.',
+    ],
+    specs: [
+      { label: 'Technology', value: 'SLS (polymer powder-bed fusion)' },
+      { label: 'Build volume', value: '130 × 180 × 330 mm', note: 'PA powders, per Sinterit specification' },
+      { label: 'Layer thickness', value: '0.075 mm', note: 'Per Sinterit specification' },
+      { label: 'Laser', value: 'IR fibre-coupled diode, 30 W', note: '976 ± 3 nm, galvo scanner, per Sinterit specification' },
+      { label: 'Build speed', value: 'up to 20 mm/h', note: 'Per Sinterit specification' },
+    ],
+    structuredSpecs: [
+      { key: 'buildVolumeX', label: 'Build volume (X)', value: 130, unit: 'mm' },
+      { key: 'buildVolumeY', label: 'Build volume (Y)', value: 180, unit: 'mm' },
+      { key: 'buildVolumeZ', label: 'Build volume (Z)', value: 330, unit: 'mm', note: 'PA powders, per Sinterit specification' },
+      { key: 'layerThickness', label: 'Layer thickness', value: 0.075, unit: 'mm', note: 'Per Sinterit specification' },
+      { key: 'laserPower', label: 'Laser power', value: 30, unit: 'W', note: 'IR fibre-coupled diode, per Sinterit specification' },
+    ],
+    notes: [
+      'Suzy is a closed system dedicated to PA12 (Sinterit PA12 Industrial); it does not run the Lisa X\'s wider material set and does not operate with nitrogen, per Sinterit\'s comparison.',
+      'Sinterit states a maximum chamber temperature of 210 °C and a minimum wall thickness from 0.5 mm in the same specification.',
+    ],
+    faqs: [
+      { q: 'What nylon does Suzy print?', a: 'PA12 only, by design: Suzy is a closed system dedicated to Sinterit\'s PA12 powder with preset profiles (Sinterit also lists PA11.5 support in its comparison). Users who need PA11, PP or filled grades are directed by Sinterit to the Lisa X.' },
+      { q: 'Why is Suzy faster than the Lisa X with the same laser?', a: 'Per Sinterit, the speed comes from the narrowed scope: one material family, preset profiles and optimised scan patterns give up to 20 mm/h against the Lisa X\'s up to 14 mm/h, on the same 130 × 180 × 330 mm envelope and 30 W laser.' },
+    ],
+    sources: [
+      { label: 'Sinterit SUZY — product specification (official PDF, 18.03.2025)', url: 'https://cdn03.plentymarkets.com/ioseuwg7moqp/propertyItems/4497158/Sinterit_SUZY_Specification_A4_032025_EN.pdf' },
+      { label: 'Sinterit — Lisa X vs. SUZY comparison & FAQ', url: 'https://sinterit.com/blog/sls-technology/sinterit-lisa-x-vs-suzy-comparison-faq/' },
+    ],
+  },
 ];
 
 for (const mc of MACHINES) {

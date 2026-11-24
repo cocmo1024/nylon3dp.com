@@ -217,7 +217,7 @@ export const MATERIALS: Material[] = [
     processSlug: 'sls',
     relatedApplications: [],
     quickAnswer:
-      'Formlabs Nylon 12 Powder is the standard PA12 for the Fuse SLS series: 50 MPa ultimate tensile strength, 1850 MPa tensile modulus and 11% elongation at break (X/Y) per the Formlabs technical data sheet, with an HDT of 171 °C at 0.45 MPa.',
+      'Formlabs Nylon 12 Powder is an unfilled PA12 powder — the desktop-SLS reference grade for the Formlabs Fuse series. Per the Formlabs technical data sheet: 50 MPa ultimate tensile strength, 1850 MPa tensile modulus and 11% elongation at break (X/Y), with an HDT of 171 °C at 0.45 MPa.',
     intro: [
       'Nylon 12 Powder is Formlabs\' general-purpose SLS material, positioned for functional prototyping and end-use production of complex assemblies and durable parts with high environmental stability. It is the default choice on Fuse printers the way PA 2200 is on EOS systems.',
       'Formlabs reports properties per ASTM D638 Type 1 specimens. Note the Z-direction penalty in elongation: 6% in Z versus 11% in X/Y — smaller than the drop EOS reports for PA 2200, but the same design lesson applies.',
@@ -491,7 +491,7 @@ export const MATERIALS: Material[] = [
     processSlug: 'fdm',
     relatedApplications: [],
     quickAnswer:
-      'PolyMide CoPA is Polymaker\'s copolyamide filament, blended for easier printing: 78.0 MPa tensile strength, 2703 MPa modulus and 12.7% elongation at break in XY per its TDS — less stiff than PA6-CF, but far more ductile, less warp-prone, and printable at 250–270 °C.',
+      'CoPA (copolyamide) is a PA6/PA66-blend nylon filament family tuned to warp less and print more easily than straight PA6. PolyMide CoPA is Polymaker\'s grade in that family: 78.0 MPa tensile strength, 2703 MPa modulus and 12.7% elongation at break in XY per its TDS — less stiff than PA6-CF, but far more ductile, less warp-prone, and printable at 250–270 °C.',
     intro: [
       'CoPA is a copolymer of PA6 and PA66 formulated to fix the two complaints about straight nylon filament: warping and brittleness. It gives up the extreme stiffness of carbon-filled PA6 in exchange for 12.7% elongation and a friendlier printing window — the "nylon for people who found PA6-CF too much" option.',
       'Its XY/Z split also teaches the standard FDM lesson in reverse: elongation is 12.7% within layers but only 1.3% across them — interlayer ductility, not strength, is the first thing FDM nylon loses.',
